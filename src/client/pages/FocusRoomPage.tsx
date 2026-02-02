@@ -6,8 +6,11 @@ import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/re
 import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import ChatPanel from '@/client/components/ChatPanel';
+import ConnectionStatusIndicator from '@/client/components/ConnectionStatusIndicator';
 import { cn } from '@/client/lib/utils';
 import { useSessionNotifications } from '@/client/hooks/useSessionNotifications';
+import { useSessionChannel } from '@/client/hooks/useSessionChannel';
+import type { SessionEvent } from '@/client/channels';
 
 type Participant = {
   odonym: string;
@@ -181,15 +184,42 @@ export default function FocusRoomPage() {
   const previousStatusRef = useRef<string | null>(null);
   const hasNotifiedWarningRef = useRef<boolean>(false);
 
+  // Handle real-time status changes via WebSocket
+  const handleStatusChange = useCallback((event: SessionEvent) => {
+    if (event.status && event.timer) {
+      // Sync timer immediately from WebSocket event
+      const networkDelay = Date.now() - event.timer.serverTimestamp;
+      const adjustedRemaining = Math.max(0, event.timer.remainingSeconds - Math.floor(networkDelay / 1000));
+      setLocalRemainingSeconds(adjustedRemaining);
+      timerSyncRef.current = Date.now();
+    }
+  }, []);
+
+  // Handle timer sync events for precise synchronization
+  const handleTimerSync = useCallback((event: SessionEvent) => {
+    if (event.timer) {
+      const networkDelay = Date.now() - event.timer.serverTimestamp;
+      const adjustedRemaining = Math.max(0, event.timer.remainingSeconds - Math.floor(networkDelay / 1000));
+      setLocalRemainingSeconds(adjustedRemaining);
+      timerSyncRef.current = Date.now();
+    }
+  }, []);
+
+  // Subscribe to WebSocket channel for real-time updates
+  useSessionChannel({
+    sessionId,
+    onStatusChange: handleStatusChange,
+    onTimerSync: handleTimerSync,
+    enableChat: true, // Chat handled by ChatPanel
+  });
+
+  // Session data query with reduced polling (WebSocket handles real-time updates)
+  // Fallback polling at 30s for recovery if WebSocket disconnects
   const { data: session, isLoading, error } = useQuery({
     ...modelenceQuery<SessionData>('focus.getSession', { sessionId }),
     enabled: !!sessionId,
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (data?.status === 'focusing') return 5000;
-      if (data?.status === 'waiting' || data?.status === 'warmup') return 3000;
-      return 10000;
-    },
+    refetchInterval: 30000, // Reduced from 3-10s to 30s - WebSocket handles real-time
+    staleTime: 5000, // Consider data fresh for 5s (reduces unnecessary refetches)
   });
 
   const { mutate: joinSession, isPending: isJoining } = useMutation({
@@ -524,6 +554,7 @@ export default function FocusRoomPage() {
             chatEnabled={session.chatEnabled}
             isCreator={isCreator}
             isActiveParticipant={isActiveParticipant}
+            currentOdonym={currentOdonym}
           />
         )}
       </Page>
@@ -584,6 +615,7 @@ export default function FocusRoomPage() {
             chatEnabled={session.chatEnabled}
             isCreator={isCreator}
             isActiveParticipant={isActiveParticipant}
+            currentOdonym={currentOdonym}
           />
         )}
       </Page>
@@ -605,6 +637,7 @@ export default function FocusRoomPage() {
               <div className="flex items-center justify-center gap-2 mb-2">
                 <span className="status-dot status-live" />
                 <span className="text-sm text-white/50">You're in the zone</span>
+                <ConnectionStatusIndicator sessionId={sessionId} />
                 {session.repetitions > 1 && (
                   <span className="text-sm text-white/30">
                     ({session.currentRepetition}/{session.repetitions})
@@ -713,6 +746,7 @@ export default function FocusRoomPage() {
             chatEnabled={session.chatEnabled}
             isCreator={isCreator}
             isActiveParticipant={isActiveParticipant}
+            currentOdonym={currentOdonym}
           />
         )}
       </Page>
@@ -784,6 +818,7 @@ export default function FocusRoomPage() {
             chatEnabled={session.chatEnabled}
             isCreator={isCreator}
             isActiveParticipant={isActiveParticipant}
+            currentOdonym={currentOdonym}
           />
         )}
       </Page>

@@ -325,21 +325,26 @@ export default function HomePage() {
   const { user } = useSession();
   const { hasActiveSession } = useActiveSession();
 
+  // Fetch active sessions with reduced polling
+  // These are browsing views, not active session participation, so less frequent updates are acceptable
   const { data: activeSessions, isLoading: sessionsLoading } = useQuery({
     ...modelenceQuery<FocusSession[]>('focus.getActiveSessions', {}),
-    refetchInterval: 10000,
+    refetchInterval: 30000, // Reduced from 10s to 30s for session list
+    staleTime: 10000, // Consider data fresh for 10s
   });
 
   const { data: myRooms } = useQuery({
     ...modelenceQuery<MyRoom[]>('focus.getMyRooms', {}),
     enabled: !!user,
-    refetchInterval: 10000,
+    refetchInterval: 30000, // Reduced from 10s to 30s for my rooms
+    staleTime: 10000,
   });
 
   const { data: suggestedCohorts } = useQuery({
     ...modelenceQuery<CohortMatch[]>('focus.getSuggestedCohorts', {}),
     enabled: !!user,
-    refetchInterval: 30000,
+    refetchInterval: 60000, // Reduced from 30s to 60s - AI suggestions don't change often
+    staleTime: 30000,
   });
 
   const formatDuration = useCallback((min: number, max: number) => {

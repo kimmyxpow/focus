@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { renderApp } from 'modelence/client';
+import { renderApp, startWebsockets } from 'modelence/client';
 import { toast, Toaster } from 'react-hot-toast';
 import { RouterProvider } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,6 +8,15 @@ import { router } from './router';
 import favicon from './assets/favicon.svg';
 import './index.css';
 import LoadingSpinner from './components/LoadingSpinner';
+import { sessionClientChannel, chatClientChannel } from './channels';
+
+// Initialize WebSocket connection with registered channels
+startWebsockets({
+  channels: [
+    sessionClientChannel,
+    chatClientChannel,
+  ],
+});
 
 const queryClient = new QueryClient();
 

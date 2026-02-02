@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/react-query';
 import Tooltip from '@/client/components/ui/Tooltip';
 import { cn } from '@/client/lib/utils';
+import { chatClientChannel, onChatEvent, type ChatEvent } from '@/client/channels';
 
 type ChatMessage = {
   id: string;
@@ -19,6 +20,7 @@ interface ChatPanelProps {
   chatEnabled: boolean;
   isCreator: boolean;
   isActiveParticipant: boolean;
+  currentOdonym?: string; // Current user's anonymous name in this session
 }
 
 export default function ChatPanel({
@@ -28,23 +30,94 @@ export default function ChatPanel({
   chatEnabled,
   isCreator,
   isActiveParticipant,
+  currentOdonym,
 }: ChatPanelProps) {
   const [message, setMessage] = useState('');
+  const [realtimeMessages, setRealtimeMessages] = useState<ChatMessage[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
+  const hasInitializedRef = useRef(false);
 
-  const { data: messages = [], isLoading } = useQuery({
+  // Fetch initial messages (no polling - WebSocket handles new messages)
+  const { data: initialMessages = [], isLoading } = useQuery({
     ...modelenceQuery<ChatMessage[]>('focus.getSessionMessages', { sessionId, limit: 50 }),
     enabled: chatEnabled && isOpen && isActiveParticipant,
-    refetchInterval: isOpen ? 3000 : false, // Poll every 3s when open
+    refetchInterval: false, // REMOVED polling - WebSocket handles real-time
+    staleTime: 60000, // Consider data fresh for 1 minute
   });
 
-  const { mutate: sendMessage, isPending: isSending } = useMutation({
+  // Initialize realtime messages from initial fetch
+  useEffect(() => {
+    if (initialMessages.length > 0 && !hasInitializedRef.current) {
+      setRealtimeMessages(initialMessages);
+      hasInitializedRef.current = true;
+    }
+  }, [initialMessages]);
+
+  // Handle incoming WebSocket chat messages
+  const handleChatMessage = useCallback((event: ChatEvent) => {
+    if (event.type === 'message' && event.message) {
+      const newMessage: ChatMessage = {
+        id: event.message.id,
+        odonym: event.message.odonym,
+        message: event.message.message,
+        sentAt: event.message.sentAt,
+        isOwn: event.message.odonym === currentOdonym,
+      };
+      
+      // Add message if not already present (avoid duplicates)
+      setRealtimeMessages((prev) => {
+        if (prev.some(m => m.id === newMessage.id)) {
+          return prev;
+        }
+        return [...prev, newMessage];
+      });
+    }
+  }, [currentOdonym]);
+
+  // Subscribe to chat channel when panel is open
+  useEffect(() => {
+    if (!sessionId || !chatEnabled || !isOpen || !isActiveParticipant) return;
+
+    // Join chat channel
+    chatClientChannel.joinChannel(sessionId);
+    
+    // Subscribe to chat events
+    const unsubscribe = onChatEvent(sessionId, handleChatMessage);
+
+    return () => {
+      chatClientChannel.leaveChannel(sessionId);
+      unsubscribe();
+    };
+  }, [sessionId, chatEnabled, isOpen, isActiveParticipant, handleChatMessage]);
+
+  // Reset state when chat is disabled or session changes
+  useEffect(() => {
+    if (!chatEnabled) {
+      hasInitializedRef.current = false;
+      setRealtimeMessages([]);
+    }
+  }, [chatEnabled, sessionId]);
+
+  const { mutate: sendMessageMutation, isPending: isSending } = useMutation({
     ...modelenceMutation<{ success: boolean; message: ChatMessage }>('focus.sendMessage'),
-    onSuccess: () => {
+    onSuccess: (data) => {
       setMessage('');
-      queryClient.invalidateQueries({ queryKey: createQueryKey('focus.getSessionMessages', { sessionId, limit: 50 }) });
+      // Message will arrive via WebSocket, but add optimistically for immediate feedback
+      if (data.message) {
+        const optimisticMessage: ChatMessage = {
+          ...data.message,
+          isOwn: true,
+        };
+        setRealtimeMessages((prev) => {
+          // Only add if not already present (WebSocket may have already delivered it)
+          if (prev.some(m => m.id === optimisticMessage.id)) {
+            return prev;
+          }
+          return [...prev, optimisticMessage];
+        });
+      }
     },
   });
 
@@ -55,12 +128,15 @@ export default function ChatPanel({
     },
   });
 
+  // Combine initial and realtime messages
+  const messages = realtimeMessages;
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (isOpen && messagesEndRef.current) {
+    if (isOpen && messagesEndRef.current && messages.length > 0) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [messages, isOpen]);
+  }, [messages.length, isOpen]);
 
   // Focus input when panel opens
   useEffect(() => {
@@ -73,8 +149,8 @@ export default function ChatPanel({
     e.preventDefault();
     const trimmedMessage = message.trim();
     if (!trimmedMessage || isSending) return;
-    sendMessage({ sessionId, message: trimmedMessage });
-  }, [message, sessionId, sendMessage, isSending]);
+    sendMessageMutation({ sessionId, message: trimmedMessage });
+  }, [message, sessionId, sendMessageMutation, isSending]);
 
   const handleToggleChat = useCallback(() => {
     toggleChat({ sessionId, enabled: !chatEnabled });
@@ -84,6 +160,7 @@ export default function ChatPanel({
   const toggleButton = (
     <Tooltip label={chatEnabled ? (isOpen ? "Close chat" : "Open chat") : "Chat disabled"}>
       <button
+        type="button"
         onClick={onToggle}
         className={cn(
           "fixed bottom-4 right-4 z-40 w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg",
@@ -96,10 +173,12 @@ export default function ChatPanel({
       >
         {isOpen ? (
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <title>Close chat</title>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
           </svg>
         ) : (
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <title>Open chat</title>
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
           </svg>
         )}
@@ -128,13 +207,14 @@ export default function ChatPanel({
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-white">Chat</span>
               {chatEnabled ? (
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="w-2 h-2 rounded-full bg-emerald-400" title="Real-time connected" />
               ) : (
                 <span className="text-xs text-white/40">Disabled</span>
               )}
             </div>
             {isCreator && (
               <button
+                type="button"
                 onClick={handleToggleChat}
                 disabled={isTogglingChat}
                 className={cn(
@@ -154,6 +234,7 @@ export default function ChatPanel({
             {!chatEnabled ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
                 <svg className="w-8 h-8 text-white/20 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <title>Chat disabled</title>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                 </svg>
                 <p className="text-white/40 text-sm">Chat is turned off for this session</p>
@@ -165,13 +246,14 @@ export default function ChatPanel({
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
                 <p className="text-white/40 text-sm">Join this session to start chatting</p>
               </div>
-            ) : isLoading ? (
+            ) : isLoading && messages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="spinner" />
               </div>
             ) : messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
                 <svg className="w-8 h-8 text-white/20 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <title>No messages</title>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                 </svg>
                 <p className="text-white/40 text-sm">No messages yet</p>
@@ -239,6 +321,7 @@ export default function ChatPanel({
                     <div className="spinner-sm" />
                   ) : (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <title>Send message</title>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                     </svg>
                   )}

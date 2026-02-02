@@ -11,6 +11,7 @@ import {
   generateNextStepSuggestion,
   predictOptimalDuration,
 } from './ai';
+import { sessionServerChannel, chatServerChannel } from '../channels';
 
 // Helper to create anonymous user hash for privacy
 function createUserHash(userId: string, sessionSalt: string): string {
@@ -49,6 +50,7 @@ function formatDateKey(date: Date): string {
 
 export default new Module('focus', {
   stores: [dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbCohortMetrics, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity],
+  channels: [sessionServerChannel, chatServerChannel],
 
   queries: {
     // Get user's active session (for navbar indicator)
@@ -896,6 +898,15 @@ export default new Module('focus', {
             { _id: new ObjectId(sessionId) },
             { $inc: { participantCount: 1 } }
           );
+          
+          // Broadcast participant rejoined event
+          sessionServerChannel.broadcast(sessionId, {
+            type: 'participant_joined',
+            sessionId,
+            timestamp: Date.now(),
+            participant: { odonym: existing.odonym, isActive: true },
+            participantCount: session.participantCount + 1,
+          });
         }
         return { odonym: existing.odonym, rejoined: !existing.isActive };
       }
@@ -926,6 +937,15 @@ export default new Module('focus', {
         { _id: new ObjectId(sessionId) },
         { $inc: { participantCount: 1 } }
       );
+
+      // Broadcast participant joined event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'participant_joined',
+        sessionId,
+        timestamp: Date.now(),
+        participant: { odonym, isActive: true },
+        participantCount: session.participantCount + 1,
+      });
 
       return { odonym, rejoined: false };
     },
@@ -961,6 +981,25 @@ export default new Module('focus', {
         }
       );
 
+      // Calculate initial timer state
+      const targetDuration = session.actualDuration || session.maxDuration;
+      const remainingSeconds = targetDuration * 60;
+      
+      // Broadcast session started event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'status_changed',
+        sessionId,
+        timestamp: Date.now(),
+        status: 'focusing',
+        previousStatus: session.status,
+        timer: {
+          remainingSeconds,
+          elapsedSeconds: 0,
+          targetDurationMinutes: targetDuration,
+          serverTimestamp: Date.now(),
+        },
+      });
+
       return { success: true };
     },
 
@@ -989,6 +1028,15 @@ export default new Module('focus', {
         { _id: new ObjectId(sessionId) },
         { $set: { status: 'warmup' } }
       );
+
+      // Broadcast warmup started event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'status_changed',
+        sessionId,
+        timestamp: Date.now(),
+        status: 'warmup',
+        previousStatus: 'waiting',
+      });
 
       return { success: true };
     },
@@ -1019,6 +1067,25 @@ export default new Module('focus', {
           }
         }
       );
+
+      // Calculate initial timer state for skip warmup
+      const targetDuration = session.actualDuration || session.maxDuration;
+      const remainingSeconds = targetDuration * 60;
+      
+      // Broadcast session started (skipped warmup) event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'status_changed',
+        sessionId,
+        timestamp: Date.now(),
+        status: 'focusing',
+        previousStatus: session.status,
+        timer: {
+          remainingSeconds,
+          elapsedSeconds: 0,
+          targetDurationMinutes: targetDuration,
+          serverTimestamp: Date.now(),
+        },
+      });
 
       return { success: true };
     },
@@ -1054,6 +1121,15 @@ export default new Module('focus', {
         }
       );
 
+      // Broadcast reaction event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'participant_reaction',
+        sessionId,
+        timestamp: Date.now(),
+        odonym: participant.odonym,
+        reaction,
+      });
+
       return { success: true };
     },
 
@@ -1075,6 +1151,9 @@ export default new Module('focus', {
         throw new Error('Not a participant');
       }
 
+      // Get session for participant count
+      const session = await dbFocusSessions.findOne({ _id: new ObjectId(sessionId) });
+
       await dbSessionParticipants.updateOne(
         { _id: participant._id },
         {
@@ -1090,6 +1169,15 @@ export default new Module('focus', {
         { _id: new ObjectId(sessionId) },
         { $inc: { participantCount: -1 } }
       );
+
+      // Broadcast participant left event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'participant_left',
+        sessionId,
+        timestamp: Date.now(),
+        odonym: participant.odonym,
+        participantCount: session ? session.participantCount - 1 : 0,
+      });
 
       return { success: true };
     },
@@ -1128,6 +1216,15 @@ export default new Module('focus', {
         }
       );
 
+      // Broadcast session ended (cooldown) event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'status_changed',
+        sessionId,
+        timestamp: Date.now(),
+        status: 'cooldown',
+        previousStatus: 'focusing',
+      });
+
       return { success: true, cooldownPrompt };
     },
 
@@ -1159,6 +1256,15 @@ export default new Module('focus', {
         { sessionId: new ObjectId(sessionId), isActive: true, outcome: { $exists: false } },
         { $set: { outcome: 'completed' } }
       );
+
+      // Broadcast session completed event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'status_changed',
+        sessionId,
+        timestamp: Date.now(),
+        status: 'completed',
+        previousStatus: session.status,
+      });
 
       return { success: true };
     },
@@ -1286,7 +1392,9 @@ export default new Module('focus', {
         throw new Error('Not an active participant');
       }
 
+      const messageId = new ObjectId();
       const messageDoc = {
+        _id: messageId,
         sessionId: new ObjectId(sessionId),
         odonym: participant.odonym,
         message: message.trim(),
@@ -1294,6 +1402,19 @@ export default new Module('focus', {
       };
 
       await dbSessionMessages.insertOne(messageDoc);
+
+      // Broadcast chat message to all participants in the session
+      chatServerChannel.broadcast(sessionId, {
+        type: 'message',
+        sessionId,
+        timestamp: Date.now(),
+        message: {
+          id: messageId.toString(),
+          odonym: participant.odonym,
+          message: message.trim(),
+          sentAt: messageDoc.sentAt.toISOString(),
+        },
+      });
 
       return {
         success: true,
@@ -1330,6 +1451,14 @@ export default new Module('focus', {
         { _id: new ObjectId(sessionId) },
         { $set: { chatEnabled: enabled } }
       );
+
+      // Broadcast chat toggled event
+      sessionServerChannel.broadcast(sessionId, {
+        type: 'chat_toggled',
+        sessionId,
+        timestamp: Date.now(),
+        chatEnabled: enabled,
+      });
 
       return { success: true, chatEnabled: enabled };
     },
