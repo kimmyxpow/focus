@@ -63,15 +63,6 @@ const REACTIONS = [
   { key: 'break' as const, label: 'Need a break', color: 'text-blue-300/80' },
 ];
 
-function Tooltip({ children, label }: { children: React.ReactNode; label: string }) {
-  return (
-    <span className="tooltip-wrapper">
-      {children}
-      <span className="tooltip">{label}</span>
-    </span>
-  );
-}
-
 function CircularProgress({ progress, size = 280, strokeWidth = 4 }: { progress: number; size?: number; strokeWidth?: number }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
@@ -686,17 +677,16 @@ export default function FocusRoomPage() {
               <>
                 <div className="flex justify-center gap-2">
                   {REACTIONS.map((reaction) => (
-                    <Tooltip key={reaction.key} label={reaction.label}>
-                      <button
-                        onClick={() => sendReaction({ sessionId, reaction: reaction.key })}
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs font-medium border border-white/10 focus-ring",
-                          reaction.color
-                        )}
-                      >
-                        {reaction.label}
-                      </button>
-                    </Tooltip>
+                    <button
+                      key={reaction.key}
+                      onClick={() => sendReaction({ sessionId, reaction: reaction.key })}
+                      className={cn(
+                        "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs font-medium border border-white/10 focus-ring",
+                        reaction.color
+                      )}
+                    >
+                      {reaction.label}
+                    </button>
                   ))}
                 </div>
 

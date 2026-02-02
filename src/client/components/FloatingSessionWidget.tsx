@@ -79,11 +79,26 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
   // Don't show widget if:
   // 1. No active session or not an active participant
   // 2. User is currently viewing the SAME session page (not summary)
-  const isViewingSameSession = activeSession && location.pathname === `/focus/${activeSession.sessionId}`;
+  // const isViewingSameSession = activeSession && location.pathname === `/focus/${activeSession.sessionId}`;
   
-  if (!activeSession || !activeSession.isActiveParticipant || isViewingSameSession) {
+  // DEBUG: Temporarily removed all conditions to always show widget for debugging
+  // TODO: Restore this conditional after debugging:
+  // if (!activeSession || !activeSession.isActiveParticipant || isViewingSameSession) {
+  //   return null;
+  // }
+  
+  // For debugging, just hide if no active session data at all
+  if (!activeSession) {
+    console.log('[FloatingSessionWidget] No activeSession data');
     return null;
   }
+  
+  console.log('[FloatingSessionWidget] Rendering with:', { 
+    sessionId: activeSession.sessionId, 
+    isActiveParticipant: activeSession.isActiveParticipant,
+    status: activeSession.status,
+    pathname: location.pathname 
+  });
 
   const statusConfig = STATUS_CONFIG[activeSession.status] || STATUS_CONFIG.waiting;
   const isFocusing = activeSession.status === 'focusing';

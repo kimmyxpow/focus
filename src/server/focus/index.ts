@@ -1466,9 +1466,10 @@ export default new Module('focus', {
       return {
         success: true,
         message: {
+          id: messageId.toString(),
           odonym: participant.odonym,
           message: message.trim(),
-          sentAt: messageDoc.sentAt,
+          sentAt: messageDoc.sentAt.toISOString(),
           isOwn: true,
         },
       };
