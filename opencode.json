@@ -1,0 +1,10 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+    "mcp": {
+      "modelence": {
+        "type": "remote",
+        "url": "https://docs.modelence.com/mcp",
+        "enabled": true,
+      }
+    }
+  }

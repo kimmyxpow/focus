@@ -79,18 +79,6 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
           >
             Leaderboard
           </Link>
-          {user && (
-            <Link
-              to="/focus-overview"
-              className={cn(
-                "nav-link",
-                isDark && "nav-link-dark",
-                isActive('/focus-overview') && "nav-link-active"
-              )}
-            >
-              My Focus
-            </Link>
-          )}
         </div>
 
         {/* Divider */}
@@ -98,12 +86,13 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
 
         {/* User Actions */}
         {user ? (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <Link
               to="/create-session"
               className={cn("nav-btn-primary", isDark && "nav-btn-primary-dark")}
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                <title>Add</title>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
               <span className="hidden sm:inline">New Session</span>
