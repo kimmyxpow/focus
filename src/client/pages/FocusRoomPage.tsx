@@ -264,6 +264,8 @@ export default function FocusRoomPage() {
   const { mutate: leaveSession, isPending: isLeaving } = useMutation({
     ...modelenceMutation('focus.leaveSession'),
     onSuccess: () => {
+      // FIXED: Invalidate getActiveSession immediately so FloatingSessionWidget disappears
+      queryClient.invalidateQueries({ queryKey: createQueryKey('focus.getActiveSession', {}) });
       navigate('/');
       toast.success('Left session');
     },

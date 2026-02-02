@@ -11,11 +11,23 @@ export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected';
  * 1. Whether channels have been joined
  * 2. Whether we've received events recently
  * 3. Periodic heartbeat checks
+ * 
+ * FIXED:
+ * - Removed `status` from dependency array to prevent infinite loops
+ * - Use ref to track status for timeout callback (avoiding stale closure)
+ * - Properly track if component is mounted
  */
 export function useWebSocketStatus(sessionId?: string) {
   const [status, setStatus] = useState<ConnectionStatus>('connecting');
   const [lastEventTime, setLastEventTime] = useState<number | null>(null);
   const heartbeatTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const statusRef = useRef<ConnectionStatus>('connecting');
+  
+  // Keep ref in sync with state
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
   
   // Track when we receive any event
   const handleEvent = useCallback(() => {
@@ -39,6 +51,7 @@ export function useWebSocketStatus(sessionId?: string) {
 
     // Initial status
     setStatus('connecting');
+    statusRef.current = 'connecting';
 
     // Subscribe to events to track connection health
     const unsubSession = onSessionEvent(sessionId, handleEvent);
@@ -46,8 +59,9 @@ export function useWebSocketStatus(sessionId?: string) {
 
     // After 5s of joining, if no events received, assume connected
     // (no events doesn't mean disconnected, just no activity)
-    const connectionTimeout = setTimeout(() => {
-      if (status === 'connecting') {
+    // Use ref to check current status (avoid stale closure)
+    connectionTimeoutRef.current = setTimeout(() => {
+      if (statusRef.current === 'connecting') {
         setStatus('connected');
       }
     }, 5000);
@@ -55,12 +69,14 @@ export function useWebSocketStatus(sessionId?: string) {
     return () => {
       unsubSession();
       unsubChat();
-      clearTimeout(connectionTimeout);
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+      }
       if (heartbeatTimeoutRef.current) {
         clearTimeout(heartbeatTimeoutRef.current);
       }
     };
-  }, [sessionId, handleEvent, status]);
+  }, [sessionId, handleEvent]); // FIXED: Removed `status` from dependencies
 
   return {
     status,

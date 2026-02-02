@@ -3,9 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createQueryKey } from '@modelence/react-query';
 import { 
   sessionClientChannel, 
-  chatClientChannel, 
   onSessionEvent, 
-  onChatEvent,
   type SessionEvent,
   type ChatEvent,
 } from '@/client/channels';
@@ -36,6 +34,11 @@ interface UseSessionChannelOptions {
  * - Returns connection status so components can adjust behavior
  * - Fallback polling (30s) in FocusRoomPage ensures data stays fresh even if WebSocket fails
  * - Connection status indicator shows users when they're receiving real-time vs polling updates
+ * 
+ * **IMPORTANT FIX:**
+ * - Chat channel subscription is now handled ONLY in ChatPanel.tsx
+ * - This prevents double join/leave causing race conditions
+ * - Session channel is still managed here for session events
  */
 export function useSessionChannel({
   sessionId,
@@ -45,9 +48,11 @@ export function useSessionChannel({
   onReaction,
   onTimerSync,
   onChatToggled,
-  onChatMessage,
-  onTyping,
-  enableChat = true,
+  // Note: onChatMessage and onTyping are kept for API compatibility but not used here
+  // Chat messages are handled by ChatPanel directly
+  onChatMessage: _onChatMessage,
+  onTyping: _onTyping,
+  enableChat: _enableChat = true,
 }: UseSessionChannelOptions) {
   const queryClient = useQueryClient();
   const isJoinedRef = useRef(false);
@@ -55,12 +60,30 @@ export function useSessionChannel({
   // Track WebSocket connection status
   const { status: connectionStatus, isConnected, isDisconnected } = useWebSocketStatus(sessionId);
   
-  // Handle session events
+  // Handle session events - use refs for callbacks to prevent effect re-runs
+  const onStatusChangeRef = useRef(onStatusChange);
+  const onParticipantJoinedRef = useRef(onParticipantJoined);
+  const onParticipantLeftRef = useRef(onParticipantLeft);
+  const onReactionRef = useRef(onReaction);
+  const onTimerSyncRef = useRef(onTimerSync);
+  const onChatToggledRef = useRef(onChatToggled);
+  
+  // Keep refs updated
+  useEffect(() => {
+    onStatusChangeRef.current = onStatusChange;
+    onParticipantJoinedRef.current = onParticipantJoined;
+    onParticipantLeftRef.current = onParticipantLeft;
+    onReactionRef.current = onReaction;
+    onTimerSyncRef.current = onTimerSync;
+    onChatToggledRef.current = onChatToggled;
+  }, [onStatusChange, onParticipantJoined, onParticipantLeft, onReaction, onTimerSync, onChatToggled]);
+  
+  // Handle session events - stable callback using refs
   const handleSessionEvent = useCallback((event: SessionEvent) => {
     // Dispatch to appropriate handler
     switch (event.type) {
       case 'status_changed':
-        onStatusChange?.(event);
+        onStatusChangeRef.current?.(event);
         // Invalidate session query to get fresh data
         queryClient.invalidateQueries({ 
           queryKey: createQueryKey('focus.getSession', { sessionId: event.sessionId }) 
@@ -68,84 +91,60 @@ export function useSessionChannel({
         break;
         
       case 'participant_joined':
-        onParticipantJoined?.(event);
+        onParticipantJoinedRef.current?.(event);
         queryClient.invalidateQueries({ 
           queryKey: createQueryKey('focus.getSession', { sessionId: event.sessionId }) 
         });
         break;
         
       case 'participant_left':
-        onParticipantLeft?.(event);
+        onParticipantLeftRef.current?.(event);
         queryClient.invalidateQueries({ 
           queryKey: createQueryKey('focus.getSession', { sessionId: event.sessionId }) 
         });
         break;
         
       case 'participant_reaction':
-        onReaction?.(event);
+        onReactionRef.current?.(event);
         queryClient.invalidateQueries({ 
           queryKey: createQueryKey('focus.getSession', { sessionId: event.sessionId }) 
         });
         break;
         
       case 'timer_sync':
-        onTimerSync?.(event);
+        onTimerSyncRef.current?.(event);
         break;
         
       case 'chat_toggled':
-        onChatToggled?.(event);
+        onChatToggledRef.current?.(event);
         queryClient.invalidateQueries({ 
           queryKey: createQueryKey('focus.getSession', { sessionId: event.sessionId }) 
         });
         break;
     }
-  }, [queryClient, onStatusChange, onParticipantJoined, onParticipantLeft, onReaction, onTimerSync, onChatToggled]);
+  }, [queryClient]); // Only depends on queryClient which is stable
 
-  // Handle chat events
-  const handleChatEvent = useCallback((event: ChatEvent) => {
-    switch (event.type) {
-      case 'message':
-        onChatMessage?.(event);
-        // No need to invalidate chat query since we're handling messages directly
-        break;
-        
-      case 'typing':
-        onTyping?.(event);
-        break;
-    }
-  }, [onChatMessage, onTyping]);
-
-  // Join/leave channels on mount/unmount
+  // Join/leave SESSION channel on mount/unmount
+  // FIXED: Chat channel is now managed by ChatPanel.tsx only
   useEffect(() => {
     if (!sessionId) return;
 
-    // Join session channel
+    // Join session channel only
     sessionClientChannel.joinChannel(sessionId);
     isJoinedRef.current = true;
     
     // Subscribe to session events
     const unsubscribeSession = onSessionEvent(sessionId, handleSessionEvent);
 
-    // Join chat channel if enabled
-    let unsubscribeChat: (() => void) | null = null;
-    if (enableChat) {
-      chatClientChannel.joinChannel(sessionId);
-      unsubscribeChat = onChatEvent(sessionId, handleChatEvent);
-    }
-
-    // Cleanup: leave channels and unsubscribe
+    // Cleanup: leave session channel and unsubscribe
     return () => {
       if (isJoinedRef.current) {
         sessionClientChannel.leaveChannel(sessionId);
-        if (enableChat) {
-          chatClientChannel.leaveChannel(sessionId);
-        }
         isJoinedRef.current = false;
       }
       unsubscribeSession();
-      unsubscribeChat?.();
     };
-  }, [sessionId, enableChat, handleSessionEvent, handleChatEvent]);
+  }, [sessionId, handleSessionEvent]); // FIXED: Removed enableChat dependency and chat channel handling
 
   return {
     /** Whether channels have been joined */

@@ -24,6 +24,7 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
 
   // Fetch active session with reduced polling (fallback for WebSocket)
   // Timer countdown is handled locally, so we don't need frequent server syncs
+  // FIXED: Reduced staleTime and added refetchOnWindowFocus to ensure widget responds quickly
   const { data: activeSession } = useQuery({
     ...modelenceQuery<{
       sessionId: string;
@@ -39,7 +40,8 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
     } | null>('focus.getActiveSession', {}),
     enabled: true,
     refetchInterval: 10000, // Poll every 10s to ensure widget appears quickly
-    staleTime: 5000,
+    staleTime: 2000, // FIXED: Reduced from 5s to 2s - allows faster invalidation response
+    refetchOnWindowFocus: true, // Refetch when window regains focus
     retry: false,
   });
 

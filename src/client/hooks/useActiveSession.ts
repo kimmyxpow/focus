@@ -15,12 +15,16 @@ type ActiveSessionData = {
  * Note: This hook uses reduced polling (30s) as a fallback.
  * The actual session page uses WebSocket for real-time updates.
  * This hook is primarily for the global session indicator/widget.
+ * 
+ * FIXED: Reduced staleTime from 10s to 2s to allow faster response to invalidation
+ * when user leaves a session.
  */
 export function useActiveSession() {
   const { data, isLoading } = useQuery({
     ...modelenceQuery<ActiveSessionData>('focus.getActiveSession', {}),
     refetchInterval: 30000, // Reduced from 10s to 30s - used as fallback only
-    staleTime: 10000, // Consider data fresh for 10s
+    staleTime: 2000, // FIXED: Reduced from 10s to 2s - faster invalidation response
+    refetchOnWindowFocus: true, // Refetch when window regains focus
     retry: false,
   });
 

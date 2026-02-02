@@ -38,6 +38,13 @@ export default function ChatPanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const hasInitializedRef = useRef(false);
+  
+  // FIXED: Use ref to store currentOdonym to avoid recreating handleChatMessage
+  // This prevents the effect from re-running and causing channel re-subscription
+  const currentOdonymRef = useRef(currentOdonym);
+  useEffect(() => {
+    currentOdonymRef.current = currentOdonym;
+  }, [currentOdonym]);
 
   // Fetch initial messages (no polling - WebSocket handles new messages)
   const { data: initialMessages = [], isLoading } = useQuery({
@@ -55,7 +62,8 @@ export default function ChatPanel({
     }
   }, [initialMessages]);
 
-  // Handle incoming WebSocket chat messages
+  // FIXED: Handle incoming WebSocket chat messages - use ref instead of closure
+  // This ensures the callback is stable and doesn't cause effect re-runs
   const handleChatMessage = useCallback((event: ChatEvent) => {
     if (event.type === 'message' && event.message) {
       const newMessage: ChatMessage = {
@@ -63,7 +71,7 @@ export default function ChatPanel({
         odonym: event.message.odonym,
         message: event.message.message,
         sentAt: event.message.sentAt,
-        isOwn: event.message.odonym === currentOdonym,
+        isOwn: event.message.odonym === currentOdonymRef.current,
       };
       
       // Add message if not already present (avoid duplicates)
@@ -74,12 +82,18 @@ export default function ChatPanel({
         return [...prev, newMessage];
       });
     }
-  }, [currentOdonym]);
+  }, []); // FIXED: Empty dependency array - uses ref for currentOdonym
 
-  // Subscribe to chat channel when panel is open
+  // FIXED: Subscribe to chat channel - only depends on stable values
+  // Channel subscription is managed ONLY here (not in useSessionChannel)
+  // to avoid double subscription causing race conditions
   useEffect(() => {
-    if (!sessionId || !chatEnabled || !isOpen || !isActiveParticipant) return;
-
+    if (!sessionId || !chatEnabled || !isActiveParticipant) return;
+    
+    // Only join/subscribe when chat panel conditions are met
+    // Note: We join even when panel is closed to ensure messages are received
+    // The isOpen check is only for initial messages fetch
+    
     // Join chat channel
     chatClientChannel.joinChannel(sessionId);
     
@@ -87,10 +101,11 @@ export default function ChatPanel({
     const unsubscribe = onChatEvent(sessionId, handleChatMessage);
 
     return () => {
+      // Leave channel on cleanup
       chatClientChannel.leaveChannel(sessionId);
       unsubscribe();
     };
-  }, [sessionId, chatEnabled, isOpen, isActiveParticipant, handleChatMessage]);
+  }, [sessionId, chatEnabled, isActiveParticipant, handleChatMessage]); // FIXED: Removed isOpen - stay subscribed even when closed
 
   // Reset state when chat is disabled or session changes
   useEffect(() => {
@@ -98,7 +113,17 @@ export default function ChatPanel({
       hasInitializedRef.current = false;
       setRealtimeMessages([]);
     }
-  }, [chatEnabled, sessionId]);
+  }, [chatEnabled]);
+
+  // FIXED: Reset state when sessionId changes (switching between sessions)
+  const prevSessionIdRef = useRef(sessionId);
+  useEffect(() => {
+    if (prevSessionIdRef.current !== sessionId) {
+      hasInitializedRef.current = false;
+      setRealtimeMessages([]);
+      prevSessionIdRef.current = sessionId;
+    }
+  }, [sessionId]);
 
   const { mutate: sendMessageMutation, isPending: isSending } = useMutation({
     ...modelenceMutation<{ success: boolean; message: ChatMessage }>('focus.sendMessage'),
