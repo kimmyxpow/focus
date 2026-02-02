@@ -131,7 +131,7 @@
 
   /* Nav link with subtle active indicator */
   .nav-link {
-    @apply px-3 py-1.5 rounded-lg text-sm font-medium transition-colors relative;
+    @apply px-3 py-1.5 rounded-lg text-sm font-medium transition-colors;
     color: var(--color-stone-500);
   }
 
@@ -142,18 +142,7 @@
 
   .nav-link-active {
     color: var(--color-stone-900);
-  }
-
-  .nav-link-active::after {
-    content: '';
-    position: absolute;
-    bottom: 4px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--color-primary);
+    background: var(--color-stone-100);
   }
 
   .nav-link-dark {
@@ -167,6 +156,7 @@
 
   .nav-link-dark.nav-link-active {
     color: white;
+    background: rgba(255, 255, 255, 0.1);
   }
 
   /* Primary nav button (New Session) */

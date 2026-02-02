@@ -125,18 +125,20 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
 
         {/* Active Session Indicator */}
         {activeSession && activeSession.isActiveParticipant && (
-          <div className="flex-shrink-0">
-            <ActiveSessionIndicator
-              sessionId={activeSession.sessionId}
-              topic={activeSession.topic}
-              status={activeSession.status}
-              remainingSeconds={activeSession.timer?.remainingSeconds}
-            />
-          </div>
-        )}
+          <>
+            <div className="flex-shrink-0">
+              <ActiveSessionIndicator
+                sessionId={activeSession.sessionId}
+                topic={activeSession.topic}
+                status={activeSession.status}
+                remainingSeconds={activeSession.timer?.remainingSeconds}
+              />
+            </div>
 
-        {/* Divider */}
-        <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />
+            {/* Divider after Active Session Indicator */}
+            <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />
+          </>
+        )}
 
         {/* User Actions */}
         {user ? (

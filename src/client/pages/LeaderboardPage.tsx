@@ -183,14 +183,14 @@ export default function LeaderboardPage() {
           </div>
 
           {/* Ranking Type Selector - Row 2 */}
-          <div className="flex items-center justify-center sm:justify-end">
-            <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg w-full sm:w-auto">
               {SORT_OPTIONS.map((option) => (
                 <button
                   key={option.value}
                   onClick={() => setSortBy(option.value)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors flex-1 sm:flex-none",
                     sortBy === option.value
                       ? "bg-white text-stone-900"
                       : "text-white/50 hover:text-white hover:bg-white/10"
