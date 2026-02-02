@@ -106,9 +106,9 @@ function EmptyState() {
           <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-white mb-2">No sessions yet</h3>
+      <h3 className="text-lg font-semibold text-white mb-2">Ready to focus?</h3>
       <p className="text-white/50 text-sm mb-6 max-w-xs mx-auto">
-        Be the first to start a focus session. Others can join you!
+        Start a session and invite others to join you. Deep work is better together.
       </p>
       <Link to="/create-session" className="btn-light">
         Start a Session
@@ -123,14 +123,14 @@ function SessionCard({ session, formatDuration, hasActiveSession }: { session: F
   const handleJoinAttempt = useCallback((e: React.MouseEvent) => {
     if (hasActiveSession) {
       e.preventDefault();
-      toast.error('Please leave your current session first');
+      toast.error('Please finish or leave your current session first');
     }
   }, [hasActiveSession]);
 
   const handleCopyLink = useCallback(() => {
     const sessionUrl = `${window.location.origin}/focus/${session._id}`;
     navigator.clipboard.writeText(sessionUrl);
-    toast.success('Session link copied!');
+    toast.success('Link copied to clipboard');
   }, [session._id]);
 
   return (
@@ -144,7 +144,7 @@ function SessionCard({ session, formatDuration, hasActiveSession }: { session: F
             <span className="font-semibold text-white truncate">{session.topic}</span>
             <StatusIndicator status={session.status} />
             {session.isCreator && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/20 text-white">Your Room</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/20 text-white">Your Session</span>
             )}
             {session.isActiveParticipant && !session.isCreator && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/10 text-white/70">Joined</span>
@@ -219,7 +219,7 @@ function MyRoomCard({ room, formatDuration }: { room: MyRoom; formatDuration: (m
   const handleCopyLink = useCallback(() => {
     const sessionUrl = `${window.location.origin}/focus/${room._id}`;
     navigator.clipboard.writeText(sessionUrl);
-    toast.success('Session link copied!');
+    toast.success('Link copied to clipboard');
   }, [room._id]);
 
   return (
@@ -244,7 +244,7 @@ function MyRoomCard({ room, formatDuration }: { room: MyRoom; formatDuration: (m
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-white/50">Private</span>
           )}
           {room.isCreator && (
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/20 text-white">Owner</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/20 text-white">Host</span>
           )}
         </div>
       </div>
@@ -283,7 +283,7 @@ function SuggestedCard({ match, formatDuration, hasActiveSession }: { match: Coh
   const handleJoinAttempt = useCallback((e: React.MouseEvent) => {
     if (hasActiveSession) {
       e.preventDefault();
-      toast.error('Please leave your current session first');
+      toast.error('Please finish or leave your current session first');
     }
   }, [hasActiveSession]);
 
@@ -356,7 +356,7 @@ export default function HomePage() {
             Focus Together
           </h1>
           <p className="text-white/60 max-w-md mx-auto mb-6">
-            Join focused work sessions with others. No chat, no distractions. Just shared presence.
+            Work alongside others in focused sessions. No endless chatting, no notifications. Just you, your goals, and a supportive community.
           </p>
           {!user && (
             <Link to="/login" className="btn-light">
@@ -365,13 +365,13 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Your Rooms (for logged in users) */}
+        {/* Your Sessions (for logged in users) */}
         {user && myRooms && myRooms.length > 0 && (
           <section className="mb-8 fade-in">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-label text-white/40">Your Rooms</h2>
+              <h2 className="text-label text-white/40">Your Sessions</h2>
               <Link to="/create-session" className="text-xs text-white/50 hover:text-white/70 transition-colors">
-                + New Room
+                + New Session
               </Link>
             </div>
             <div className="grid gap-3 sm:grid-cols-2 fade-stagger">
@@ -429,8 +429,8 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
                   </svg>
                 ),
-                title: "Private",
-                description: "Anonymous sessions. You control your data."
+                title: "Privacy First",
+                description: "Anonymous by default. You decide what to share and keep private."
               },
               {
                 icon: (
@@ -438,8 +438,8 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                   </svg>
                 ),
-                title: "No Distractions",
-                description: "No chat. Just a timer and presence."
+                title: "Distraction-Free",
+                description: "No endless chat or notifications. Just a simple timer and the presence of others working alongside you."
               },
               {
                 icon: (
@@ -447,8 +447,8 @@ export default function HomePage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                   </svg>
                 ),
-                title: "AI Matching",
-                description: "Paired by intent, topic, and duration."
+                title: "Smart Matching",
+                description: "Our AI connects you with people working on similar topics and goals, at times that work for you."
               }
             ].map((feature, i) => (
               <div key={i} className="fade-in" style={{ animationDelay: `${i * 100}ms` }}>

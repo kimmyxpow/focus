@@ -89,19 +89,19 @@ export default function ProfilePage() {
       return;
     }
     if (nickname.length < 3) {
-      setNicknameError('Nickname must be at least 3 characters');
+      setNicknameError('Nicknames need at least 3 characters');
       return;
     }
     if (nickname.length > 20) {
-      setNicknameError('Nickname must be at most 20 characters');
+      setNicknameError('Keep it under 20 characters');
       return;
     }
     if (!/^[a-zA-Z0-9_]+$/.test(nickname)) {
-      setNicknameError('Only letters, numbers, and underscores allowed');
+      setNicknameError('Letters, numbers, and underscores only');
       return;
     }
     if (nicknameAvailable && !nicknameAvailable.available && nickname !== profile?.nickname) {
-      setNicknameError('This nickname is already taken');
+      setNicknameError("Someone's already using that nickname");
       return;
     }
     setNicknameError('');
@@ -148,14 +148,14 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-display-sm text-white">Profile</h1>
-            <p className="text-white/50 text-sm mt-1">Manage your profile and privacy settings</p>
+            <p className="text-white/50 text-sm mt-1">Personalize your profile and choose what to share</p>
           </div>
           {profile && !isEditing && (
             <button
               onClick={() => setIsEditing(true)}
               className="btn-outline-light"
             >
-              Edit Profile
+              Edit profile
             </button>
           )}
         </div>
@@ -235,11 +235,11 @@ export default function ProfilePage() {
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className="text-sm font-medium text-white">Public Profile</span>
+                    <span className="text-sm font-medium text-white">Public profile</span>
                     <p className="text-xs text-white/40 mt-0.5">
                       {isPublic
-                        ? 'Your stats appear on leaderboards and are visible to all users'
-                        : 'Your profile is private and hidden from leaderboards'}
+                        ? 'Your focus stats will appear on the leaderboard for everyone to see'
+                        : "Your profile stays private and won't appear on leaderboards"}
                     </p>
                   </div>
                   <button
@@ -267,7 +267,7 @@ export default function ProfilePage() {
                   disabled={isSaving || !!nicknameError || !nickname}
                   className="btn-light"
                 >
-                  {isSaving ? 'Saving...' : profile ? 'Save Changes' : 'Create Profile'}
+                  {isSaving ? 'Saving...' : profile ? 'Save changes' : 'Create profile'}
                 </button>
                 {profile && (
                   <button
@@ -355,7 +355,7 @@ export default function ProfilePage() {
         {/* Focus Heatmap */}
         {profile && (
           <div className="card-dark p-6">
-            <h3 className="text-lg font-semibold text-white mb-4">Focus Activity</h3>
+            <h3 className="text-lg font-semibold text-white mb-4">Your focus activity</h3>
             <FocusHeatmap />
           </div>
         )}

@@ -5,38 +5,38 @@ export default function TermsPage() {
     <Page variant="dark">
       <div className="container-sm fade-in">
         <div className="card-dark p-8">
-          <h1 className="text-display-md text-white mb-6">Terms and Conditions</h1>
+          <h1 className="text-display-md text-white mb-6">Terms of Service</h1>
 
           <div className="space-y-6 text-white/70">
-            <p>
-              By using this service, you agree to the following terms and conditions.
+            <p className="text-white/60">
+              Welcome! By using Focus, you're agreeing to these simple terms. We've tried to keep them straightforward and fair.
             </p>
 
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-white">1. Acceptance of Terms</h2>
+              <h2 className="text-lg font-semibold text-white">1. Using Focus</h2>
               <p>
-                By accessing and using this application, you accept and agree to be bound by the terms and conditions outlined here.
+                Focus is designed to help you work better alongside others. Please use it for its intended purpose—productive focus sessions—and be respectful to fellow users.
               </p>
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-white">2. Use of Service</h2>
+              <h2 className="text-lg font-semibold text-white">2. Your Privacy</h2>
               <p>
-                You agree to use the service only for lawful purposes and in accordance with these terms.
+                We take privacy seriously. Your focus sessions are private and ephemeral—we don't store your session notes or detailed activity. We only keep anonymized summaries to help improve your experience and show you relevant stats.
               </p>
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-white">3. Privacy</h2>
+              <h2 className="text-lg font-semibold text-white">3. Your Data</h2>
               <p>
-                Focus sessions are ephemeral. Only aggregated focus data is stored. Your session details and intents are not permanently stored after completion.
+                You own your data. You can view, export, or delete your focus history at any time from your profile settings. We only retain data you've chosen to keep.
               </p>
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-white">4. User Conduct</h2>
+              <h2 className="text-lg font-semibold text-white">4. Community Guidelines</h2>
               <p>
-                You agree to use this service respectfully and not engage in any behavior that disrupts the focus experience of other users.
+                Be kind, be focused, be respectful. Don't disrupt others' focus sessions or use the platform for anything harmful. We're all here to help each other do better work.
               </p>
             </section>
 

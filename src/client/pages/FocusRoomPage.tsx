@@ -54,9 +54,9 @@ type SessionData = {
 };
 
 const REACTIONS = [
-  { key: 'focus' as const, label: 'Deep Focus', color: 'text-purple-300/80' },
+  { key: 'focus' as const, label: 'Deep focus', color: 'text-purple-300/80' },
   { key: 'energy' as const, label: 'Energized', color: 'text-pink-300/80' },
-  { key: 'break' as const, label: 'Need Break', color: 'text-blue-300/80' },
+  { key: 'break' as const, label: 'Need a break', color: 'text-blue-300/80' },
 ];
 
 function Tooltip({ children, label }: { children: React.ReactNode; label: string }) {
@@ -285,7 +285,7 @@ export default function FocusRoomPage() {
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center fade-in">
             <div className="spinner-lg mx-auto mb-4" />
-            <span className="text-white/50 text-sm">Loading session...</span>
+            <span className="text-white/50 text-sm">Getting your session ready...</span>
           </div>
         </div>
       </Page>
@@ -302,10 +302,10 @@ export default function FocusRoomPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-display-sm text-white mb-2">Session Not Found</h2>
-            <p className="text-white/50 text-sm mb-6">This session may have ended or doesn't exist.</p>
+            <h2 className="text-display-sm text-white mb-2">Oops! We couldn't find this session</h2>
+            <p className="text-white/50 text-sm mb-6">This session might have ended, or the link may be incorrect.</p>
             <Link to="/" className="btn-light inline-block">
-              Back to Sessions
+              Browse Active Sessions
             </Link>
           </div>
         </div>
@@ -323,10 +323,10 @@ export default function FocusRoomPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-display-sm text-white mb-2">Session Complete</h2>
-            <p className="text-white/50 text-sm mb-6">This focus session has been completed.</p>
+            <h2 className="text-display-sm text-white mb-2">Session finished</h2>
+            <p className="text-white/50 text-sm mb-6">Great work! This session has wrapped up.</p>
             <Link to={`/focus/${sessionId}/summary`} className="btn-light inline-block">
-              View Summary
+              See how it went
             </Link>
           </div>
         </div>
@@ -342,7 +342,7 @@ export default function FocusRoomPage() {
           <div className="card-dark p-6 fade-in">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="chip bg-white/10 text-white/70">Waiting to Start</span>
+                <span className="chip bg-white/10 text-white/70">Getting ready to focus</span>
                 {session.isPrivate && (
                   <span className="chip bg-white/5 text-white/50">Private</span>
                 )}
@@ -410,7 +410,7 @@ export default function FocusRoomPage() {
                   onClick={() => joinSession({ sessionId })}
                   disabled={isJoining}
                 >
-                  {isJoining ? 'Rejoining...' : 'Rejoin Session'}
+                  {isJoining ? 'Rejoining...' : 'Rejoin'}
                 </button>
               ) : !isActiveParticipant && !isParticipant ? (
                 <button
@@ -427,21 +427,21 @@ export default function FocusRoomPage() {
                     onClick={() => startWarmup({ sessionId })}
                     disabled={isStartingWarmup || isSkippingWarmup}
                   >
-                    {isStartingWarmup ? 'Starting...' : 'Begin Warmup'}
+                    {isStartingWarmup ? 'Starting...' : 'Start Warmup'}
                   </button>
                   <button
                     className="btn-outline-light w-full"
                     onClick={() => skipWarmup({ sessionId })}
                     disabled={isSkippingWarmup || isStartingWarmup}
                   >
-                    Skip Warmup & Start
+                    Skip warmup and start now
                   </button>
                 </>
               ) : (
                 <div className="text-center py-4">
                   <div className="inline-flex items-center gap-2 text-white/40">
                     <span className="w-2 h-2 rounded-full bg-white/40 animate-pulse" />
-                    <span>Waiting for the session to start...</span>
+                    <span>Sit tight, we're starting soon...</span>
                   </div>
                 </div>
               )}
@@ -451,7 +451,7 @@ export default function FocusRoomPage() {
                 onClick={() => isActiveParticipant ? leaveSession({ sessionId }) : navigate('/')}
                 disabled={isLeaving}
               >
-                {isActiveParticipant ? 'Leave Session' : 'Back'}
+                {isActiveParticipant ? 'Leave session' : 'Back'}
               </button>
             </div>
           </div>
@@ -479,7 +479,7 @@ export default function FocusRoomPage() {
         <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
           <div className="container-md text-center space-y-8 fade-in">
             <div>
-              <span className="chip bg-white/10 text-white/70 mb-3 inline-block">Warmup</span>
+              <span className="chip bg-white/10 text-white/70 mb-3 inline-block">Warmup time</span>
               <h1 className="text-display-md text-white mb-2">{session.topic}</h1>
               <p className="text-white/60">{session.intent}</p>
             </div>
@@ -489,7 +489,7 @@ export default function FocusRoomPage() {
                 <p className="text-lg text-white/90 leading-relaxed italic">
                   "{session.warmupPrompt}"
                 </p>
-                <p className="text-xs text-white/40 mt-4">AI-generated warmup prompt</p>
+                <p className="text-xs text-white/40 mt-4">Let's get in the zone</p>
               </div>
             )}
 
@@ -509,10 +509,10 @@ export default function FocusRoomPage() {
                 onClick={() => startSession({ sessionId })}
                 disabled={isStarting}
               >
-                {isStarting ? 'Starting...' : 'Start Focus Session'}
+                {isStarting ? 'Starting...' : 'Start focusing'}
               </button>
             ) : (
-              <p className="text-white/40">Preparing to focus...</p>
+              <p className="text-white/40">Almost there...</p>
             )}
           </div>
         </div>
@@ -546,7 +546,7 @@ export default function FocusRoomPage() {
             <div>
               <div className="flex items-center justify-center gap-2 mb-2">
                 <span className="status-dot status-live" />
-                <span className="text-sm text-white/50">In Focus</span>
+                <span className="text-sm text-white/50">You're in the zone</span>
                 {session.repetitions > 1 && (
                   <span className="text-sm text-white/30">
                     ({session.currentRepetition}/{session.repetitions})
@@ -586,7 +586,7 @@ export default function FocusRoomPage() {
                   onClick={() => joinSession({ sessionId })}
                   disabled={isJoining}
                 >
-                  {isJoining ? 'Rejoining...' : 'Rejoin Session'}
+                  {isJoining ? 'Rejoining...' : 'Rejoin'}
                 </button>
               </div>
             ) : isActiveParticipant ? (
@@ -614,21 +614,21 @@ export default function FocusRoomPage() {
                       onClick={() => endSession({ sessionId })}
                       disabled={isEnding}
                     >
-                      {isEnding ? 'Ending...' : 'End Early'}
+                      {isEnding ? 'Ending...' : 'End session early'}
                     </button>
                   )}
                   <button
                     className="btn-ghost-light"
                     onClick={() => navigate('/')}
                   >
-                    Back to Home
+                    Back home
                   </button>
                   <button
                     className="btn-ghost-light"
                     onClick={() => leaveSession({ sessionId })}
                     disabled={isLeaving}
                   >
-                    {isLeaving ? 'Leaving...' : 'Leave'}
+                    {isLeaving ? 'Leaving...' : 'Leave session'}
                   </button>
                 </div>
               </>
@@ -673,7 +673,7 @@ export default function FocusRoomPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <span className="chip bg-emerald-500/20 text-emerald-400 mb-3 inline-block">Session Complete</span>
+              <span className="chip bg-emerald-500/20 text-emerald-400 mb-3 inline-block">Session complete!</span>
               <h1 className="text-display-md text-white">{session.topic}</h1>
             </div>
 
@@ -682,7 +682,7 @@ export default function FocusRoomPage() {
                 <p className="text-lg text-white/90 leading-relaxed italic">
                   "{session.cooldownPrompt}"
                 </p>
-                <p className="text-xs text-white/40 mt-4">Take a moment to reflect</p>
+                <p className="text-xs text-white/40 mt-4">Take a moment to reflect on your session</p>
               </div>
             )}
 

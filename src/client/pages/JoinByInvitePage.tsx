@@ -51,12 +51,12 @@ export default function JoinByInvitePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
               </svg>
             </div>
-            <h2 className="text-display-sm text-white mb-2">Invalid Invite Link</h2>
+            <h2 className="text-display-sm text-white mb-2">Hmm, that link doesn't work</h2>
             <p className="text-white/50 text-sm mb-6">
-              {(error as Error)?.message || 'This invite link may be invalid or the session has ended.'}
+              {(error as Error)?.message || 'This invite might have expired, or the session has already ended.'}
             </p>
             <Link to="/" className="btn-light inline-block">
-              Browse Sessions
+              Browse active sessions
             </Link>
           </div>
         </div>
@@ -75,17 +75,17 @@ export default function JoinByInvitePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
               </svg>
             </div>
-            <h2 className="text-display-sm text-white mb-2">You're Invited!</h2>
+            <h2 className="text-display-sm text-white mb-2">You're invited to focus!</h2>
             <p className="text-white/60 mb-1">{session.topic}</p>
-            <p className="text-white/40 text-sm mb-6">{session.participantCount} participant{session.participantCount !== 1 ? 's' : ''} waiting</p>
+            <p className="text-white/40 text-sm mb-6">{session.participantCount} {session.participantCount === 1 ? 'person' : 'people'} waiting to start</p>
             <p className="text-white/50 text-sm mb-6">
-              Sign in to join this focus session.
+              Sign in to join the session and start focusing together.
             </p>
             <Link
               to={`/login?_redirect=${encodeURIComponent(`/join/${inviteCode}`)}`}
               className="btn-light inline-block"
             >
-              Sign In to Join
+              Sign in to join
             </Link>
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function JoinByInvitePage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center fade-in">
           <div className="spinner-lg mx-auto mb-4" />
-          <span className="text-white/50 text-sm">Joining session...</span>
+          <span className="text-white/50 text-sm">Joining your session...</span>
         </div>
       </div>
     </Page>

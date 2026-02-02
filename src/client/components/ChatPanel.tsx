@@ -156,14 +156,14 @@ export default function ChatPanel({
                 <svg className="w-8 h-8 text-white/20 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                 </svg>
-                <p className="text-white/40 text-sm">Chat is disabled for this session</p>
+                <p className="text-white/40 text-sm">Chat is turned off for this session</p>
                 {isCreator && (
-                  <p className="text-white/30 text-xs mt-1">You can enable it above</p>
+                  <p className="text-white/30 text-xs mt-1">You can enable it from the menu above</p>
                 )}
               </div>
             ) : !isActiveParticipant ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                <p className="text-white/40 text-sm">Join the session to chat</p>
+                <p className="text-white/40 text-sm">Join this session to start chatting</p>
               </div>
             ) : isLoading ? (
               <div className="flex items-center justify-center h-full">
@@ -175,7 +175,7 @@ export default function ChatPanel({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
                 </svg>
                 <p className="text-white/40 text-sm">No messages yet</p>
-                <p className="text-white/30 text-xs mt-1">Start the conversation</p>
+                <p className="text-white/30 text-xs mt-1">Be the first to say hello!</p>
               </div>
             ) : (
               <>
@@ -221,7 +221,7 @@ export default function ChatPanel({
                   type="text"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Type a message..."
+                  placeholder="Send a message..."
                   maxLength={500}
                   className="flex-1 px-3 py-2 rounded-lg text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-white/20"
                 />

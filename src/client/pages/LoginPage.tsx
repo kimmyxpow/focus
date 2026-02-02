@@ -61,7 +61,7 @@ export default function LoginPage() {
             </div>
             <h1 className="text-display-sm text-white mb-2">Welcome to Focus</h1>
             <p className="text-white/50 text-sm">
-              Sign in to start your focus sessions
+              Sign in to start focusing with others
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="flex items-center gap-4 my-6">
             <div className="flex-1 h-px bg-white/10" />
-            <span className="text-xs text-white/40">Passwordless sign-in</span>
+            <span className="text-xs text-white/40">Quick and secure sign-in</span>
             <div className="flex-1 h-px bg-white/10" />
           </div>
 

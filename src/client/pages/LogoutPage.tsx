@@ -14,7 +14,7 @@ export default function LogoutPage() {
       <div className="flex items-center justify-center min-h-[80vh]">
         <div className="text-center fade-in">
           <div className="w-12 h-12 rounded-full border-2 border-white/20 border-t-white animate-spin mx-auto mb-4" />
-          <p className="text-white/50 text-sm">Signing out...</p>
+          <p className="text-white/50 text-sm">See you soon!</p>
         </div>
       </div>
     </Page>

@@ -233,9 +233,9 @@ export default function FocusOverviewPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h2 className="text-display-sm text-white mb-2">Sign in to Continue</h2>
+            <h2 className="text-display-sm text-white mb-2">Welcome back!</h2>
             <p className="text-white/50 text-sm mb-6">
-              View your focus history and track your progress.
+              Sign in to see your personal focus journey and track your progress over time.
             </p>
             <Link to={`/login?_redirect=${encodeURIComponent('/focus-overview')}`} className="btn-light">
               Sign In
@@ -269,7 +269,7 @@ export default function FocusOverviewPage() {
             <p className="text-white/50 text-sm">Your private focus history and stats</p>
           </div>
           <Link to="/create-session" className="btn-light">
-            New Session
+            Start a Session
           </Link>
         </div>
 
@@ -288,16 +288,16 @@ export default function FocusOverviewPage() {
         {/* Stats Overview */}
         {hasStats && (
           <section className="fade-in">
-            <h2 className="text-label text-white/40 mb-4">Your Stats</h2>
+            <h2 className="text-label text-white/40 mb-4">Your Progress</h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <StatCard
                 value={formatHours(overview.totalFocusMinutes)}
-                label="Total Focus"
+                label="Time Focused"
                 highlight
               />
               <StatCard value={overview.totalSessions} label="Sessions" />
               <StatCard value={`${Math.round(overview.completionRate * 100)}%`} label="Completion" />
-              <StatCard value={overview.focusStreak} label="Day Streak" />
+              <StatCard value={overview.focusStreak} label="Current Streak" />
             </div>
           </section>
         )}
@@ -305,8 +305,8 @@ export default function FocusOverviewPage() {
         {/* Weekly Chart */}
         {hasStats && overview.weeklyStats.length > 0 && (
           <section className="card-dark p-6 fade-in">
-            <h3 className="text-white font-semibold mb-1">Weekly Focus Time</h3>
-            <p className="text-white/40 text-xs mb-4">Last {Math.min(overview.weeklyStats.length, 8)} weeks</p>
+            <h3 className="text-white font-semibold mb-1">Your Focus Journey</h3>
+            <p className="text-white/40 text-xs mb-4">Activity over the past {Math.min(overview.weeklyStats.length, 8)} weeks</p>
             <WeeklyChart stats={overview.weeklyStats} />
           </section>
         )}
@@ -314,7 +314,7 @@ export default function FocusOverviewPage() {
         {/* Past Sessions */}
         {pastSessions.length > 0 && (
           <section className="fade-in">
-            <h2 className="text-label text-white/40 mb-4">Past Sessions</h2>
+            <h2 className="text-label text-white/40 mb-4">Session History</h2>
             <div className="space-y-3">
               {pastSessions.slice(0, 10).map((session) => (
                 <SessionHistoryCard key={session._id} session={session} />
@@ -331,9 +331,9 @@ export default function FocusOverviewPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-white mb-2">No focus sessions yet</h2>
+            <h2 className="text-xl font-semibold text-white mb-2">Your focus journey starts here</h2>
             <p className="text-white/50 mb-8 max-w-sm mx-auto">
-              Start your first focus session to begin tracking your progress.
+              Every focused minute counts. Start your first session and watch your progress grow.
             </p>
             <Link to="/create-session" className="btn-light">
               Start Your First Session
@@ -345,11 +345,11 @@ export default function FocusOverviewPage() {
         {hasStats && overview.focusPatterns && (
           <section className="card-dark p-6 fade-in">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-white font-semibold">Your Focus Patterns</h3>
+              <h3 className="text-white font-semibold">How You Focus</h3>
               <span className="chip text-[10px]">AI</span>
             </div>
             <p className="text-white/40 text-xs mb-4">
-              Used for cohort matching and session recommendations
+              These insights help us find the perfect focus partners for you
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               {overview.focusPatterns.preferredDurationRange && (
@@ -377,9 +377,9 @@ export default function FocusOverviewPage() {
 
         {/* Privacy & Data Controls */}
         <section className="card-dark p-6 fade-in">
-          <h3 className="text-white font-semibold mb-1">Privacy & Data</h3>
+          <h3 className="text-white font-semibold mb-1">Your Privacy</h3>
           <p className="text-white/40 text-xs mb-4">
-            You control your data. Only aggregated, anonymized data is stored.
+            You're in control. We only keep anonymized summaries to help improve your experience.
           </p>
 
           <button
@@ -387,8 +387,8 @@ export default function FocusOverviewPage() {
             className="flex items-center justify-between w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
           >
             <div className="text-left">
-              <p className="font-medium text-white text-sm">Manage Data</p>
-              <p className="text-xs text-white/40">Retention settings & deletion</p>
+              <p className="font-medium text-white text-sm">Data Settings</p>
+              <p className="text-xs text-white/40">Control how long we keep your data</p>
             </div>
             <svg
               className={cn(
@@ -407,7 +407,7 @@ export default function FocusOverviewPage() {
             <div className="space-y-4 p-4 bg-white/5 rounded-xl mt-4 scale-in">
               <div>
                 <label className="text-sm font-medium text-white mb-2 block">
-                  Data Retention Period
+                  Keep my data for
                 </label>
                 <div className="flex items-center gap-3">
                   <select
@@ -433,7 +433,7 @@ export default function FocusOverviewPage() {
 
               <div className="pt-4 border-t border-white/10">
                 <p className="text-sm text-white/60 mb-3">
-                  Permanently delete all your focus data. This cannot be undone.
+                  This will permanently delete all your focus history. This action cannot be reversed.
                 </p>
                 <button
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
@@ -458,7 +458,7 @@ export default function FocusOverviewPage() {
               <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
-              What we store
+              What we keep
             </p>
             <ul className="text-white/50 space-y-1 text-xs">
               <li>Aggregated focus minutes per week</li>
@@ -471,7 +471,7 @@ export default function FocusOverviewPage() {
               <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
               </svg>
-              What we don't store
+              What stays private
             </p>
             <ul className="text-white/50 space-y-1 text-xs">
               <li>Individual session details</li>

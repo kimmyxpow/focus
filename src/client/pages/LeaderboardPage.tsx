@@ -111,7 +111,7 @@ function EmptyLeaderboard() {
       </div>
       <h3 className="text-lg font-semibold text-white mb-2">No rankings yet</h3>
       <p className="text-white/50 text-sm max-w-xs mx-auto">
-        Users with public profiles who complete focus sessions will appear here.
+        Focus champions will appear here once sessions are completed. Make your profile public to join the leaderboard!
       </p>
     </div>
   );
@@ -154,9 +154,9 @@ export default function LeaderboardPage() {
       <div className="container-md py-8 space-y-6">
         {/* Header */}
         <div className="text-center">
-          <h1 className="text-display-sm text-white mb-2">Leaderboard</h1>
+          <h1 className="text-display-sm text-white mb-2">Focus champions</h1>
           <p className="text-white/50 text-sm">
-            See how you stack up against other focused minds
+            Celebrate the community's most dedicated focusers
           </p>
         </div>
 
@@ -262,19 +262,19 @@ export default function LeaderboardPage() {
         {user && (
           <div className="card-dark p-5 text-center bg-gradient-to-r from-white/5 to-white/0">
             <p className="text-white/70 text-sm mb-3">
-              Want to appear on the leaderboard? Make your profile public!
+              Want to join the leaderboard? Make your profile public and start racking up those focus minutes!
             </p>
             <Link to="/profile" className="btn-outline-light text-sm">
-              Go to Profile Settings
+              Update your profile
             </Link>
           </div>
         )}
 
         {/* Privacy note */}
         <p className="text-center text-white/30 text-xs">
-          Only users with public profiles are shown on the leaderboard.
+          Only users with public profiles appear here. Your privacy is always in your control.
           <br />
-          Your privacy settings can be changed at any time from your profile.
+          You can change your visibility settings anytime from your profile page.
         </p>
       </div>
     </Page>

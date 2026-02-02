@@ -24,9 +24,9 @@ type SessionSummary = {
 };
 
 const OUTCOMES = [
-  { key: 'completed', label: 'Completed', description: 'Stayed focused throughout', icon: '✓' },
-  { key: 'partial', label: 'Partial', description: 'Got some work done', icon: '◐' },
-  { key: 'interrupted', label: 'Interrupted', description: 'Had to stop early', icon: '○' },
+  { key: 'completed', label: 'Nailed it', description: 'Stayed focused the whole time', icon: '✓' },
+  { key: 'partial', label: 'Good progress', description: 'Made solid progress', icon: '◐' },
+  { key: 'interrupted', label: 'Got interrupted', description: 'Had to step away', icon: '○' },
 ] as const;
 
 function LoadingSkeleton() {
@@ -130,12 +130,12 @@ export default function SessionSummaryPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
-            <h2 className="text-display-sm text-white mb-2">Summary Not Available</h2>
+            <h2 className="text-display-sm text-white mb-2">Summary not ready yet</h2>
             <p className="text-white/50 text-sm mb-6">
-              {(error as Error)?.message || 'Unable to load the session summary.'}
+              {(error as Error)?.message || "We couldn't load the summary. It might still be processing."}
             </p>
             <Link to="/" className="btn-light inline-block">
-              Back to Sessions
+              Back to sessions
             </Link>
           </div>
         </div>
@@ -157,7 +157,7 @@ export default function SessionSummaryPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <span className="chip bg-emerald-500/20 text-emerald-400 mb-4">Session Complete</span>
+          <span className="chip bg-emerald-500/20 text-emerald-400 mb-4">Session complete!</span>
           <h1 className="text-display-md text-white mb-2">{summary.topic}</h1>
           <p className="text-white/50">{summary.intent}</p>
         </div>
@@ -181,8 +181,8 @@ export default function SessionSummaryPage() {
         {/* Outcome Selection */}
         {!summary.userOutcome && (
           <div className="card-dark p-6">
-            <h2 className="text-lg font-semibold text-white mb-1">How did it go?</h2>
-            <p className="text-sm text-white/50 mb-4">Your feedback helps improve AI matching</p>
+            <h2 className="text-lg font-semibold text-white mb-1">How did your session go?</h2>
+            <p className="text-sm text-white/50 mb-4">Your feedback helps us match you with better focus partners</p>
             <div className="grid grid-cols-3 gap-3">
               {OUTCOMES.map((outcome) => (
                 <button
@@ -229,7 +229,7 @@ export default function SessionSummaryPage() {
         {/* AI Summary */}
         <div className="card-dark p-6">
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-base font-semibold text-white">Session Summary</h2>
+            <h2 className="text-base font-semibold text-white">Session insights</h2>
             <span className="chip bg-white/10 text-white/50 text-xs">AI</span>
           </div>
           <p className="text-white/70 leading-relaxed">{summary.aiSummary}</p>
@@ -238,7 +238,7 @@ export default function SessionSummaryPage() {
         {/* AI Next Step */}
         <div className="p-6 bg-white/5 rounded-xl border border-white/5">
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-base font-semibold text-white">Suggested Next Step</h2>
+            <h2 className="text-base font-semibold text-white">What to do next</h2>
             <span className="chip bg-white/10 text-white/50 text-xs">AI</span>
           </div>
           <p className="text-white/70 leading-relaxed">{summary.aiNextStep}</p>
@@ -246,24 +246,24 @@ export default function SessionSummaryPage() {
 
         {/* Focus Minutes Earned */}
         <div className="card-dark p-8 text-center bg-white/5">
-          <p className="text-sm text-white/50 mb-2">Focus minutes earned</p>
+          <p className="text-sm text-white/50 mb-2">Focus time earned</p>
           <p className="text-5xl font-bold text-white display-number">+{summary.focusMinutesEarned}</p>
-          <p className="text-sm text-white/40 mt-3">Added to your private focus ledger</p>
+          <p className="text-sm text-white/40 mt-3">Added to your personal stats</p>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3 pt-4">
           <Link to="/" className="btn-outline-light flex-1 text-center">
-            Back to Sessions
+            Back to sessions
           </Link>
           <Link to="/create-session" className="btn-light flex-1 text-center">
-            Start Another
+            Start another session
           </Link>
         </div>
 
         {/* Privacy note */}
         <p className="text-xs text-white/40 text-center pb-4">
-          Only aggregated focus data is stored. Session details are ephemeral.
+          We only save your focus time and outcomes. Session details disappear after it ends.
         </p>
       </div>
     </Page>

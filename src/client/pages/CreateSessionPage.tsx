@@ -169,9 +169,9 @@ export default function CreateSessionPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
-            <h2 className="text-display-sm text-white mb-2">Sign in to Continue</h2>
+            <h2 className="text-display-sm text-white mb-2">Let's get you set up</h2>
             <p className="text-white/50 text-sm mb-6">
-              Create an account to start your first focus session.
+              Sign in to create your focus session and invite others to join you.
             </p>
             <Link to={`/login?_redirect=${encodeURIComponent('/create-session')}`} className="btn-light">
               Sign In
@@ -187,16 +187,16 @@ export default function CreateSessionPage() {
       <div className="container-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-display-md text-white mb-2">Create Focus Session</h1>
-          <p className="text-white/50 text-sm">Set up your session and invite others to focus together</p>
+          <h1 className="text-display-md text-white mb-2">Create a Focus Session</h1>
+          <p className="text-white/50 text-sm">Set your intentions, choose your focus time, and invite others to work alongside you</p>
         </div>
 
         <div className="card-dark p-6 fade-in space-y-8">
           {/* Intent */}
           <div>
-            <label className="text-label text-white/60 mb-2 block">What will you focus on? *</label>
+            <label className="text-label text-white/60 mb-2 block">What are you focusing on today? *</label>
             <textarea
-              placeholder="e.g., Writing the introduction section of my research paper..."
+              placeholder="For example: Writing the intro to my research paper, or finishing that coding project..."
               value={intent}
               onChange={(e) => setIntent(e.target.value)}
               maxLength={200}
@@ -207,7 +207,7 @@ export default function CreateSessionPage() {
                 "transition-colors",
                 intent.length < 10 ? "text-white/40" : "text-white/60"
               )}>
-                {intent.length < 10 ? `${10 - intent.length} more characters needed` : 'Good to go'}
+                {intent.length < 10 ? `Just ${10 - intent.length} more characters to go` : 'Perfect!'}
               </span>
               <span className="text-white/40">{intent.length}/200</span>
             </div>
@@ -273,7 +273,7 @@ export default function CreateSessionPage() {
 
           {/* Session Settings - All visible */}
           <div className="space-y-5">
-            <h3 className="text-label text-white/60">Session Settings</h3>
+            <h3 className="text-label text-white/60">Customize Your Session</h3>
 
             {/* Privacy & Chat Row */}
             <div className="grid sm:grid-cols-2 gap-4">
@@ -281,16 +281,16 @@ export default function CreateSessionPage() {
                 <Toggle
                   enabled={isPrivate}
                   onChange={setIsPrivate}
-                  label="Private Session"
-                  description="Invite-only, hidden from feed"
+                  label="Make this private"
+                  description="Only people with the link can join"
                 />
               </div>
               <div className="p-4 bg-white/5 rounded-lg">
                 <Toggle
                   enabled={chatEnabled}
                   onChange={setChatEnabled}
-                  label="Enable Chat"
-                  description="Allow participants to message"
+                  label="Enable chat"
+                  description="Let participants send messages during the session"
                 />
               </div>
             </div>
@@ -302,7 +302,7 @@ export default function CreateSessionPage() {
                 onChange={setRepetitions}
                 min={1}
                 max={10}
-                label="Repetitions"
+                label="Focus cycles"
                 unit={repetitions === 1 ? 'session' : 'sessions'}
               />
 
@@ -314,7 +314,7 @@ export default function CreateSessionPage() {
                       onChange={setBreakDuration}
                       min={1}
                       max={30}
-                      label="Break duration"
+                      label="Break time"
                       unit="min"
                     />
                   </div>
@@ -324,7 +324,7 @@ export default function CreateSessionPage() {
                       onChange={setBreakInterval}
                       min={1}
                       max={repetitions}
-                      label="Break every"
+                      label="Take a break every"
                       unit={breakInterval === 1 ? 'session' : 'sessions'}
                     />
                   </div>
