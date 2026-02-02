@@ -29,37 +29,6 @@ const OUTCOMES = [
   { key: 'interrupted', label: 'Got interrupted', description: 'Had to step away', icon: '○' },
 ] as const;
 
-function LoadingSkeleton() {
-  return (
-    <div className="container-sm space-y-6 fade-in">
-      {/* Header skeleton */}
-      <div className="text-center py-8">
-        <div className="w-20 h-20 rounded-full bg-white/5 mx-auto mb-6 skeleton" />
-        <div className="h-6 w-32 bg-white/5 rounded-lg mx-auto mb-4 skeleton" />
-        <div className="h-8 w-48 bg-white/5 rounded-lg mx-auto mb-2 skeleton" />
-        <div className="h-4 w-64 bg-white/5 rounded-lg mx-auto skeleton" />
-      </div>
-
-      {/* Stats skeleton */}
-      <div className="grid grid-cols-3 gap-3">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="card-dark p-5 text-center">
-            <div className="h-9 w-16 bg-white/5 rounded-lg mx-auto mb-2 skeleton" />
-            <div className="h-3 w-12 bg-white/5 rounded mx-auto skeleton" />
-          </div>
-        ))}
-      </div>
-
-      {/* Content skeleton */}
-      <div className="card-dark p-6 space-y-3">
-        <div className="h-5 w-32 bg-white/5 rounded skeleton" />
-        <div className="h-4 w-full bg-white/5 rounded skeleton" />
-        <div className="h-4 w-3/4 bg-white/5 rounded skeleton" />
-      </div>
-    </div>
-  );
-}
-
 export default function SessionSummaryPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const queryClient = useQueryClient();
