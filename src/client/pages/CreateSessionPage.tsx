@@ -1,0 +1,377 @@
+import { useState, useCallback } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+import { useSession } from 'modelence/client';
+import { modelenceMutation } from '@modelence/react-query';
+import toast from 'react-hot-toast';
+import Page from '@/client/components/Page';
+import { cn } from '@/client/lib/utils';
+
+const TOPICS = [
+  { id: 'writing', label: 'Writing' },
+  { id: 'coding', label: 'Coding' },
+  { id: 'reading', label: 'Reading' },
+  { id: 'studying', label: 'Studying' },
+  { id: 'design', label: 'Design' },
+  { id: 'research', label: 'Research' },
+  { id: 'planning', label: 'Planning' },
+  { id: 'creative', label: 'Creative' },
+  { id: 'deep-work', label: 'Deep Work' },
+  { id: 'other', label: 'Other' },
+];
+
+const DURATION_PRESETS = [
+  { label: 'Quick', time: '15-20', min: 15, max: 20, description: 'Short burst' },
+  { label: 'Standard', time: '25-30', min: 25, max: 30, description: 'Classic pomodoro' },
+  { label: 'Deep', time: '45-50', min: 45, max: 50, description: 'Extended focus' },
+  { label: 'Marathon', time: '60-90', min: 60, max: 90, description: 'Long session' },
+];
+
+function Toggle({
+  enabled,
+  onChange,
+  label,
+  description,
+}: {
+  enabled: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  description?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <div>
+        <span className="text-sm font-medium text-white/70">{label}</span>
+        {description && <p className="text-xs text-white/40 mt-0.5">{description}</p>}
+      </div>
+      <button
+        type="button"
+        onClick={() => onChange(!enabled)}
+        className={cn(
+          "relative w-11 h-6 rounded-full transition-colors",
+          enabled ? "bg-white" : "bg-white/20"
+        )}
+      >
+        <span
+          className={cn(
+            "absolute top-1 left-1 w-4 h-4 rounded-full transition-transform",
+            enabled ? "translate-x-5 bg-stone-900" : "translate-x-0 bg-white/60"
+          )}
+        />
+      </button>
+    </div>
+  );
+}
+
+function NumberStepper({
+  value,
+  onChange,
+  min,
+  max,
+  label,
+  unit,
+}: {
+  value: number;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  label: string;
+  unit: string;
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <span className="text-sm font-medium text-white/70">{label}</span>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-lg font-semibold transition-colors bg-white/10 text-white/60 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
+          onClick={() => onChange(Math.max(min, value - 1))}
+          disabled={value <= min}
+        >
+          -
+        </button>
+        <span className="text-xl font-bold text-white min-w-[2.5rem] text-center">{value}</span>
+        <button
+          type="button"
+          className="w-8 h-8 rounded-lg flex items-center justify-center text-lg font-semibold transition-colors bg-white/10 text-white/60 hover:bg-white/20 disabled:opacity-40 disabled:cursor-not-allowed"
+          onClick={() => onChange(Math.min(max, value + 1))}
+          disabled={value >= max}
+        >
+          +
+        </button>
+      </div>
+      <span className="text-xs text-white/40 w-16 text-right">{unit}</span>
+    </div>
+  );
+}
+
+export default function CreateSessionPage() {
+  const navigate = useNavigate();
+  const { user } = useSession();
+
+  // Core session info
+  const [intent, setIntent] = useState('');
+  const [topic, setTopic] = useState('');
+  const [durationPreset, setDurationPreset] = useState<number | null>(1); // Default to Standard
+
+  // Session settings (all visible upfront)
+  const [repetitions, setRepetitions] = useState(1);
+  const [breakDuration, setBreakDuration] = useState(5);
+  const [breakInterval, setBreakInterval] = useState(1);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [chatEnabled, setChatEnabled] = useState(false);
+
+  const selectedDuration = durationPreset !== null ? DURATION_PRESETS[durationPreset] : null;
+  const minDuration = selectedDuration?.min ?? 25;
+  const maxDuration = selectedDuration?.max ?? 30;
+
+  const canSubmit = intent.trim().length >= 10 && topic !== '' && durationPreset !== null;
+
+  const { mutate: createSession, isPending } = useMutation({
+    ...modelenceMutation<{ sessionId: string }>('focus.createSession'),
+    onSuccess: (data) => {
+      toast.success('Session created!');
+      navigate(`/focus/${data.sessionId}`);
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to create session');
+    },
+  });
+
+  const handleSubmit = useCallback(() => {
+    if (!canSubmit) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    const topicLabel = TOPICS.find(t => t.id === topic)?.label || topic;
+    createSession({
+      intent: intent.trim(),
+      topic: topicLabel,
+      minDuration,
+      maxDuration,
+      repetitions,
+      breakDuration,
+      breakInterval,
+      isPrivate,
+      chatEnabled,
+    });
+  }, [intent, topic, minDuration, maxDuration, repetitions, breakDuration, breakInterval, isPrivate, chatEnabled, createSession, canSubmit]);
+
+  // Sign in prompt
+  if (!user) {
+    return (
+      <Page variant="dark">
+        <div className="container-sm">
+          <div className="card-dark p-8 text-center fade-in">
+            <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
+              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h2 className="text-display-sm text-white mb-2">Sign in to Continue</h2>
+            <p className="text-white/50 text-sm mb-6">
+              Create an account to start your first focus session.
+            </p>
+            <Link to={`/login?_redirect=${encodeURIComponent('/create-session')}`} className="btn-light">
+              Sign In
+            </Link>
+          </div>
+        </div>
+      </Page>
+    );
+  }
+
+  return (
+    <Page variant="dark">
+      <div className="container-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-display-md text-white mb-2">Create Focus Session</h1>
+          <p className="text-white/50 text-sm">Set up your session and invite others to focus together</p>
+        </div>
+
+        <div className="card-dark p-6 fade-in space-y-8">
+          {/* Intent */}
+          <div>
+            <label className="text-label text-white/60 mb-2 block">What will you focus on? *</label>
+            <textarea
+              placeholder="e.g., Writing the introduction section of my research paper..."
+              value={intent}
+              onChange={(e) => setIntent(e.target.value)}
+              maxLength={200}
+              className="w-full px-3 py-2.5 rounded-lg text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 min-h-[100px] resize-none"
+            />
+            <div className="flex items-center justify-between mt-2 text-xs">
+              <span className={cn(
+                "transition-colors",
+                intent.length < 10 ? "text-white/40" : "text-white/60"
+              )}>
+                {intent.length < 10 ? `${10 - intent.length} more characters needed` : 'Good to go'}
+              </span>
+              <span className="text-white/40">{intent.length}/200</span>
+            </div>
+          </div>
+
+          {/* Topic */}
+          <div>
+            <label className="text-label text-white/60 mb-2 block">Topic *</label>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              {TOPICS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setTopic(t.id)}
+                  className={cn(
+                    "p-2.5 rounded-lg border text-sm font-medium transition-colors text-center",
+                    topic === t.id
+                      ? "border-white bg-white text-stone-900"
+                      : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+                  )}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Duration */}
+          <div>
+            <label className="text-label text-white/60 mb-2 block">Duration *</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {DURATION_PRESETS.map((preset, index) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={() => setDurationPreset(index)}
+                  className={cn(
+                    "p-4 rounded-lg border text-center transition-colors",
+                    durationPreset === index
+                      ? "border-white bg-white text-stone-900"
+                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                  )}
+                >
+                  <span className={cn(
+                    "text-2xl font-semibold display-number block",
+                    durationPreset === index ? "text-stone-900" : "text-white"
+                  )}>
+                    {preset.time}
+                  </span>
+                  <span className={cn(
+                    "text-xs block mt-1",
+                    durationPreset === index ? "text-stone-500" : "text-white/50"
+                  )}>
+                    min · {preset.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-white/10" />
+
+          {/* Session Settings - All visible */}
+          <div className="space-y-5">
+            <h3 className="text-label text-white/60">Session Settings</h3>
+
+            {/* Privacy & Chat Row */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div className="p-4 bg-white/5 rounded-lg">
+                <Toggle
+                  enabled={isPrivate}
+                  onChange={setIsPrivate}
+                  label="Private Session"
+                  description="Invite-only, hidden from feed"
+                />
+              </div>
+              <div className="p-4 bg-white/5 rounded-lg">
+                <Toggle
+                  enabled={chatEnabled}
+                  onChange={setChatEnabled}
+                  label="Enable Chat"
+                  description="Allow participants to message"
+                />
+              </div>
+            </div>
+
+            {/* Repetitions & Breaks */}
+            <div className="p-4 bg-white/5 rounded-lg space-y-4">
+              <NumberStepper
+                value={repetitions}
+                onChange={setRepetitions}
+                min={1}
+                max={10}
+                label="Repetitions"
+                unit={repetitions === 1 ? 'session' : 'sessions'}
+              />
+
+              {repetitions > 1 && (
+                <>
+                  <div className="border-t border-white/10 pt-4">
+                    <NumberStepper
+                      value={breakDuration}
+                      onChange={setBreakDuration}
+                      min={1}
+                      max={30}
+                      label="Break duration"
+                      unit="min"
+                    />
+                  </div>
+                  <div className="border-t border-white/10 pt-4">
+                    <NumberStepper
+                      value={breakInterval}
+                      onChange={setBreakInterval}
+                      min={1}
+                      max={repetitions}
+                      label="Break every"
+                      unit={breakInterval === 1 ? 'session' : 'sessions'}
+                    />
+                  </div>
+                  <p className="text-xs text-white/40 pt-2">
+                    {repetitions} sessions with {breakDuration}-min breaks every {breakInterval} session{breakInterval > 1 ? 's' : ''}
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Summary */}
+          {canSubmit && (
+            <div className="p-4 bg-white/5 rounded-lg scale-in">
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">Summary</p>
+              <p className="text-white text-sm mb-3 line-clamp-2">{intent}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="chip bg-white/10 text-white/70">{TOPICS.find(t => t.id === topic)?.label}</span>
+                <span className="text-sm text-white/50">{selectedDuration?.time} min</span>
+                {repetitions > 1 && (
+                  <span className="chip bg-white/10 text-white/70">{repetitions}x</span>
+                )}
+                {isPrivate && (
+                  <span className="chip bg-white/5 text-white/50">Private</span>
+                )}
+                {chatEnabled && (
+                  <span className="chip bg-white/10 text-white/70">Chat On</span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <Link to="/" className="btn-ghost-light flex-1 text-center">
+              Cancel
+            </Link>
+            <button
+              className="btn-light flex-1"
+              onClick={handleSubmit}
+              disabled={isPending || !canSubmit}
+            >
+              {isPending ? 'Creating...' : 'Create Session'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Page>
+  );
+}
