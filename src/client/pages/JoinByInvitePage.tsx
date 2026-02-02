@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceQuery } from '@modelence/react-query';
 import Page from '@/client/components/Page';
+import JoinSessionSkeleton from '@/client/components/skeletons/JoinSessionSkeleton';
 
 type InviteSession = {
   sessionId: string;
@@ -35,12 +36,7 @@ export default function JoinByInvitePage() {
   if (isLoading) {
     return (
       <Page variant="dark" hideNav>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center fade-in">
-            <div className="spinner-lg mx-auto mb-4" />
-            <span className="text-white/50 text-sm">Loading invite...</span>
-          </div>
-        </div>
+        <JoinSessionSkeleton />
       </Page>
     );
   }

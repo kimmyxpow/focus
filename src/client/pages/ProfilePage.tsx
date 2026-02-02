@@ -6,6 +6,7 @@ import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/re
 import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import FocusHeatmap from '@/client/components/FocusHeatmap';
+import ProfileSkeleton from '@/client/components/skeletons/ProfileSkeleton';
 import { cn } from '@/client/lib/utils';
 
 type Profile = {
@@ -134,9 +135,7 @@ export default function ProfilePage() {
     return (
       <Page variant="dark">
         <div className="container-md py-8">
-          <div className="flex items-center justify-center py-20">
-            <div className="spinner-lg" />
-          </div>
+          <ProfileSkeleton />
         </div>
       </Page>
     );

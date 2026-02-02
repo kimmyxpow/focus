@@ -5,6 +5,7 @@ import { useSession } from 'modelence/client';
 import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/react-query';
 import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
+import SessionSummarySkeleton from '@/client/components/skeletons/SessionSummarySkeleton';
 import { cn } from '@/client/lib/utils';
 
 type SessionSummary = {
@@ -114,7 +115,7 @@ export default function SessionSummaryPage() {
   if (isLoading) {
     return (
       <Page variant="dark">
-        <LoadingSkeleton />
+        <SessionSummarySkeleton />
       </Page>
     );
   }
