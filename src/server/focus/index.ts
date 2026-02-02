@@ -397,7 +397,7 @@ export default new Module('focus', {
     },
 
     // Get session by invite code
-    getSessionByInvite: async (args: unknown, _context: { user: UserInfo | null }) => {
+    getSessionByInvite: async (args: unknown, { user }: { user: UserInfo | null }) => {
       const { inviteCode } = z.object({ inviteCode: z.string() }).parse(args);
 
       const session = await dbFocusSessions.findOne({ inviteCode });
@@ -409,6 +409,16 @@ export default new Module('focus', {
         throw new Error('This session has ended');
       }
 
+      // Check if user has already accepted the invite (for private sessions)
+      let hasAcceptedInvite = false;
+      if (user && session.isPrivate) {
+        const userHash = createUserHash(user.id, session._id.toString());
+        hasAcceptedInvite = session.acceptedUserHashes?.includes(userHash) ?? false;
+      }
+
+      // For private sessions, also check if user is the creator
+      const isCreator = user ? session.creatorId.toString() === user.id : false;
+
       return {
         sessionId: session._id.toString(),
         topic: session.topic,
@@ -416,6 +426,11 @@ export default new Module('focus', {
         status: session.status,
         participantCount: session.participantCount,
         isPrivate: session.isPrivate ?? false,
+        hasAcceptedInvite,
+        isCreator,
+        creatorName: session.creatorName,
+        minDuration: session.minDuration,
+        maxDuration: session.maxDuration,
       };
     },
 
@@ -888,6 +903,14 @@ export default new Module('focus', {
       // New participant - only allow in waiting/warmup states
       if (session.status !== 'waiting' && session.status !== 'warmup') {
         throw new Error('Session is no longer accepting new participants');
+      }
+
+      // For private sessions, check if user has accepted the invite (unless they're the creator)
+      if (session.isPrivate && session.creatorId.toString() !== user.id) {
+        const hasAccepted = session.acceptedUserHashes?.includes(userHash) ?? false;
+        if (!hasAccepted) {
+          throw new Error('You need to accept the invitation first to join this private session');
+        }
       }
 
       const odonym = generateOdonym();
@@ -1397,6 +1420,49 @@ export default new Module('focus', {
       );
 
       return { success: true, isPublic };
+    },
+
+    // Accept a private session invite
+    acceptPrivateInvite: async (args: unknown, { user }: { user: UserInfo | null }) => {
+      if (!user) {
+        throw new AuthError('Not authenticated');
+      }
+
+      const { inviteCode } = z.object({ inviteCode: z.string() }).parse(args);
+
+      const session = await dbFocusSessions.findOne({ inviteCode });
+      if (!session) {
+        throw new Error('Invalid invite link');
+      }
+
+      if (session.status === 'completed' || session.status === 'cancelled') {
+        throw new Error('This session has ended');
+      }
+
+      if (!session.isPrivate) {
+        // For public sessions, no need to accept - just redirect to join
+        return { success: true, sessionId: session._id.toString(), alreadyAccepted: true };
+      }
+
+      // Check if user is the creator (they don't need to accept)
+      if (session.creatorId.toString() === user.id) {
+        return { success: true, sessionId: session._id.toString(), alreadyAccepted: true };
+      }
+
+      const userHash = createUserHash(user.id, session._id.toString());
+
+      // Check if already accepted
+      if (session.acceptedUserHashes?.includes(userHash)) {
+        return { success: true, sessionId: session._id.toString(), alreadyAccepted: true };
+      }
+
+      // Add user to accepted list
+      await dbFocusSessions.updateOne(
+        { _id: session._id },
+        { $addToSet: { acceptedUserHashes: userHash } }
+      );
+
+      return { success: true, sessionId: session._id.toString(), alreadyAccepted: false };
     },
   },
 });

@@ -128,17 +128,20 @@ function ParticipantAvatar({ participant, isCurrentUser }: { participant: Partic
   );
 }
 
-function CopyInviteButton({ sessionId }: { sessionId: string }) {
+function CopyInviteButton({ sessionId, inviteCode, isPrivate }: { sessionId: string; inviteCode?: string; isPrivate: boolean }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
-    // Copy direct session URL instead of invite code URL
-    const sessionUrl = `${window.location.origin}/focus/${sessionId}`;
-    navigator.clipboard.writeText(sessionUrl);
+    // For private sessions with invite code, use the invite URL for the acceptance flow
+    // For public sessions or when no invite code, use direct session URL
+    const url = isPrivate && inviteCode
+      ? `${window.location.origin}/invite/${inviteCode}`
+      : `${window.location.origin}/focus/${sessionId}`;
+    navigator.clipboard.writeText(url);
     setCopied(true);
     toast.success('Session link copied!');
     setTimeout(() => setCopied(false), 2000);
-  }, [sessionId]);
+  }, [sessionId, inviteCode, isPrivate]);
 
   return (
     <button
@@ -397,9 +400,17 @@ export default function FocusRoomPage() {
               <div className="mb-6 p-4 bg-white/5 rounded-lg flex items-center justify-between gap-4">
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-white">Share session</p>
-                  <p className="text-xs text-white/40 truncate">Copy link to share with others</p>
+                  <p className="text-xs text-white/40 truncate">
+                    {session.isPrivate 
+                      ? 'Copy invite link to share with others'
+                      : 'Copy link to share with others'}
+                  </p>
                 </div>
-                <CopyInviteButton sessionId={sessionId!} />
+                <CopyInviteButton 
+                  sessionId={sessionId!} 
+                  inviteCode={session.inviteCode} 
+                  isPrivate={session.isPrivate} 
+                />
               </div>
             )}
 

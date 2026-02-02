@@ -13,6 +13,11 @@ type InviteSession = {
   status: string;
   participantCount: number;
   isPrivate: boolean;
+  hasAcceptedInvite: boolean;
+  isCreator: boolean;
+  creatorName?: string;
+  minDuration: number;
+  maxDuration: number;
 };
 
 export default function JoinByInvitePage() {
@@ -26,12 +31,19 @@ export default function JoinByInvitePage() {
     retry: false,
   });
 
-  // Redirect to the session room once loaded
+  // Redirect logic
   useEffect(() => {
-    if (session?.sessionId) {
-      navigate(`/focus/${session.sessionId}`, { replace: true });
+    if (!session) return;
+
+    // For private sessions that haven't been accepted, redirect to accept page
+    if (session.isPrivate && !session.isCreator && !session.hasAcceptedInvite) {
+      navigate(`/invite/${inviteCode}`, { replace: true });
+      return;
     }
-  }, [session, navigate]);
+
+    // Otherwise, redirect directly to the session room
+    navigate(`/focus/${session.sessionId}`, { replace: true });
+  }, [session, navigate, inviteCode]);
 
   if (isLoading) {
     return (
@@ -66,6 +78,11 @@ export default function JoinByInvitePage() {
 
   // Show preview while redirecting (user not logged in case)
   if (!user) {
+    // For private sessions, redirect to accept page for sign in
+    const redirectPath = session.isPrivate 
+      ? `/invite/${inviteCode}` 
+      : `/join/${inviteCode}`;
+
     return (
       <Page variant="dark">
         <div className="container-sm flex items-center justify-center min-h-[70vh]">
@@ -75,17 +92,27 @@ export default function JoinByInvitePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
               </svg>
             </div>
+            {session.isPrivate && (
+              <span className="chip bg-white/10 text-white/70 mb-3 inline-block">Private Session</span>
+            )}
             <h2 className="text-display-sm text-white mb-2">You're invited to focus!</h2>
+            {session.creatorName && (
+              <p className="text-white/60 text-sm mb-1">
+                Invited by <span className="font-medium text-white/80">{session.creatorName}</span>
+              </p>
+            )}
             <p className="text-white/60 mb-1">{session.topic}</p>
             <p className="text-white/40 text-sm mb-6">{session.participantCount} {session.participantCount === 1 ? 'person' : 'people'} waiting to start</p>
             <p className="text-white/50 text-sm mb-6">
-              Sign in to join the session and start focusing together.
+              {session.isPrivate 
+                ? 'Sign in to accept the invitation and join this private session.'
+                : 'Sign in to join the session and start focusing together.'}
             </p>
             <Link
-              to={`/login?_redirect=${encodeURIComponent(`/join/${inviteCode}`)}`}
+              to={`/login?_redirect=${encodeURIComponent(redirectPath)}`}
               className="btn-light inline-block"
             >
-              Sign in to join
+              {session.isPrivate ? 'Sign in to accept' : 'Sign in to join'}
             </Link>
           </div>
         </div>
@@ -99,7 +126,11 @@ export default function JoinByInvitePage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center fade-in">
           <div className="spinner-lg mx-auto mb-4" />
-          <span className="text-white/50 text-sm">Joining your session...</span>
+          <span className="text-white/50 text-sm">
+            {session.isPrivate && !session.hasAcceptedInvite && !session.isCreator 
+              ? 'Redirecting to accept invitation...' 
+              : 'Joining your session...'}
+          </span>
         </div>
       </div>
     </Page>

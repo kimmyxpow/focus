@@ -70,6 +70,7 @@ export const dbFocusSessions = new Store('focusSessions', {
     // Privacy settings
     isPrivate: schema.boolean().optional(),    // If true, hidden from public feed
     inviteCode: schema.string().optional(),    // Unique invite code for sharing
+    acceptedUserHashes: schema.array(schema.string()).optional(), // Users who accepted the invite (for private sessions)
 
     // Chat settings
     chatEnabled: schema.boolean().optional(),  // If true, participants can chat

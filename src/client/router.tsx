@@ -51,6 +51,10 @@ const publicRoutes: RouteObject[] = [
     Component: lazy(() => import('./pages/JoinByInvitePage'))
   },
   {
+    path: '/invite/:inviteCode',
+    Component: lazy(() => import('./pages/AcceptInvitePage'))
+  },
+  {
     path: '/leaderboard',
     Component: lazy(() => import('./pages/LeaderboardPage'))
   },
