@@ -165,9 +165,9 @@ export default function CreateSessionPage() {
     return (
       <Page variant="dark">
         <div className="container-sm">
-          <div className="card-dark p-8 text-center fade-in">
+          <div className="text-center py-12 fade-in">
             <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
@@ -197,7 +197,7 @@ export default function CreateSessionPage() {
         {hasActiveSession && activeSession && (
           <div className="mb-6 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg fade-in">
             <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
@@ -210,7 +210,7 @@ export default function CreateSessionPage() {
                   className="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 mt-2 transition-colors"
                 >
                   Return to session
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </Link>
@@ -219,16 +219,17 @@ export default function CreateSessionPage() {
           </div>
         )}
 
-        <div className="card-dark p-6 fade-in space-y-8">
+        <div className="py-6 fade-in space-y-8">
           {/* Intent */}
           <div>
-            <label className="text-label text-white/60 mb-2 block">What are you focusing on today? *</label>
+            <label htmlFor="intent-input" className="text-label text-white/60 mb-2 block">What are you focusing on today? *</label>
             <textarea
+              id="intent-input"
               placeholder="For example: Writing the intro to my research paper, or finishing that coding project..."
               value={intent}
               onChange={(e) => setIntent(e.target.value)}
               maxLength={200}
-              className="w-full px-3 py-2.5 rounded-lg text-sm bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-white/20 min-h-[100px] resize-none"
+              className="w-full px-3 py-2.5 rounded-md text-sm bg-white/5 text-white placeholder:text-white/30 focus:outline-none min-h-[100px] resize-none shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)] focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2),0_0_0_3px_rgba(255,255,255,0.05)]"
             />
             <div className="flex items-center justify-between mt-2 text-xs">
               <span className={cn(
@@ -242,41 +243,45 @@ export default function CreateSessionPage() {
           </div>
 
           {/* Topic */}
-          <div>
-            <label className="text-label text-white/60 mb-2 block">Topic *</label>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <fieldset>
+            <legend className="text-label text-white/60 mb-2 block">Topic *</legend>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2" role="radiogroup" aria-label="Select topic">
               {TOPICS.map((t) => (
                 <button
                   key={t.id}
                   type="button"
+                  role="radio"
+                  aria-checked={topic === t.id}
                   onClick={() => setTopic(t.id)}
                   className={cn(
-                    "p-2.5 rounded-lg border text-sm font-medium transition-colors text-center",
+                    "p-2.5 rounded-lg text-sm font-medium transition-all text-center",
                     topic === t.id
-                      ? "border-white bg-white text-stone-900"
-                      : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+                      ? "bg-white text-stone-900 shadow-sm"
+                      : "bg-white/5 text-white/70 hover:bg-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
                   )}
                 >
                   {t.label}
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Duration */}
-          <div>
-            <label className="text-label text-white/60 mb-2 block">Duration *</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <fieldset>
+            <legend className="text-label text-white/60 mb-2 block">Duration *</legend>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" role="radiogroup" aria-label="Select duration">
               {DURATION_PRESETS.map((preset, index) => (
                 <button
                   key={preset.label}
                   type="button"
+                  role="radio"
+                  aria-checked={durationPreset === index}
                   onClick={() => setDurationPreset(index)}
                   className={cn(
-                    "p-4 rounded-lg border text-center transition-colors",
+                    "p-4 rounded-lg text-center transition-all",
                     durationPreset === index
-                      ? "border-white bg-white text-stone-900"
-                      : "border-white/10 bg-white/5 hover:bg-white/10"
+                      ? "bg-white text-stone-900 shadow-sm"
+                      : "bg-white/5 hover:bg-white/10 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]"
                   )}
                 >
                   <span className={cn(
@@ -294,7 +299,7 @@ export default function CreateSessionPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           {/* Divider */}
           <div className="border-t border-white/10" />
@@ -385,15 +390,20 @@ export default function CreateSessionPage() {
             </div>
           )}
 
-          {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <Link to="/" className="btn-ghost-light flex-1 text-center">
-              Cancel
-            </Link>
+          {/* Actions - Primary action on right, secondary on left */}
+          <div className="flex gap-3 pt-4">
             <button
-              className="btn-light flex-1"
+              className="btn-ghost-light flex-1 sm:flex-none"
+              onClick={() => navigate('/')}
+              type="button"
+            >
+              Cancel
+            </button>
+            <button
+              className="btn-light flex-1 sm:flex-auto"
               onClick={handleSubmit}
               disabled={isPending || !canSubmit}
+              type="button"
             >
               {isPending ? 'Creating...' : 'Create Session'}
             </button>

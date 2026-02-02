@@ -2,15 +2,32 @@ import * as React from "react"
 
 import { cn } from "@/client/lib/utils"
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  variant?: 'default' | 'dark';
+}
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+  ({ className, type, variant = 'default', ...props }, ref) => {
     return (
       <input
         type={type}
         className={cn(
-          "flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          // Base styles
+          "flex h-10 w-full px-3 py-2 text-sm transition-all",
+          "file:border-0 file:bg-transparent file:text-sm file:font-medium",
+          "disabled:cursor-not-allowed disabled:opacity-50",
+          // Standardized radius (--radius-sm = 6px)
+          "rounded-md",
+          // Variant styles
+          variant === 'dark' ? [
+            "bg-white/5 text-white placeholder:text-white/30",
+            "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]",
+            "focus:outline-none focus:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.2),0_0_0_3px_rgba(255,255,255,0.05)]",
+          ] : [
+            "bg-white text-stone-900 placeholder:text-stone-400",
+            "shadow-[inset_0_0_0_1px_theme(colors.stone.200)]",
+            "focus:outline-none focus:shadow-[inset_0_0_0_1px_theme(colors.stone.400),0_0_0_3px_rgba(120,113,108,0.1)]",
+          ],
           className
         )}
         ref={ref}

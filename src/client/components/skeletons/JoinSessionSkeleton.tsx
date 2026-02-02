@@ -7,7 +7,7 @@ interface JoinSessionSkeletonProps {
 export default function JoinSessionSkeleton({ className }: JoinSessionSkeletonProps) {
   return (
     <div className={cn("container-sm", className)}>
-      <div className="card-dark p-8 space-y-6 fade-in">
+      <div className="py-12 space-y-6 fade-in">
         {/* Icon */}
         <div className="flex justify-center">
           <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center animate-pulse">
@@ -32,8 +32,8 @@ export default function JoinSessionSkeleton({ className }: JoinSessionSkeletonPr
         <div className="space-y-2">
           <div className="h-4 w-28 bg-white/5 rounded animate-pulse" />
           <div className="flex gap-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-10 w-20 bg-white/10 rounded-lg animate-pulse" />
+            {[1, 2, 3].map((n) => (
+              <div key={n} className="h-10 w-20 bg-white/10 rounded-lg animate-pulse" />
             ))}
           </div>
         </div>

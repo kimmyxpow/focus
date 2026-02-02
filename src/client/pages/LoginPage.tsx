@@ -7,7 +7,7 @@ import Page from '@/client/components/Page';
 
 function GoogleIcon() {
   return (
-    <svg className="w-5 h-5" viewBox="0 0 24 24">
+    <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
       <path
         fill="currentColor"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -30,7 +30,7 @@ function GoogleIcon() {
 
 function GitHubIcon() {
   return (
-    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -42,7 +42,7 @@ function GitHubIcon() {
 
 function MailIcon() {
   return (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -55,7 +55,7 @@ function MailIcon() {
 
 function ArrowLeftIcon() {
   return (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
     </svg>
   );
@@ -184,7 +184,7 @@ export default function LoginPage() {
   return (
     <Page variant="dark">
       <div className="container-xs flex items-center justify-center min-h-[70vh]">
-        <div className="card-dark p-8 w-full fade-in">
+        <div className="py-8 w-full fade-in">
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center mx-auto mb-5">
@@ -207,6 +207,7 @@ export default function LoginPage() {
               {/* OAuth Buttons */}
               <div className="space-y-3">
                 <button
+                  type="button"
                   onClick={handleGoogleSignIn}
                   className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white text-stone-900 font-medium text-sm hover:bg-white/90 transition-colors"
                 >
@@ -215,6 +216,7 @@ export default function LoginPage() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={handleGitHubSignIn}
                   className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white font-medium text-sm hover:bg-white/15 transition-colors border border-white/10"
                 >
@@ -232,6 +234,7 @@ export default function LoginPage() {
 
               {/* Email Option */}
               <button
+                type="button"
                 onClick={() => setStep('email')}
                 className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white font-medium text-sm hover:bg-white/10 transition-colors border border-white/10"
               >
@@ -250,6 +253,7 @@ export default function LoginPage() {
           {step === 'email' && (
             <>
               <button
+                type="button"
                 onClick={() => setStep('method')}
                 className="flex items-center gap-1 text-white/50 hover:text-white text-sm mb-6 transition-colors"
               >
@@ -269,7 +273,6 @@ export default function LoginPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all"
-                    autoFocus
                     disabled={sendOTPMutation.isPending}
                   />
                 </div>
@@ -293,6 +296,7 @@ export default function LoginPage() {
           {step === 'otp' && (
             <>
               <button
+                type="button"
                 onClick={() => {
                   setStep('email');
                   setOtp(['', '', '', '', '', '']);
@@ -306,19 +310,20 @@ export default function LoginPage() {
               <div className="space-y-6">
                 {/* OTP Input Grid */}
                 <div className="flex justify-center gap-2">
-                  {otp.map((digit, index) => (
+                  {[0, 1, 2, 3, 4, 5].map((position) => (
                     <input
-                      key={index}
-                      ref={(el) => {otpInputRefs.current[index] = el}}
+                      key={position}
+                      ref={(el) => {otpInputRefs.current[position] = el}}
                       type="text"
                       inputMode="numeric"
                       maxLength={1}
-                      value={digit}
-                      onChange={(e) => handleOTPChange(index, e.target.value)}
-                      onKeyDown={(e) => handleOTPKeyDown(index, e)}
-                      onPaste={index === 0 ? handleOTPPaste : undefined}
+                      value={otp[position]}
+                      onChange={(e) => handleOTPChange(position, e.target.value)}
+                      onKeyDown={(e) => handleOTPKeyDown(position, e)}
+                      onPaste={position === 0 ? handleOTPPaste : undefined}
                       disabled={verifyOTPMutation.isPending}
                       className="w-12 h-14 text-center text-xl font-semibold rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all disabled:opacity-50"
+                      aria-label={`Digit ${position + 1} of 6`}
                     />
                   ))}
                 </div>

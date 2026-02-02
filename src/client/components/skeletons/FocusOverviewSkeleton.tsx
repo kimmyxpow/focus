@@ -18,8 +18,8 @@ export default function FocusOverviewSkeleton({ className }: FocusOverviewSkelet
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="p-5 rounded-xl bg-white/5">
+        {[1, 2, 3, 4].map((n) => (
+          <div key={n} className="p-5 rounded-xl bg-white/5">
             <div className="h-8 w-20 bg-white/10 rounded mx-auto mb-2 animate-pulse" />
             <div className="h-3 w-20 bg-white/5 rounded mx-auto animate-pulse" />
           </div>
@@ -27,12 +27,12 @@ export default function FocusOverviewSkeleton({ className }: FocusOverviewSkelet
       </div>
 
       {/* Weekly Chart */}
-      <div className="card-dark p-6 space-y-4">
+      <div className="py-6 border-t border-white/10 space-y-4">
         <div className="h-6 w-40 bg-white/10 rounded animate-pulse" />
         <div className="h-3 w-32 bg-white/5 rounded animate-pulse" />
         <div className="space-y-2">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="flex items-center gap-3">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div key={n} className="flex items-center gap-3">
               <div className="h-8 w-14 bg-white/5 rounded animate-pulse" />
               <div className="flex-1 h-8 bg-white/5 rounded animate-pulse" />
               <div className="h-8 w-14 bg-white/10 rounded animate-pulse" />
@@ -44,9 +44,9 @@ export default function FocusOverviewSkeleton({ className }: FocusOverviewSkelet
       {/* Session List */}
       <div className="space-y-4">
         <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
-        <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="card-dark p-4 space-y-2">
+        <div className="divide-y divide-white/5">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="py-4 space-y-2">
               <div className="flex items-center gap-3">
                 <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
                 <div className="h-5 w-20 bg-white/5 rounded animate-pulse" />

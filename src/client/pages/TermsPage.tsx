@@ -4,7 +4,7 @@ export default function TermsPage() {
   return (
     <Page variant="dark">
       <div className="container-sm fade-in">
-        <div className="card-dark p-8">
+        <div className="py-8">
           <h1 className="text-display-md text-white mb-6">Terms of Service</h1>
 
           <div className="space-y-6 text-white/70">

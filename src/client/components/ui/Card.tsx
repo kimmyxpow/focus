@@ -8,18 +8,23 @@ const Card = React.forwardRef<
     variant?: 'default' | 'dark' | 'ghost' | 'interactive';
   }
 >(({ className, variant = 'default', ...props }, ref) => {
+  // Refined card styling: subtle borders, cohesive backgrounds, modern shadows
   const variants = {
-    default: "bg-white border border-neutral-200/60 shadow-[0_1px_3px_0_rgb(0_0_0/0.04),0_1px_2px_-1px_rgb(0_0_0/0.04)]",
-    dark: "bg-neutral-900 border border-neutral-800 text-white",
-    ghost: "bg-white/60 backdrop-blur-sm border border-neutral-200/40",
-    interactive: "bg-white border border-neutral-200/60 shadow-[0_1px_3px_0_rgb(0_0_0/0.04)] hover:shadow-[0_4px_6px_-1px_rgb(0_0_0/0.05),0_2px_4px_-2px_rgb(0_0_0/0.05)] hover:-translate-y-0.5 transition-all duration-200",
+    // Light mode: nearly borderless with subtle shadow for depth
+    default: "bg-white/80 backdrop-blur-sm shadow-[0_1px_2px_0_rgba(0,0,0,0.03),0_1px_3px_0_rgba(0,0,0,0.02)]",
+    // Dark mode: seamless with page background, subtle separation via opacity
+    dark: "bg-white/[0.03] backdrop-blur-sm text-white",
+    // Ghost: transparent with blur
+    ghost: "bg-white/40 backdrop-blur-md",
+    // Interactive: subtle hover elevation
+    interactive: "bg-white/80 backdrop-blur-sm shadow-[0_1px_2px_0_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer",
   };
 
   return (
     <div
       ref={ref}
       className={cn(
-        "rounded-2xl text-neutral-900",
+        "rounded-xl text-neutral-900",
         variants[variant],
         className
       )}

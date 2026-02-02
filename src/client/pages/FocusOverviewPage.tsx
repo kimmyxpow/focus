@@ -11,7 +11,7 @@ import { cn } from '@/client/lib/utils';
 
 // Add svg import for copy icon
 const CopyIcon = () => (
-  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
   </svg>
 );
@@ -89,10 +89,10 @@ function WeeklyChart({ stats }: { stats: WeeklyStat[] }) {
 
   return (
     <div className="space-y-2">
-      {stats.slice(-8).map((week, index) => {
+      {stats.slice(-8).map((week) => {
         const percentage = (week.focusMinutes / maxMinutes) * 100;
         return (
-          <div key={index} className="flex items-center gap-3">
+          <div key={week.weekStart} className="flex items-center gap-3">
             <span className="text-xs text-white/40 w-14 flex-shrink-0">
               {formatDate(week.weekStart)}
             </span>
@@ -132,7 +132,7 @@ function SessionHistoryCard({ session }: { session: UserSession }) {
   }, [session._id]);
 
   return (
-    <div className="card-dark p-4 fade-in">
+    <div className="py-4 border-b border-white/5 last:border-0 fade-in">
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
@@ -158,6 +158,7 @@ function SessionHistoryCard({ session }: { session: UserSession }) {
         <div className="flex items-center gap-2">
           <Tooltip label="Copy session link">
             <button
+              type="button"
               onClick={handleCopyLink}
               className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors"
             >
@@ -227,9 +228,9 @@ export default function FocusOverviewPage() {
     return (
       <Page variant="dark">
         <div className="container-sm">
-          <div className="card-dark p-8 text-center fade-in">
+          <div className="text-center py-12 fade-in">
             <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
@@ -304,7 +305,7 @@ export default function FocusOverviewPage() {
 
         {/* Weekly Chart */}
         {hasStats && overview.weeklyStats.length > 0 && (
-          <section className="card-dark p-6 fade-in">
+          <section className="py-6 border-t border-white/10 fade-in">
             <h3 className="text-white font-semibold mb-1">Your Focus Journey</h3>
             <p className="text-white/40 text-xs mb-4">Activity over the past {Math.min(overview.weeklyStats.length, 8)} weeks</p>
             <WeeklyChart stats={overview.weeklyStats} />
@@ -315,7 +316,7 @@ export default function FocusOverviewPage() {
         {pastSessions.length > 0 && (
           <section className="fade-in">
             <h2 className="text-label text-white/40 mb-4">Session History</h2>
-            <div className="space-y-3">
+            <div>
               {pastSessions.slice(0, 10).map((session) => (
                 <SessionHistoryCard key={session._id} session={session} />
               ))}
@@ -325,14 +326,14 @@ export default function FocusOverviewPage() {
 
         {/* Empty State */}
         {!hasSessions && !hasStats && (
-          <div className="card-dark p-12 text-center fade-in">
-            <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-6">
-              <svg className="w-8 h-8 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="text-center py-12 fade-in">
+            <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
+              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-semibold text-white mb-2">Your focus journey starts here</h2>
-            <p className="text-white/50 mb-8 max-w-sm mx-auto">
+            <h2 className="text-display-sm text-white mb-2">Your focus journey starts here</h2>
+            <p className="text-white/50 text-sm mb-6 max-w-sm mx-auto">
               Every focused minute counts. Start your first session and watch your progress grow.
             </p>
             <Link to="/create-session" className="btn-light">
@@ -343,7 +344,7 @@ export default function FocusOverviewPage() {
 
         {/* Focus Patterns */}
         {hasStats && overview.focusPatterns && (
-          <section className="card-dark p-6 fade-in">
+          <section className="py-6 border-t border-white/10 fade-in">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-white font-semibold">How You Focus</h3>
               <span className="chip text-[10px]">AI</span>
@@ -376,13 +377,14 @@ export default function FocusOverviewPage() {
         )}
 
         {/* Privacy & Data Controls */}
-        <section className="card-dark p-6 fade-in">
+        <section className="py-6 border-t border-white/10 fade-in">
           <h3 className="text-white font-semibold mb-1">Your Privacy</h3>
           <p className="text-white/40 text-xs mb-4">
             You're in control. We only keep anonymized summaries to help improve your experience.
           </p>
 
           <button
+            type="button"
             onClick={() => setShowDataControls(!showDataControls)}
             className="flex items-center justify-between w-full p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors"
           >
@@ -398,6 +400,7 @@ export default function FocusOverviewPage() {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
@@ -406,11 +409,12 @@ export default function FocusOverviewPage() {
           {showDataControls && (
             <div className="space-y-4 p-4 bg-white/5 rounded-xl mt-4 scale-in">
               <div>
-                <label className="text-sm font-medium text-white mb-2 block">
+                <label htmlFor="retention-select" className="text-sm font-medium text-white mb-2 block">
                   Keep my data for
                 </label>
                 <div className="flex items-center gap-3">
                   <select
+                    id="retention-select"
                     value={retentionWeeks}
                     onChange={(e) => setRetentionWeeks(Number(e.target.value))}
                     className="flex-1 px-3 py-2 rounded-lg border border-white/10 bg-white/5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/20"
@@ -422,6 +426,7 @@ export default function FocusOverviewPage() {
                     <option value="52">52 weeks</option>
                   </select>
                   <button
+                    type="button"
                     className="btn-light text-sm px-4 py-2"
                     onClick={() => updateRetention({ retentionWeeks })}
                     disabled={isUpdatingRetention}
@@ -436,6 +441,7 @@ export default function FocusOverviewPage() {
                   This will permanently delete all your focus history. This action cannot be reversed.
                 </p>
                 <button
+                  type="button"
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-red-500/20 text-red-300 hover:bg-red-500/30 transition-colors"
                   onClick={() => {
                     if (window.confirm('Are you sure you want to delete all your focus data? This cannot be undone.')) {
@@ -455,7 +461,7 @@ export default function FocusOverviewPage() {
         <div className="grid sm:grid-cols-2 gap-4 text-sm fade-in">
           <div className="p-4 rounded-xl bg-white/5">
             <p className="font-medium text-white mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               What we keep
@@ -468,7 +474,7 @@ export default function FocusOverviewPage() {
           </div>
           <div className="p-4 rounded-xl bg-white/5">
             <p className="font-medium text-white mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-4 h-4 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
               </svg>
               What stays private

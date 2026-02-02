@@ -152,6 +152,7 @@ export default function ProfilePage() {
           </div>
           {profile && !isEditing && (
             <button
+              type="button"
               onClick={() => setIsEditing(true)}
               className="btn-outline-light"
             >
@@ -161,17 +162,18 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Form / Display */}
-        <div className="card-dark p-6">
+        <div className="space-y-6">
           {isEditing || !profile ? (
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Nickname */}
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">
+                <label htmlFor="nickname" className="block text-sm font-medium text-white/70 mb-2">
                   Nickname <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">@</span>
                   <input
+                    id="nickname"
                     type="text"
                     value={nickname}
                     onChange={(e) => setNickname(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
@@ -189,7 +191,7 @@ export default function ProfilePage() {
                   )}
                   {!checkingNickname && nickname && !nicknameError && nickname !== profile?.nickname && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-400">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -205,10 +207,11 @@ export default function ProfilePage() {
 
               {/* Pronouns */}
               <div>
-                <label className="block text-sm font-medium text-white/70 mb-2">
+                <label htmlFor="pronouns" className="block text-sm font-medium text-white/70 mb-2">
                   Pronouns <span className="text-white/30">(optional)</span>
                 </label>
                 <select
+                  id="pronouns"
                   value={pronouns}
                   onChange={(e) => setPronouns(e.target.value)}
                   className="w-full px-3 py-2.5 rounded-lg text-sm bg-white/5 border border-white/10 text-white focus:outline-none focus:border-white/20"
@@ -354,7 +357,7 @@ export default function ProfilePage() {
 
         {/* Focus Heatmap */}
         {profile && (
-          <div className="card-dark p-6">
+          <div className="pt-6 border-t border-white/10">
             <h3 className="text-lg font-semibold text-white mb-4">Your focus activity</h3>
             <FocusHeatmap />
           </div>

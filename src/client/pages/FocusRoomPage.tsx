@@ -69,7 +69,7 @@ function CircularProgress({ progress, size = 280, strokeWidth = 4 }: { progress:
   const offset = circumference - (progress / 100) * circumference;
 
   return (
-    <svg width={size} height={size} className="transform -rotate-90">
+    <svg width={size} height={size} className="transform -rotate-90" aria-hidden="true">
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -140,19 +140,20 @@ function CopyInviteButton({ sessionId, inviteCode, isPrivate }: { sessionId: str
 
   return (
     <button
+      type="button"
       onClick={handleCopy}
       className="btn-outline-light text-sm flex items-center gap-2"
     >
       {copied ? (
         <>
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
           Copied!
         </>
       ) : (
         <>
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
           </svg>
           Copy Invite Link
@@ -369,9 +370,9 @@ export default function FocusRoomPage() {
     return (
       <Page variant="dark">
         <div className="container-sm">
-          <div className="card-dark p-8 text-center fade-in">
+          <div className="text-center py-12 fade-in">
             <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -390,9 +391,9 @@ export default function FocusRoomPage() {
     return (
       <Page variant="dark">
         <div className="container-sm">
-          <div className="card-dark p-8 text-center fade-in">
+          <div className="text-center py-12 fade-in">
             <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -412,7 +413,7 @@ export default function FocusRoomPage() {
     return (
       <Page variant="dark">
         <div className="container-md">
-          <div className="card-dark p-6 fade-in">
+          <div className="py-6 fade-in">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="chip bg-white/10 text-white/70">Getting ready to focus</span>
@@ -487,6 +488,7 @@ export default function FocusRoomPage() {
             <div className="space-y-3">
               {canRejoin ? (
                 <button
+                  type="button"
                   className="btn-light w-full"
                   onClick={() => joinSession({ sessionId })}
                   disabled={isJoining}
@@ -495,6 +497,7 @@ export default function FocusRoomPage() {
                 </button>
               ) : !isActiveParticipant && !isParticipant ? (
                 <button
+                  type="button"
                   className="btn-light w-full"
                   onClick={() => joinSession({ sessionId })}
                   disabled={isJoining || !user}
@@ -504,6 +507,7 @@ export default function FocusRoomPage() {
               ) : isCreator ? (
                 <>
                   <button
+                    type="button"
                     className="btn-light w-full"
                     onClick={() => startWarmup({ sessionId })}
                     disabled={isStartingWarmup || isSkippingWarmup}
@@ -511,6 +515,7 @@ export default function FocusRoomPage() {
                     {isStartingWarmup ? 'Starting...' : 'Start Warmup'}
                   </button>
                   <button
+                    type="button"
                     className="btn-outline-light w-full"
                     onClick={() => skipWarmup({ sessionId })}
                     disabled={isSkippingWarmup || isStartingWarmup}
@@ -528,6 +533,7 @@ export default function FocusRoomPage() {
               )}
 
               <button
+                type="button"
                 className="btn-ghost-light w-full"
                 onClick={() => isActiveParticipant ? leaveSession({ sessionId }) : navigate('/')}
                 disabled={isLeaving}
@@ -567,7 +573,7 @@ export default function FocusRoomPage() {
             </div>
 
             {session.warmupPrompt && (
-              <div className="card-dark p-6 text-left">
+              <div className="p-6 bg-white/5 rounded-xl text-left border border-white/5">
                 <p className="text-lg text-white/90 leading-relaxed italic">
                   "{session.warmupPrompt}"
                 </p>
@@ -587,6 +593,7 @@ export default function FocusRoomPage() {
 
             {isCreator ? (
               <button
+                type="button"
                 className="btn-light"
                 onClick={() => startSession({ sessionId })}
                 disabled={isStarting}
@@ -666,6 +673,7 @@ export default function FocusRoomPage() {
               <div className="text-center">
                 <p className="text-white/50 mb-4">You left this session. Rejoin to continue focusing.</p>
                 <button
+                  type="button"
                   className="btn-light"
                   onClick={() => joinSession({ sessionId })}
                   disabled={isJoining}
@@ -678,6 +686,7 @@ export default function FocusRoomPage() {
                 <div className="flex justify-center gap-2">
                   {REACTIONS.map((reaction) => (
                     <button
+                      type="button"
                       key={reaction.key}
                       onClick={() => sendReaction({ sessionId, reaction: reaction.key })}
                       className={cn(
@@ -693,6 +702,7 @@ export default function FocusRoomPage() {
                 <div className="flex justify-center gap-3 pt-4">
                   {isCreator && (
                     <button
+                      type="button"
                       className="btn-outline-light"
                       onClick={() => endSession({ sessionId })}
                       disabled={isEnding}
@@ -701,12 +711,14 @@ export default function FocusRoomPage() {
                     </button>
                   )}
                   <button
+                    type="button"
                     className="btn-ghost-light"
                     onClick={() => navigate('/')}
                   >
                     Back home
                   </button>
                   <button
+                    type="button"
                     className="btn-ghost-light"
                     onClick={() => leaveSession({ sessionId })}
                     disabled={isLeaving}
@@ -719,6 +731,7 @@ export default function FocusRoomPage() {
               <div className="text-center">
                 <p className="text-white/50 mb-4">Session in progress</p>
                 <button
+                  type="button"
                   className="btn-ghost-light"
                   onClick={() => navigate('/')}
                 >
@@ -753,7 +766,7 @@ export default function FocusRoomPage() {
           <div className="container-md text-center space-y-8 fade-in">
             <div>
               <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
@@ -762,7 +775,7 @@ export default function FocusRoomPage() {
             </div>
 
             {session.cooldownPrompt && (
-              <div className="card-dark p-6">
+              <div className="p-6 bg-white/5 rounded-xl border border-white/5">
                 <p className="text-lg text-white/90 leading-relaxed italic">
                   "{session.cooldownPrompt}"
                 </p>
@@ -771,13 +784,13 @@ export default function FocusRoomPage() {
             )}
 
             <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
-              <div className="card-dark p-4 text-center">
+              <div className="p-4 text-center bg-white/5 rounded-xl">
                 <span className="text-3xl font-semibold display-number text-white">
                   {session.actualDuration || session.maxDuration}
                 </span>
                 <span className="block text-xs text-white/40 mt-1">minutes</span>
               </div>
-              <div className="card-dark p-4 text-center">
+              <div className="p-4 text-center bg-white/5 rounded-xl">
                 <span className="text-3xl font-semibold display-number text-white">
                   {session.participantCount}
                 </span>
@@ -787,6 +800,7 @@ export default function FocusRoomPage() {
 
             {isCreator ? (
               <button
+                type="button"
                 className="btn-light"
                 onClick={() => completeSession({ sessionId })}
                 disabled={isCompleting}

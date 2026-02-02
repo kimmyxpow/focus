@@ -15,20 +15,20 @@ export default function SessionSummarySkeleton({ className }: SessionSummarySkel
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-4 max-w-xs mx-auto">
-        <div className="card-dark p-6 text-center">
+        <div className="p-6 text-center bg-white/5 rounded-xl">
           <div className="h-12 w-12 bg-white/10 rounded-full mx-auto mb-3 animate-pulse" />
           <div className="h-8 w-20 bg-white/5 rounded mx-auto mb-2 animate-pulse" />
           <div className="h-3 w-16 bg-white/5 rounded mx-auto animate-pulse" />
         </div>
-        <div className="card-dark p-6 text-center">
+        <div className="p-6 text-center bg-white/5 rounded-xl">
           <div className="h-12 w-12 bg-white/10 rounded-full mx-auto mb-3 animate-pulse" />
           <div className="h-8 w-20 bg-white/5 rounded mx-auto mb-2 animate-pulse" />
           <div className="h-3 w-16 bg-white/5 rounded mx-auto animate-pulse" />
         </div>
       </div>
 
-      {/* AI Summary Card */}
-      <div className="card-dark p-8 space-y-4">
+      {/* AI Summary */}
+      <div className="py-6 border-t border-white/10 space-y-4">
         <div className="h-6 w-32 bg-white/10 rounded animate-pulse" />
         <div className="space-y-2">
           <div className="h-4 bg-white/5 rounded animate-pulse" />
@@ -40,8 +40,8 @@ export default function SessionSummarySkeleton({ className }: SessionSummarySkel
         </div>
       </div>
 
-      {/* Next Steps Card */}
-      <div className="card-dark p-6 space-y-3">
+      {/* Next Steps */}
+      <div className="py-6 border-t border-white/10 space-y-3">
         <div className="h-5 w-28 bg-white/10 rounded animate-pulse" />
         <div className="h-4 bg-white/5 rounded animate-pulse w-full" />
       </div>

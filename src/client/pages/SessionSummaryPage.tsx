@@ -59,9 +59,9 @@ export default function SessionSummaryPage() {
     return (
       <Page variant="dark">
         <div className="container-sm">
-          <div className="card-dark p-8 text-center fade-in">
+          <div className="text-center py-12 fade-in">
             <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
@@ -93,9 +93,9 @@ export default function SessionSummaryPage() {
     return (
       <Page variant="dark">
         <div className="container-sm">
-          <div className="card-dark p-8 text-center fade-in">
+          <div className="text-center py-12 fade-in">
             <div className="w-14 h-14 rounded-xl bg-white/10 flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <svg className="w-7 h-7 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
             </div>
@@ -122,7 +122,7 @@ export default function SessionSummaryPage() {
         {/* Celebration Header */}
         <div className="text-center py-8">
           <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className="w-10 h-10 text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -133,15 +133,15 @@ export default function SessionSummaryPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3">
-          <div className="card-dark p-5 text-center">
+          <div className="p-5 text-center bg-white/5 rounded-xl">
             <p className="text-3xl font-bold text-white display-number">{summary.duration}</p>
             <p className="text-xs text-white/50 mt-1">minutes</p>
           </div>
-          <div className="card-dark p-5 text-center">
+          <div className="p-5 text-center bg-white/5 rounded-xl">
             <p className="text-3xl font-bold text-white">{summary.cohortStats.totalParticipants}</p>
             <p className="text-xs text-white/50 mt-1">participants</p>
           </div>
-          <div className="card-dark p-5 text-center">
+          <div className="p-5 text-center bg-white/5 rounded-xl">
             <p className="text-3xl font-bold text-white">{completionRate}%</p>
             <p className="text-xs text-white/50 mt-1">completed</p>
           </div>
@@ -149,12 +149,13 @@ export default function SessionSummaryPage() {
 
         {/* Outcome Selection */}
         {!summary.userOutcome && (
-          <div className="card-dark p-6">
+          <section className="py-6 border-t border-white/10">
             <h2 className="text-lg font-semibold text-white mb-1">How did your session go?</h2>
             <p className="text-sm text-white/50 mb-4">Your feedback helps us match you with better focus partners</p>
             <div className="grid grid-cols-3 gap-3">
               {OUTCOMES.map((outcome) => (
                 <button
+                  type="button"
                   key={outcome.key}
                   onClick={() => handleRecordOutcome(outcome.key)}
                   disabled={isRecording}
@@ -177,7 +178,7 @@ export default function SessionSummaryPage() {
                 </button>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* User Outcome Display */}
@@ -196,29 +197,29 @@ export default function SessionSummaryPage() {
         )}
 
         {/* AI Summary */}
-        <div className="card-dark p-6">
+        <section className="py-6 border-t border-white/10">
           <div className="flex items-center gap-2 mb-3">
             <h2 className="text-base font-semibold text-white">Session insights</h2>
             <span className="chip bg-white/10 text-white/50 text-xs">AI</span>
           </div>
           <p className="text-white/70 leading-relaxed">{summary.aiSummary}</p>
-        </div>
+        </section>
 
         {/* AI Next Step */}
-        <div className="p-6 bg-white/5 rounded-xl border border-white/5">
+        <section className="py-6 border-t border-white/10">
           <div className="flex items-center gap-2 mb-3">
             <h2 className="text-base font-semibold text-white">What to do next</h2>
             <span className="chip bg-white/10 text-white/50 text-xs">AI</span>
           </div>
           <p className="text-white/70 leading-relaxed">{summary.aiNextStep}</p>
-        </div>
+        </section>
 
         {/* Focus Minutes Earned */}
-        <div className="card-dark p-8 text-center bg-white/5">
+        <section className="py-8 text-center border-t border-white/10">
           <p className="text-sm text-white/50 mb-2">Focus time earned</p>
           <p className="text-5xl font-bold text-white display-number">+{summary.focusMinutesEarned}</p>
           <p className="text-sm text-white/40 mt-3">Added to your personal stats</p>
-        </div>
+        </section>
 
         {/* Actions */}
         <div className="flex gap-3 pt-4">
