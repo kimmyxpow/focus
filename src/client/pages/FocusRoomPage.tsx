@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import ChatPanel from '@/client/components/ChatPanel';
 import { cn } from '@/client/lib/utils';
+import { useSessionNotifications } from '@/client/hooks/useSessionNotifications';
 
 type Participant = {
   odonym: string;
@@ -172,10 +173,13 @@ export default function FocusRoomPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user } = useSession();
+  const { notifySessionEnd, notifyBreakEnd, notifyBreakStart, notifyWarning } = useSessionNotifications();
 
   const [localRemainingSeconds, setLocalRemainingSeconds] = useState<number | null>(null);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const timerSyncRef = useRef<number>(0);
+  const previousStatusRef = useRef<string | null>(null);
+  const hasNotifiedWarningRef = useRef<boolean>(false);
 
   const { data: session, isLoading, error } = useQuery({
     ...modelenceQuery<SessionData>('focus.getSession', { sessionId }),
@@ -269,6 +273,49 @@ export default function FocusRoomPage() {
       endSession({ sessionId });
     }
   }, [localRemainingSeconds, session?.status, sessionId, endSession]);
+
+  // Detect status changes and trigger appropriate notifications
+  const sessionStatus = session?.status;
+  const sessionTopic = session?.topic;
+  const sessionBreakDuration = session?.breakDuration;
+  const isUserActive = session?.userParticipation?.isActive;
+
+  useEffect(() => {
+    if (!sessionStatus || !isUserActive) return;
+
+    const prevStatus = previousStatusRef.current;
+    const currentStatus = sessionStatus;
+
+    // Status changed
+    if (prevStatus && prevStatus !== currentStatus) {
+      // Focus session ended -> cooldown
+      if (prevStatus === 'focusing' && currentStatus === 'cooldown') {
+        notifySessionEnd(sessionTopic || 'Focus Session');
+      }
+      // Break ended -> focusing resumed
+      if (prevStatus === 'break' && currentStatus === 'focusing') {
+        notifyBreakEnd(sessionTopic || 'Focus Session');
+      }
+      // Focus ended -> break started
+      if (prevStatus === 'focusing' && currentStatus === 'break') {
+        notifyBreakStart(sessionBreakDuration || 5);
+      }
+    }
+
+    previousStatusRef.current = currentStatus;
+  }, [sessionStatus, sessionTopic, sessionBreakDuration, isUserActive, notifySessionEnd, notifyBreakEnd, notifyBreakStart]);
+
+  // Warning notification at 1 minute remaining
+  useEffect(() => {
+    if (localRemainingSeconds === 60 && !hasNotifiedWarningRef.current && session?.status === 'focusing') {
+      notifyWarning('1 minute remaining');
+      hasNotifiedWarningRef.current = true;
+    }
+    // Reset warning flag when timer resets (new session/repetition)
+    if (localRemainingSeconds && localRemainingSeconds > 60) {
+      hasNotifiedWarningRef.current = false;
+    }
+  }, [localRemainingSeconds, session?.status, notifyWarning]);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
