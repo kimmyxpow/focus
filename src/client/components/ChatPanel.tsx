@@ -64,6 +64,7 @@ export default function ChatPanel({
   // FIXED: Handle incoming WebSocket chat messages - use ref instead of closure
   // This ensures the callback is stable and doesn't cause effect re-runs
   const handleChatMessage = useCallback((event: ChatEvent) => {
+    console.log('[ChatPanel] WebSocket event received:', event);
     if (event.type === 'message' && event.message) {
       const newMessage: ChatMessage = {
         id: event.message.id,
@@ -72,12 +73,15 @@ export default function ChatPanel({
         sentAt: event.message.sentAt,
         isOwn: event.message.odonym === currentOdonymRef.current,
       };
+      console.log('[ChatPanel] Processing WebSocket message:', newMessage, 'currentOdonym:', currentOdonymRef.current);
       
       // Add message if not already present (avoid duplicates)
       setRealtimeMessages((prev) => {
         if (prev.some(m => m.id === newMessage.id)) {
+          console.log('[ChatPanel] WebSocket message already exists, skipping');
           return prev;
         }
+        console.log('[ChatPanel] Added WebSocket message, new count:', prev.length + 1);
         return [...prev, newMessage];
       });
     }
