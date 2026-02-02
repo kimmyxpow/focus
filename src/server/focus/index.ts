@@ -48,6 +48,35 @@ function formatDateKey(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
+// Helper to check if user has an active session in another session
+async function hasActiveSessionElsewhere(userId: string, excludeSessionId?: string): Promise<{ hasActive: boolean; activeSessionId?: string }> {
+  // Get all participations for this user
+  const participations = await dbSessionParticipants.fetch({}, { limit: 500 });
+  
+  for (const p of participations) {
+    // Skip the session we're trying to join/rejoin
+    if (excludeSessionId && p.sessionId.toString() === excludeSessionId) {
+      continue;
+    }
+    
+    // Check if this participation belongs to the user
+    const userHash = createUserHash(userId, p.sessionId.toString());
+    if (p.userHash === userHash && p.isActive) {
+      // Check if the session is still active (not completed/cancelled)
+      const session = await dbFocusSessions.findOne({
+        _id: p.sessionId,
+        status: { $in: ['waiting', 'warmup', 'focusing', 'break', 'cooldown'] },
+      });
+      
+      if (session) {
+        return { hasActive: true, activeSessionId: session._id.toString() };
+      }
+    }
+  }
+  
+  return { hasActive: false };
+}
+
 export default new Module('focus', {
   stores: [dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbCohortMetrics, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity],
   channels: [sessionServerChannel, chatServerChannel],
@@ -791,6 +820,12 @@ export default new Module('focus', {
         throw new AuthError('Not authenticated');
       }
 
+      // Check if user already has an active session
+      const { hasActive } = await hasActiveSessionElsewhere(user.id);
+      if (hasActive) {
+        throw new Error('You are already participating in an active session. Please leave your current session first before creating a new one.');
+      }
+
       const { intent, topic, minDuration, maxDuration, repetitions, breakDuration, breakInterval, isPrivate, chatEnabled } = z.object({
         intent: z.string().min(1).max(200),
         topic: z.string().min(1).max(50),
@@ -890,6 +925,12 @@ export default new Module('focus', {
 
         // Rejoin if left
         if (!existing.isActive) {
+          // Check if user has another active session before allowing rejoin
+          const { hasActive } = await hasActiveSessionElsewhere(user.id, sessionId);
+          if (hasActive) {
+            throw new Error('You are already in another active session. Please leave that session first before rejoining this one.');
+          }
+
           await dbSessionParticipants.updateOne(
             { _id: existing._id },
             { $set: { isActive: true, leftAt: undefined, outcome: undefined } }
@@ -914,6 +955,12 @@ export default new Module('focus', {
       // New participant - only allow in waiting/warmup states
       if (session.status !== 'waiting' && session.status !== 'warmup') {
         throw new Error('Session is no longer accepting new participants');
+      }
+
+      // Check if user already has an active session elsewhere
+      const { hasActive } = await hasActiveSessionElsewhere(user.id, sessionId);
+      if (hasActive) {
+        throw new Error(`You are already participating in another active session. Please leave your current session first before joining a new one.`);
       }
 
       // For private sessions, check if user has accepted the invite (unless they're the creator)

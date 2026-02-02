@@ -20,7 +20,6 @@ const STATUS_CONFIG: Record<string, { label: string; className: string; bgClass:
 export default function FloatingSessionWidget({ className }: FloatingSessionWidgetProps) {
   const location = useLocation();
   const [localRemaining, setLocalRemaining] = useState<number | null>(null);
-  const [isDismissed, setIsDismissed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   // Fetch active session with reduced polling (fallback for WebSocket)
@@ -39,17 +38,10 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
       startedAt?: string;
     } | null>('focus.getActiveSession', {}),
     enabled: true,
-    refetchInterval: 30000, // Reduced from 10s to 30s - local timer handles countdown
-    staleTime: 10000, // Consider data fresh for 10s
+    refetchInterval: 10000, // Poll every 10s to ensure widget appears quickly
+    staleTime: 5000,
     retry: false,
   });
-
-  // Reset dismissed state when session changes
-  useEffect(() => {
-    if (activeSession?.sessionId) {
-      setIsDismissed(false);
-    }
-  }, [activeSession?.sessionId]);
 
   // Sync timer
   useEffect(() => {
@@ -84,11 +76,10 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
 
   // Don't show widget if:
   // 1. No active session or not an active participant
-  // 2. User dismissed the widget
-  // 3. User is currently viewing the SAME session page (not summary)
+  // 2. User is currently viewing the SAME session page (not summary)
   const isViewingSameSession = activeSession && location.pathname === `/focus/${activeSession.sessionId}`;
   
-  if (!activeSession || !activeSession.isActiveParticipant || isDismissed || isViewingSameSession) {
+  if (!activeSession || !activeSession.isActiveParticipant || isViewingSameSession) {
     return null;
   }
 
@@ -241,36 +232,9 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
                         </span>
                       )}
                       <span className="text-white/30">|</span>
-                      <span>Click to open</span>
+                      <span>Click to return</span>
                     </motion.div>
                   </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Dismiss Button - Only on hover */}
-              <AnimatePresence>
-                {isHovered && (
-                  <motion.button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsDismissed(true);
-                    }}
-                    className="flex-shrink-0 p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors ml-2"
-                    aria-label="Hide session widget"
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    transition={{ duration: 0.2 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
-                      <title>Close</title>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </motion.button>
                 )}
               </AnimatePresence>
             </motion.div>
