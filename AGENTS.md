@@ -2,6 +2,44 @@
 
 I've explored the Modelence application codebase. Here's a detailed breakdown of what's available:
 
+---
+
+## 🚨 CRITICAL FRAMEWORD INFORMATION
+
+### Modelence Framework - MANDATORY USAGE
+
+**THIS PROJECT USES THE MODELENCE FRAMEWORK. NON-NEGOTIABLE.**
+
+**MANDATORY MCP SERVER USAGE:**
+- **ALWAYS** use the Modelence MCP server to fetch the LATEST documentation
+- **NEVER** rely on cached documentation or assumptions about Modelence
+- **REQUIRED** to consult MCP before implementing any Modelence-specific features
+- **NON-NEGOTIABLE** for all server-side modules, queries, mutations, and database operations
+
+**When to use Modelence MCP Server (MANDATORY):**
+- Creating or modifying backend modules (`new Module()`)
+- Defining database schemas and stores
+- Implementing queries and mutations
+- Setting up cron jobs
+- Configuring authentication
+- Working with React Query integration (`@modelence/react-query`)
+- ANY server-side operations
+
+**How to access Modelence documentation:**
+```
+Use MCP: ListMcpResourcesTool -> ReadMcpResourceTool for Modelence
+Search: mcp__modelence__SearchModelence for specific topics
+```
+
+**CONSEQUENCES of skipping MCP consultation:**
+- Outdated implementation patterns
+- Breaking changes in newer versions
+- Missed optimizations and features
+- Incompatible code structure
+- GUARANTEED technical debt
+
+---
+
 ### 1. PROJECT STRUCTURE
 
 ```
@@ -238,3 +276,53 @@ This is a full-stack Modelence framework application with:
 - Authentication system in place
 - TypeScript support throughout
 - No external shadcn/ui dependency needed - custom components are already implemented
+
+---
+
+## AVAILABLE SKILLS
+
+### Design & Frontend Skills
+
+- **Skill(12-principles-of-animation)**: MANDATORY when reviewing motion, implementing animations, or checking animation quality. MUST audit animation code against Disney's 12 principles adapted for web. Outputs file:line findings. NEVER skip animation quality checks.
+
+- **Skill(baseline-ui)**: NON-NEGOTIABLE foundation for all UI work. Enforces opinionated UI baseline to prevent AI-generated interface slop. REQUIRED for component consistency. Skipping this guarantees inconsistency and amateur results.
+
+- **Skill(canvas-design)**: REQUIRED when user asks to create a poster, piece of art, design, or static visual piece. MUST create beautiful visual art in .png and .pdf documents using design philosophy. NEVER copy existing artists' work to avoid copyright violations. Create ORIGINAL visual designs exclusively.
+
+- **Skill(design-lab)**: MANDATORY when user wants to explore UI design options, redesign existing components, or create new UI with multiple approaches to compare. Conducts design interviews, generates five distinct UI variations in a temporary design lab, collects feedback, and produces implementation plans. NEVER skip the exploration phase for significant UI work.
+
+- **Skill(frontend-design)**: REQUIRED for all web components, pages, artifacts, posters, or applications. Creates distinctive, production-grade frontend interfaces with high design quality. MUST generate creative, polished code that avoids generic AI aesthetics. NEVER produce forgettable, template-like designs.
+
+- **Skill(interface-design)**: EXCLUSIVELY for dashboards, admin panels, SaaS apps, tools, settings pages, and data interfaces. NOT for landing pages, marketing sites, campaigns—those redirect to frontend-design. MANDATORY for building interface design with craft and consistency. NEVER produce generic dashboards.
+
+- **Skill(interaction-design)**: REQUIRED when adding polish to UI interactions, implementing loading states, or creating delightful user experiences. Designs and implements microinteractions, motion design, transitions, and user feedback patterns. NEVER ship interactions without thoughtful feedback patterns.
+
+- **Skill(ui-ux-pro-max)**: COMPREHENSIVE design intelligence for UI/UX work. Contains 50+ styles, 97 color palettes, 57 font pairings, 99 UX guidelines across 9 technology stacks. MANDATORY for design, build, create, implement, review, fix, improve, optimize, enhance, or refactor tasks. NEVER guess design decisions—consult this skill first.
+
+### Accessibility & Performance Skills
+
+- **Skill(fixing-accessibility)**: NON-NEGOTIABLE for all UI work. Fixes accessibility issues with minimal, targeted changes. MANDATORY when adding or changing buttons, links, inputs, menus, dialogs, tabs, dropdowns, forms, validation, error states, keyboard shortcuts, or custom interactions. NEVER ship inaccessible code.
+
+- **Skill(fixing-metadata)**: REQUIRED for shipping correct, complete metadata. MANDATORY when adding or changing page titles, descriptions, canonical, robots, Open Graph, Twitter cards, favicons, app icons, manifest, theme-color, structured data, locale, or alternate languages. NEVER ship incomplete metadata.
+
+- **Skill(fixing-motion-performance)**: MANDATORY when adding or changing UI animations, refactoring janky interactions, implementing scroll-linked motion, or animating layout, filters, masks, gradients. Fixes animation performance issues. NEVER ship performance-killing animations.
+
+- **Skill(wcag-audit-patterns)**: REQUIRED for conducting WCAG 2.2 accessibility audits with automated testing, manual verification, and remediation guidance. MANDATORY when auditing websites for accessibility, fixing WCAG violations, or implementing accessible design patterns. NEVER skip accessibility compliance for public-facing sites.
+
+- **Skill(web-design-guidelines)**: MANDATORY when asked to "review my UI", "check accessibility", "audit design", "review UX", or "check my site against best practices". Reviews UI code for Web Interface Guidelines compliance. NEVER ship unreviewed UI code.
+
+### Platform-Specific Skills
+
+- **Skill(swiftui-ui-patterns)**: REQUIRED when creating or refactoring SwiftUI UI, designing tab architecture with TabView, composing screens, or needing component-specific patterns and examples. Provides best practices and example-driven guidance for building SwiftUI views and components. NEVER guess SwiftUI patterns.
+
+### Framework-Specific Skills
+
+- **Modelence Framework (NON-NEGOTIABLE)**: This project is BUILT ON Modelence framework. MANDATORY usage of Modelence MCP server for ALL backend operations. **ALWAYS** fetch latest documentation via `mcp__modelence__SearchModelence` before implementing:
+  - Backend modules (`new Module()`)
+  - Database schemas and stores
+  - Queries and mutations
+  - Cron jobs
+  - Authentication
+  - React Query integration (`@modelence/react-query`)
+
+**NEVER implement Modelence features without consulting MCP first.** Skipping MCP consultation guarantees outdated patterns, breaking changes, and technical debt.
