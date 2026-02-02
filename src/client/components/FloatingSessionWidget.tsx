@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/client/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
@@ -10,17 +10,21 @@ type FloatingSessionWidgetProps = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string; bgClass: string; dotColor: string }> = {
-  waiting: { label: 'Waiting', className: 'text-white/70', bgClass: 'bg-white/5', dotColor: 'bg-white/50' },
-  warmup: { label: 'Starting', className: 'text-emerald-300/80', bgClass: 'bg-emerald-500/10', dotColor: 'bg-emerald-400' },
+  waiting: { label: 'Waiting to start', className: 'text-white/70', bgClass: 'bg-white/5', dotColor: 'bg-white/50' },
+  warmup: { label: 'Starting soon', className: 'text-emerald-300/80', bgClass: 'bg-emerald-500/10', dotColor: 'bg-emerald-400' },
   focusing: { label: 'Focus', className: 'text-emerald-300/80', bgClass: 'bg-emerald-500/20', dotColor: 'bg-emerald-400' },
-  break: { label: 'Break', className: 'text-amber-300/80', bgClass: 'bg-amber-500/20', dotColor: 'bg-amber-400' },
-  cooldown: { label: 'Ending', className: 'text-blue-300/80', bgClass: 'bg-blue-500/20', dotColor: 'bg-blue-400' },
+  break: { label: 'On break', className: 'text-amber-300/80', bgClass: 'bg-amber-500/20', dotColor: 'bg-amber-400' },
+  cooldown: { label: 'Wrapping up', className: 'text-blue-300/80', bgClass: 'bg-blue-500/20', dotColor: 'bg-blue-400' },
 };
 
 export default function FloatingSessionWidget({ className }: FloatingSessionWidgetProps) {
+  const location = useLocation();
   const [localRemaining, setLocalRemaining] = useState<number | null>(null);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isDismissed, setIsDismissed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+
+  // Check if user is currently on a focus page
+  const isOnFocusPage = location.pathname.startsWith('/focus/');
 
   const { data: activeSession } = useQuery({
     ...modelenceQuery<{
@@ -40,12 +44,22 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
     retry: false,
   });
 
+  // Reset dismissed state when session changes
+  useEffect(() => {
+    if (activeSession?.sessionId) {
+      setIsDismissed(false);
+    }
+  }, [activeSession?.sessionId]);
+
   // Sync timer
   useEffect(() => {
     if (activeSession?.timer && activeSession.status === 'focusing') {
       const networkDelay = Date.now() - activeSession.timer.serverTimestamp;
       const adjustedRemaining = Math.max(0, activeSession.timer.remainingSeconds - Math.floor(networkDelay / 1000));
       setLocalRemaining(adjustedRemaining);
+    } else {
+      // Reset timer for non-focusing states
+      setLocalRemaining(null);
     }
   }, [activeSession?.timer, activeSession?.status]);
 
@@ -62,26 +76,23 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
     return () => clearInterval(interval);
   }, [localRemaining, activeSession?.status]);
 
-  // Auto-hide when no active session
-  useEffect(() => {
-    if (!activeSession || !activeSession.isActiveParticipant) {
-      setIsVisible(false);
-    } else {
-      setIsVisible(true);
-    }
-  }, [activeSession]);
-
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
-  if (!isVisible || !activeSession || !activeSession.isActiveParticipant) {
+  // Don't show widget if:
+  // 1. No active session or not an active participant
+  // 2. User dismissed the widget
+  // 3. User is on a focus page (they're already viewing their session)
+  if (!activeSession || !activeSession.isActiveParticipant || isDismissed || isOnFocusPage) {
     return null;
   }
 
   const statusConfig = STATUS_CONFIG[activeSession.status] || STATUS_CONFIG.waiting;
+  const isFocusing = activeSession.status === 'focusing';
+  const hasTimer = isFocusing && localRemaining !== null && localRemaining > 0;
 
   return (
     <AnimatePresence>
@@ -158,7 +169,7 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
                 />
               </motion.div>
 
-              {/* Timer - Always visible */}
+              {/* Timer or Status Label - Always visible */}
               <motion.div 
                 className="flex flex-col items-start"
                 layout
@@ -170,14 +181,12 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
                   }}
                   transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 >
-                  {localRemaining !== null && localRemaining > 0 
-                    ? formatTime(localRemaining) 
-                    : '--:--'}
+                  {hasTimer ? formatTime(localRemaining) : statusConfig.label}
                 </motion.p>
                 
-                {/* Status label - only visible on hover */}
+                {/* Status label - only visible on hover when we have a timer */}
                 <AnimatePresence>
-                  {isHovered && (
+                  {isHovered && hasTimer && (
                     <motion.span
                       className={cn("text-xs font-medium", statusConfig.className)}
                       initial={{ opacity: 0, height: 0, marginTop: 0 }}
@@ -240,10 +249,11 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
               <AnimatePresence>
                 {isHovered && (
                   <motion.button
+                    type="button"
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setIsVisible(false);
+                      setIsDismissed(true);
                     }}
                     className="flex-shrink-0 p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors ml-2"
                     aria-label="Hide session widget"
