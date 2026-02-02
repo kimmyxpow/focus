@@ -54,9 +54,9 @@ type SessionData = {
 };
 
 const REACTIONS = [
-  { key: 'focus' as const, label: 'Deep Focus', icon: '●' },
-  { key: 'energy' as const, label: 'Energized', icon: '◆' },
-  { key: 'break' as const, label: 'Need Break', icon: '○' },
+  { key: 'focus' as const, label: 'Deep Focus', color: 'text-purple-300/80' },
+  { key: 'energy' as const, label: 'Energized', color: 'text-pink-300/80' },
+  { key: 'break' as const, label: 'Need Break', color: 'text-blue-300/80' },
 ];
 
 function Tooltip({ children, label }: { children: React.ReactNode; label: string }) {
@@ -112,25 +112,33 @@ function ParticipantAvatar({ participant, isCurrentUser }: { participant: Partic
           !participant.isActive && "opacity-40"
         )}
       >
-        {reaction ? reaction.icon : participant.odonym.charAt(0).toUpperCase()}
+        {participant.odonym.charAt(0).toUpperCase()}
       </div>
-      <span className="text-xs text-white/50">
-        {isCurrentUser ? 'You' : participant.odonym.slice(0, 8)}
-      </span>
+      <div className="flex flex-col items-center gap-0.5">
+        <span className="text-xs text-white/50">
+          {isCurrentUser ? 'You' : participant.odonym.slice(0, 8)}
+        </span>
+        {reaction && (
+          <span className={cn("text-[10px] font-medium", reaction.color)}>
+            {reaction.label}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
 
-function CopyInviteButton({ inviteCode }: { inviteCode: string }) {
+function CopyInviteButton({ sessionId }: { sessionId: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
-    const inviteUrl = `${window.location.origin}/join/${inviteCode}`;
-    navigator.clipboard.writeText(inviteUrl);
+    // Copy direct session URL instead of invite code URL
+    const sessionUrl = `${window.location.origin}/focus/${sessionId}`;
+    navigator.clipboard.writeText(sessionUrl);
     setCopied(true);
-    toast.success('Invite link copied!');
+    toast.success('Session link copied!');
     setTimeout(() => setCopied(false), 2000);
-  }, [inviteCode]);
+  }, [sessionId]);
 
   return (
     <button
@@ -385,13 +393,13 @@ export default function FocusRoomPage() {
             </div>
 
             {/* Invite Link */}
-            {session.inviteCode && (isCreator || isActiveParticipant) && (
+            {(session.inviteCode || isCreator || isActiveParticipant) && (
               <div className="mb-6 p-4 bg-white/5 rounded-lg flex items-center justify-between gap-4">
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-white">Invite others</p>
-                  <p className="text-xs text-white/40 truncate">Share this link with friends</p>
+                  <p className="text-sm font-medium text-white">Share session</p>
+                  <p className="text-xs text-white/40 truncate">Copy link to share with others</p>
                 </div>
-                <CopyInviteButton inviteCode={session.inviteCode} />
+                <CopyInviteButton sessionId={sessionId!} />
               </div>
             )}
 
@@ -588,9 +596,12 @@ export default function FocusRoomPage() {
                     <Tooltip key={reaction.key} label={reaction.label}>
                       <button
                         onClick={() => sendReaction({ sessionId, reaction: reaction.key })}
-                        className="px-4 py-2 rounded-lg bg-white/5 text-white/60 hover:bg-white/10 hover:text-white transition-colors text-sm border border-white/10 focus-ring"
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-xs font-medium border border-white/10 focus-ring",
+                          reaction.color
+                        )}
                       >
-                        {reaction.icon}
+                        {reaction.label}
                       </button>
                     </Tooltip>
                   ))}
@@ -606,6 +617,12 @@ export default function FocusRoomPage() {
                       {isEnding ? 'Ending...' : 'End Early'}
                     </button>
                   )}
+                  <button
+                    className="btn-ghost-light"
+                    onClick={() => navigate('/')}
+                  >
+                    Back to Home
+                  </button>
                   <button
                     className="btn-ghost-light"
                     onClick={() => leaveSession({ sessionId })}

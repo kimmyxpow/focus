@@ -183,38 +183,22 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
       {/* Heatmap */}
       <div className="overflow-x-auto pb-2">
         <div className="min-w-[700px]">
-          {/* Month labels */}
-          <div className="flex mb-1 ml-8">
+          {/* Month labels row */}
+          <div className="flex gap-[3px] mb-1 ml-8 relative h-4">
             {monthLabels.map((label, i) => (
-              <div
+              <span
                 key={i}
-                className="text-[10px] text-white/40"
+                className="text-[10px] text-white/40 absolute"
                 style={{
-                  position: 'absolute',
-                  left: `calc(${(label.weekIndex / maxWeeks) * 100}% + 32px)`,
+                  left: `${(label.weekIndex / maxWeeks) * 100}%`,
                 }}
               >
                 {label.month}
-              </div>
+              </span>
             ))}
           </div>
 
           <div className="relative mt-4">
-            {/* Month labels row */}
-            <div className="flex gap-[3px] mb-1 ml-8 relative h-4">
-              {monthLabels.map((label, i) => (
-                <span
-                  key={i}
-                  className="text-[10px] text-white/40 absolute"
-                  style={{
-                    left: `${(label.weekIndex / maxWeeks) * 100}%`,
-                  }}
-                >
-                  {label.month}
-                </span>
-              ))}
-            </div>
-
             <div className="flex">
               {/* Day labels */}
               <div className="flex flex-col gap-[3px] mr-2 text-[10px] text-white/40">

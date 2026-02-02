@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceQuery } from '@modelence/react-query';
+import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
+import { useActiveSession } from '@/client/hooks/useActiveSession';
 import { cn } from '@/client/lib/utils';
 
 type FocusSession = {
@@ -57,15 +59,14 @@ type CohortMatch = {
 
 function StatusIndicator({ status }: { status: string }) {
   const config = {
-    waiting: { label: 'Waiting', dotClass: 'status-waiting' },
-    warmup: { label: 'Starting', dotClass: 'status-live' },
-    focusing: { label: 'Live', dotClass: 'status-live' },
-  }[status] || { label: status, dotClass: 'status-idle' };
+    waiting: { label: 'Waiting', className: 'text-white/50' },
+    warmup: { label: 'Starting', className: 'text-amber-300/80' },
+    focusing: { label: 'Live', className: 'text-emerald-300/80' },
+  }[status] || { label: status, className: 'text-white/50' };
 
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className={cn("status-dot", config.dotClass)} />
-      <span className="text-xs font-medium text-white/50">{config.label}</span>
+    <span className={cn("text-xs font-medium", config.className)}>
+      {config.label}
     </span>
   );
 }
@@ -107,8 +108,15 @@ function EmptyState() {
   );
 }
 
-function SessionCard({ session, formatDuration }: { session: FocusSession; formatDuration: (min: number, max: number) => string }) {
+function SessionCard({ session, formatDuration, hasActiveSession }: { session: FocusSession; formatDuration: (min: number, max: number) => string; hasActiveSession: boolean }) {
   const canRejoin = session.isParticipant && !session.isActiveParticipant;
+
+  const handleJoinAttempt = useCallback((e: React.MouseEvent) => {
+    if (hasActiveSession) {
+      e.preventDefault();
+      toast.error('Please leave your current session first');
+    }
+  }, [hasActiveSession]);
 
   return (
     <div className={cn(
@@ -167,7 +175,16 @@ function SessionCard({ session, formatDuration }: { session: FocusSession; forma
           ) : session.status === 'focusing' ? (
             <span className="btn-outline-light opacity-50 cursor-not-allowed">In Progress</span>
           ) : (
-            <Link to={`/focus/${session._id}`} className="btn-outline-light">Join</Link>
+            <Link
+              to={`/focus/${session._id}`}
+              className={cn(
+                "btn-outline-light",
+                hasActiveSession && "opacity-50 cursor-not-allowed"
+              )}
+              onClick={handleJoinAttempt}
+            >
+              Join
+            </Link>
           )}
         </div>
       </div>
@@ -223,7 +240,14 @@ function MyRoomCard({ room, formatDuration }: { room: MyRoom; formatDuration: (m
   );
 }
 
-function SuggestedCard({ match, formatDuration }: { match: CohortMatch; formatDuration: (min: number, max: number) => string }) {
+function SuggestedCard({ match, formatDuration, hasActiveSession }: { match: CohortMatch; formatDuration: (min: number, max: number) => string; hasActiveSession: boolean }) {
+  const handleJoinAttempt = useCallback((e: React.MouseEvent) => {
+    if (hasActiveSession) {
+      e.preventDefault();
+      toast.error('Please leave your current session first');
+    }
+  }, [hasActiveSession]);
+
   return (
     <div className="card-dark p-4 fade-in hover:bg-white/5 transition-colors">
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -243,7 +267,14 @@ function SuggestedCard({ match, formatDuration }: { match: CohortMatch; formatDu
           {formatDuration(match.session.durationRange[0], match.session.durationRange[1])}
           {match.session.participantCount > 0 && ` · ${match.session.participantCount} waiting`}
         </span>
-        <Link to={`/focus/${match.sessionId}`} className="btn-outline-light text-xs px-3 py-1.5">
+        <Link
+          to={`/focus/${match.sessionId}`}
+          className={cn(
+            "btn-outline-light text-xs px-3 py-1.5",
+            hasActiveSession && "opacity-50 cursor-not-allowed"
+          )}
+          onClick={handleJoinAttempt}
+        >
           Join
         </Link>
       </div>
@@ -253,6 +284,7 @@ function SuggestedCard({ match, formatDuration }: { match: CohortMatch; formatDu
 
 export default function HomePage() {
   const { user } = useSession();
+  const { hasActiveSession } = useActiveSession();
 
   const { data: activeSessions, isLoading: sessionsLoading } = useQuery({
     ...modelenceQuery<FocusSession[]>('focus.getActiveSessions', {}),
@@ -320,7 +352,7 @@ export default function HomePage() {
             </div>
             <div className="grid gap-3 sm:grid-cols-2 fade-stagger">
               {suggestedCohorts.slice(0, 4).map((match) => (
-                <SuggestedCard key={match.sessionId} match={match} formatDuration={formatDuration} />
+                <SuggestedCard key={match.sessionId} match={match} formatDuration={formatDuration} hasActiveSession={hasActiveSession} />
               ))}
             </div>
           </section>
@@ -342,7 +374,7 @@ export default function HomePage() {
           ) : (
             <div className="space-y-3 fade-stagger">
               {activeSessions.map((session) => (
-                <SessionCard key={session._id} session={session} formatDuration={formatDuration} />
+                <SessionCard key={session._id} session={session} formatDuration={formatDuration} hasActiveSession={hasActiveSession} />
               ))}
             </div>
           )}

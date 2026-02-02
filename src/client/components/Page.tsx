@@ -7,8 +7,11 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
+import { modelenceQuery } from '@modelence/react-query';
 import LoadingSpinner from '@/client/components/LoadingSpinner';
+import ActiveSessionIndicator from '@/client/components/ActiveSessionIndicator';
 import { cn } from '@/client/lib/utils';
 
 interface PageProps {
@@ -33,6 +36,23 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
   const { user } = useSession();
   const location = useLocation();
   const isDark = variant === 'dark';
+
+  // Query active session for navbar indicator
+  const { data: activeSession } = useQuery({
+    ...modelenceQuery<{
+      sessionId: string;
+      topic: string;
+      status: 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown';
+      isActiveParticipant: boolean;
+      timer?: {
+        remainingSeconds: number;
+        serverTimestamp: number;
+      };
+    } | null>('focus.getActiveSession', {}),
+    enabled: !!user,
+    refetchInterval: 10000,
+    retry: false,
+  });
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -99,6 +119,21 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
             </Link>
           )}
         </div>
+
+        {/* Divider */}
+        <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />
+
+        {/* Active Session Indicator */}
+        {activeSession && activeSession.isActiveParticipant && (
+          <div className="flex-shrink-0">
+            <ActiveSessionIndicator
+              sessionId={activeSession.sessionId}
+              topic={activeSession.topic}
+              status={activeSession.status}
+              remainingSeconds={activeSession.timer?.remainingSeconds}
+            />
+          </div>
+        )}
 
         {/* Divider */}
         <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />

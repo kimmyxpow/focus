@@ -51,6 +51,59 @@ export default new Module('focus', {
   stores: [dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbCohortMetrics, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity],
 
   queries: {
+    // Get user's active session (for navbar indicator)
+    getActiveSession: async (_args: unknown, { user }: { user: UserInfo | null }) => {
+      if (!user) {
+        return null;
+      }
+
+      // Get all sessions where user is a participant
+      const participations = await dbSessionParticipants.fetch({}, { limit: 500 });
+
+      // Find user's active participation
+      let activeParticipation = null;
+      for (const p of participations) {
+        const userHash = createUserHash(user.id, p.sessionId.toString());
+        if (p.userHash === userHash && p.isActive) {
+          activeParticipation = p;
+          break;
+        }
+      }
+
+      if (!activeParticipation) {
+        return null;
+      }
+
+      // Get the session details
+      const session = await dbFocusSessions.findOne({
+        _id: activeParticipation.sessionId,
+        status: { $in: ['waiting', 'warmup', 'focusing', 'break', 'cooldown'] },
+      });
+
+      if (!session) {
+        return null;
+      }
+
+      // Calculate timer if focusing
+      let remainingSeconds = 0;
+      if (session.startedAt && session.status === 'focusing') {
+        const targetDuration = session.actualDuration || session.maxDuration;
+        const elapsedSeconds = Math.floor((Date.now() - session.startedAt.getTime()) / 1000);
+        remainingSeconds = Math.max(0, targetDuration * 60 - elapsedSeconds);
+      }
+
+      return {
+        sessionId: session._id.toString(),
+        topic: session.topic,
+        status: session.status,
+        isActiveParticipant: true,
+        timer: {
+          remainingSeconds,
+          serverTimestamp: Date.now(),
+        },
+      };
+    },
+
     // Get active/waiting sessions for the landing page
     getActiveSessions: async (_args: unknown, { user }: { user: UserInfo | null }) => {
       // Get public sessions (not private) for the main feed

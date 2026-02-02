@@ -161,42 +161,46 @@ export default function LeaderboardPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Time Filter */}
-          <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg">
-            {TIME_FILTERS.map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() => setTimeFilter(filter.value)}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-                  timeFilter === filter.value
-                    ? "bg-white text-stone-900"
-                    : "text-white/50 hover:text-white hover:bg-white/10"
-                )}
-              >
-                {filter.label}
-              </button>
-            ))}
+        <div className="space-y-3">
+          {/* Time Period Tabs - Row 1 */}
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg w-full sm:w-auto">
+              {TIME_FILTERS.map((filter) => (
+                <button
+                  key={filter.value}
+                  onClick={() => setTimeFilter(filter.value)}
+                  className={cn(
+                    "flex-1 sm:flex-none px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                    timeFilter === filter.value
+                      ? "bg-white text-stone-900"
+                      : "text-white/50 hover:text-white hover:bg-white/10"
+                  )}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* Sort Options */}
-          <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg">
-            {SORT_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => setSortBy(option.value)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
-                  sortBy === option.value
-                    ? "bg-white text-stone-900"
-                    : "text-white/50 hover:text-white hover:bg-white/10"
-                )}
-              >
-                {option.icon}
-                <span className="hidden sm:inline">{option.label}</span>
-              </button>
-            ))}
+          {/* Ranking Type Selector - Row 2 */}
+          <div className="flex items-center justify-center sm:justify-end">
+            <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg">
+              {SORT_OPTIONS.map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setSortBy(option.value)}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
+                    sortBy === option.value
+                      ? "bg-white text-stone-900"
+                      : "text-white/50 hover:text-white hover:bg-white/10"
+                  )}
+                >
+                  {option.icon}
+                  <span className="hidden sm:inline">{option.label}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -217,18 +221,18 @@ export default function LeaderboardPage() {
               >
                 <RankBadge rank={entry.rank} />
 
-                <div className="flex-1 min-w-0">
+                <div className="flex-1 min-w-0 max-w-[200px] sm:max-w-none">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-white truncate">@{entry.nickname}</span>
                     {entry.pronouns && (
-                      <span className="text-xs text-white/40">({entry.pronouns})</span>
+                      <span className="text-xs text-white/40 whitespace-nowrap">({entry.pronouns})</span>
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-0.5 text-xs text-white/40">
-                    <span>{formatFocusTime(entry.focusMinutes)} focused</span>
-                    <span>{entry.sessions} sessions</span>
+                    <span className="truncate">{formatFocusTime(entry.focusMinutes)} focused</span>
+                    <span className="whitespace-nowrap">{entry.sessions} sessions</span>
                     {entry.streak > 0 && (
-                      <span className="inline-flex items-center gap-0.5 text-amber-400/70">
+                      <span className="inline-flex items-center gap-0.5 text-amber-400/70 whitespace-nowrap">
                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                           <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.048 8.287 8.287 0 009 9.6a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
                         </svg>

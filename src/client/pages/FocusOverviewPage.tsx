@@ -7,6 +7,13 @@ import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import { cn } from '@/client/lib/utils';
 
+// Add svg import for copy icon
+const CopyIcon = () => (
+  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+  </svg>
+);
+
 type WeeklyStat = {
   weekStart: string;
   focusMinutes: number;
@@ -115,6 +122,12 @@ function SessionHistoryCard({ session }: { session: UserSession }) {
   const status = statusConfig[session.status] || { label: session.status, className: 'bg-white/10 text-white/70' };
   const isActive = ['waiting', 'warmup', 'focusing', 'cooldown'].includes(session.status);
 
+  const handleCopyLink = useCallback(() => {
+    const sessionUrl = `${window.location.origin}/focus/${session._id}`;
+    navigator.clipboard.writeText(sessionUrl);
+    toast.success('Session link copied!');
+  }, [session._id]);
+
   return (
     <div className="card-dark p-4 fade-in">
       <div className="flex items-start justify-between gap-3 mb-2">
@@ -139,15 +152,24 @@ function SessionHistoryCard({ session }: { session: UserSession }) {
           <span>{session.participantCount} participant{session.participantCount !== 1 ? 's' : ''}</span>
           <span>{new Date(session.createdAt).toLocaleDateString()}</span>
         </div>
-        {isActive ? (
-          <Link to={`/focus/${session._id}`} className="btn-light text-xs px-3 py-1.5">
-            {session.status === 'focusing' ? 'Rejoin' : 'Continue'}
-          </Link>
-        ) : session.status === 'completed' ? (
-          <Link to={`/focus/${session._id}/summary`} className="btn-outline-light text-xs px-3 py-1.5">
-            Summary
-          </Link>
-        ) : null}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyLink}
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+            title="Copy session link"
+          >
+            <CopyIcon />
+          </button>
+          {isActive ? (
+            <Link to={`/focus/${session._id}`} className="btn-light text-xs px-3 py-1.5">
+              {session.status === 'focusing' ? 'Rejoin' : 'Continue'}
+            </Link>
+          ) : session.status === 'completed' ? (
+            <Link to={`/focus/${session._id}/summary`} className="btn-outline-light text-xs px-3 py-1.5">
+              Summary
+            </Link>
+          ) : null}
+        </div>
       </div>
     </div>
   );
