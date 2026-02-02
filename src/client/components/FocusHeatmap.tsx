@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
+import Tooltip from '@/client/components/ui/Tooltip';
 import { cn } from '@/client/lib/utils';
 
 type HeatmapData = {
@@ -154,25 +155,29 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
       {/* Year selector and stats */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setSelectedYear(y => y - 1)}
-            disabled={selectedYear <= 2020}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+          <Tooltip label="Previous year">
+            <button
+              onClick={() => setSelectedYear(y => y - 1)}
+              disabled={selectedYear <= 2020}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          </Tooltip>
           <span className="text-sm font-medium text-white min-w-[60px] text-center">{selectedYear}</span>
-          <button
-            onClick={() => setSelectedYear(y => y + 1)}
-            disabled={selectedYear >= currentYear}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          <Tooltip label="Next year">
+            <button
+              onClick={() => setSelectedYear(y => y + 1)}
+              disabled={selectedYear >= currentYear}
+              className="p-1.5 rounded-lg hover:bg-white/10 text-white/50 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </Tooltip>
         </div>
         <div className="flex items-center gap-4 text-sm text-white/50">
           <span>{totalSessions} sessions</span>

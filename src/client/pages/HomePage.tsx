@@ -6,6 +6,7 @@ import { modelenceQuery } from '@modelence/react-query';
 import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import { useActiveSession } from '@/client/hooks/useActiveSession';
+import Tooltip from '@/client/components/ui/Tooltip';
 import { cn } from '@/client/lib/utils';
 
 type FocusSession = {
@@ -71,6 +72,14 @@ function StatusIndicator({ status }: { status: string }) {
   );
 }
 
+function CopyIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.16V8.25c0 1.092-.807 2.032-1.907 2.16-.639.074-1.281.135-1.927.184m0-12.896c-.646.049-1.288.11-1.927.184-1.1.128-1.907 1.077-1.907 2.16V8.25c0 1.092.807 2.032 1.907 2.16.639.074 1.281.135 1.927.184m7.332 12.896A2.25 2.25 0 0113.5 18.25h-3c-1.03 0-1.9-.693-2.166-1.638m7.332 0c.055-.194.084-.4.084-.612v0a.75.75 0 00-.75-.75h-4.5a.75.75 0 00-.75.75v0c0 .212.03.418.084.612m7.332 0c.646-.049 1.288-.11 1.927-.184 1.1-.128 1.907-1.077 1.907-2.16v-3.428c0-1.092-.807-2.032-1.907-2.16-.639-.074-1.281-.135-1.927-.184" />
+    </svg>
+  );
+}
+
 function SessionSkeleton() {
   return (
     <div className="card-dark p-5">
@@ -117,6 +126,12 @@ function SessionCard({ session, formatDuration, hasActiveSession }: { session: F
       toast.error('Please leave your current session first');
     }
   }, [hasActiveSession]);
+
+  const handleCopyLink = useCallback(() => {
+    const sessionUrl = `${window.location.origin}/focus/${session._id}`;
+    navigator.clipboard.writeText(sessionUrl);
+    toast.success('Session link copied!');
+  }, [session._id]);
 
   return (
     <div className={cn(
@@ -167,7 +182,15 @@ function SessionCard({ session, formatDuration, hasActiveSession }: { session: F
             </span>
           </div>
         </div>
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 flex items-center gap-2">
+          <Tooltip label="Copy session link">
+            <button
+              onClick={handleCopyLink}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+            >
+              <CopyIcon />
+            </button>
+          </Tooltip>
           {session.isActiveParticipant ? (
             <Link to={`/focus/${session._id}`} className="btn-light">Continue</Link>
           ) : canRejoin ? (
@@ -193,6 +216,12 @@ function SessionCard({ session, formatDuration, hasActiveSession }: { session: F
 }
 
 function MyRoomCard({ room, formatDuration }: { room: MyRoom; formatDuration: (min: number, max: number) => string }) {
+  const handleCopyLink = useCallback(() => {
+    const sessionUrl = `${window.location.origin}/focus/${room._id}`;
+    navigator.clipboard.writeText(sessionUrl);
+    toast.success('Session link copied!');
+  }, [room._id]);
+
   return (
     <div className={cn(
       "card-dark p-4 fade-in",
@@ -224,17 +253,27 @@ function MyRoomCard({ room, formatDuration }: { room: MyRoom; formatDuration: (m
         <span className="text-xs text-white/40">
           {formatDuration(room.minDuration, room.maxDuration)} · {room.participantCount} {room.participantCount === 1 ? 'person' : 'people'}
         </span>
-        <Link
-          to={`/focus/${room._id}`}
-          className={cn(
-            "text-xs px-3 py-1.5 rounded-lg font-medium transition-colors",
-            room.isActiveParticipant
-              ? "bg-white text-stone-900 hover:bg-white/90"
-              : "bg-white/10 text-white/70 hover:bg-white/20"
-          )}
-        >
-          {room.isActiveParticipant ? 'Continue' : 'Rejoin'}
-        </Link>
+        <div className="flex items-center gap-2">
+          <Tooltip label="Copy session link">
+            <button
+              onClick={handleCopyLink}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+            >
+              <CopyIcon />
+            </button>
+          </Tooltip>
+          <Link
+            to={`/focus/${room._id}`}
+            className={cn(
+              "text-xs px-3 py-1.5 rounded-lg font-medium transition-colors",
+              room.isActiveParticipant
+                ? "bg-white text-stone-900 hover:bg-white/90"
+                : "bg-white/10 text-white/70 hover:bg-white/20"
+            )}
+          >
+            {room.isActiveParticipant ? 'Continue' : 'Rejoin'}
+          </Link>
+        </div>
       </div>
     </div>
   );

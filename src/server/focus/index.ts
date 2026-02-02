@@ -569,18 +569,26 @@ export default new Module('focus', {
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
         .slice(0, 20);
 
-      return uniqueSessions.map(s => ({
-        _id: s._id.toString(),
-        intent: s.intent,
-        topic: s.topic,
-        duration: s.actualDuration || s.maxDuration,
-        status: s.status,
-        createdAt: s.createdAt,
-        startedAt: s.startedAt,
-        endedAt: s.endedAt,
-        participantCount: s.participantCount,
-        isCreator: s.creatorId.toString() === user.id,
-      }));
+      return uniqueSessions.map(s => {
+        // Check if user is currently an active participant
+        const userHash = createUserHash(user.id, s._id.toString());
+        const participation = participations.find(p => p.sessionId.toString() === s._id.toString() && p.userHash === userHash);
+        const isActiveParticipant = participation?.isActiveParticipant ?? false;
+
+        return {
+          _id: s._id.toString(),
+          intent: s.intent,
+          topic: s.topic,
+          duration: s.actualDuration || s.maxDuration,
+          status: s.status,
+          createdAt: s.createdAt,
+          startedAt: s.startedAt,
+          endedAt: s.endedAt,
+          participantCount: s.participantCount,
+          isCreator: s.creatorId.toString() === user.id,
+          isActiveParticipant,
+        };
+      });
     },
 
     // Get user's profile

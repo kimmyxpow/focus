@@ -6,6 +6,7 @@ import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/re
 import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import FocusOverviewSkeleton from '@/client/components/skeletons/FocusOverviewSkeleton';
+import Tooltip from '@/client/components/ui/Tooltip';
 import { cn } from '@/client/lib/utils';
 
 // Add svg import for copy icon
@@ -53,6 +54,7 @@ type UserSession = {
   endedAt?: string;
   participantCount: number;
   isCreator: boolean;
+  isActiveParticipant: boolean;
 };
 
 function StatCard({ value, label, highlight = false }: { value: string | number; label: string; highlight?: boolean }) {
@@ -154,16 +156,17 @@ function SessionHistoryCard({ session }: { session: UserSession }) {
           <span>{new Date(session.createdAt).toLocaleDateString()}</span>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleCopyLink}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors"
-            title="Copy session link"
-          >
-            <CopyIcon />
-          </button>
+          <Tooltip label="Copy session link">
+            <button
+              onClick={handleCopyLink}
+              className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-colors"
+            >
+              <CopyIcon />
+            </button>
+          </Tooltip>
           {isActive ? (
             <Link to={`/focus/${session._id}`} className="btn-light text-xs px-3 py-1.5">
-              {session.status === 'focusing' ? 'Rejoin' : 'Continue'}
+              {session.isActiveParticipant ? 'Continue' : 'Rejoin'}
             </Link>
           ) : session.status === 'completed' ? (
             <Link to={`/focus/${session._id}/summary`} className="btn-outline-light text-xs px-3 py-1.5">

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/react-query';
+import Tooltip from '@/client/components/ui/Tooltip';
 import { cn } from '@/client/lib/utils';
 
 type ChatMessage = {
@@ -81,33 +82,34 @@ export default function ChatPanel({
 
   // Chat toggle button (always visible)
   const toggleButton = (
-    <button
-      onClick={onToggle}
-      className={cn(
-        "fixed bottom-4 right-4 z-40 w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg",
-        isOpen
-          ? "bg-white text-stone-900"
-          : chatEnabled
-            ? "bg-white/20 text-white hover:bg-white/30"
-            : "bg-white/10 text-white/50 hover:bg-white/15"
-      )}
-      title={chatEnabled ? (isOpen ? "Close chat" : "Open chat") : "Chat disabled"}
-    >
-      {isOpen ? (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      ) : (
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
-        </svg>
-      )}
-      {!isOpen && messages.length > 0 && (
-        <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-stone-900 rounded-full text-xs font-semibold flex items-center justify-center">
-          {messages.length > 9 ? '9+' : messages.length}
-        </span>
-      )}
-    </button>
+    <Tooltip label={chatEnabled ? (isOpen ? "Close chat" : "Open chat") : "Chat disabled"}>
+      <button
+        onClick={onToggle}
+        className={cn(
+          "fixed bottom-4 right-4 z-40 w-12 h-12 rounded-full flex items-center justify-center transition-all shadow-lg",
+          isOpen
+            ? "bg-white text-stone-900"
+            : chatEnabled
+              ? "bg-white/20 text-white hover:bg-white/30"
+              : "bg-white/10 text-white/50 hover:bg-white/15"
+        )}
+      >
+        {isOpen ? (
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+          </svg>
+        )}
+        {!isOpen && messages.length > 0 && (
+          <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-stone-900 rounded-full text-xs font-semibold flex items-center justify-center">
+            {messages.length > 9 ? '9+' : messages.length}
+          </span>
+        )}
+      </button>
+    </Tooltip>
   );
 
   if (!isOpen) {

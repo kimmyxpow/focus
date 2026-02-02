@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
-import { modelenceQuery } from '@modelence/react-query';
 import LoadingSpinner from '@/client/components/LoadingSpinner';
-import ActiveSessionIndicator from '@/client/components/ActiveSessionIndicator';
+import FloatingSessionWidget from '@/client/components/FloatingSessionWidget';
+import ProfileDropdown from '@/client/components/ProfileDropdown';
 import { cn } from '@/client/lib/utils';
 
 interface PageProps {
@@ -23,36 +22,10 @@ interface PageProps {
   centered?: boolean;
 }
 
-function Tooltip({ children, label }: { children: React.ReactNode; label: string }) {
-  return (
-    <span className="tooltip-wrapper">
-      {children}
-      <span className="tooltip">{label}</span>
-    </span>
-  );
-}
-
 function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' }) {
   const { user } = useSession();
   const location = useLocation();
   const isDark = variant === 'dark';
-
-  // Query active session for navbar indicator
-  const { data: activeSession } = useQuery({
-    ...modelenceQuery<{
-      sessionId: string;
-      topic: string;
-      status: 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown';
-      isActiveParticipant: boolean;
-      timer?: {
-        remainingSeconds: number;
-        serverTimestamp: number;
-      };
-    } | null>('focus.getActiveSession', {}),
-    enabled: !!user,
-    refetchInterval: 10000,
-    retry: false,
-  });
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -123,23 +96,6 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
         {/* Divider */}
         <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />
 
-        {/* Active Session Indicator */}
-        {activeSession && activeSession.isActiveParticipant && (
-          <>
-            <div className="flex-shrink-0">
-              <ActiveSessionIndicator
-                sessionId={activeSession.sessionId}
-                topic={activeSession.topic}
-                status={activeSession.status}
-                remainingSeconds={activeSession.timer?.remainingSeconds}
-              />
-            </div>
-
-            {/* Divider after Active Session Indicator */}
-            <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />
-          </>
-        )}
-
         {/* User Actions */}
         {user ? (
           <div className="flex items-center gap-1">
@@ -153,30 +109,7 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
               <span className="hidden sm:inline">New Session</span>
               <span className="sm:hidden">New</span>
             </Link>
-            <Tooltip label="Profile">
-              <Link
-                to="/profile"
-                className={cn(
-                  "btn-icon",
-                  isDark && "btn-icon-dark",
-                  isActive('/profile') && "ring-1 ring-white/20"
-                )}
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                </svg>
-              </Link>
-            </Tooltip>
-            <Tooltip label="Sign out">
-              <Link
-                to="/logout"
-                className={cn("btn-icon", isDark && "btn-icon-dark")}
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                </svg>
-              </Link>
-            </Tooltip>
+            <ProfileDropdown isDark={isDark} />
           </div>
         ) : (
           <Link to="/login" className={cn("nav-btn-primary", isDark && "nav-btn-primary-dark")}>
@@ -201,6 +134,7 @@ export default function Page({
   return (
     <div className={cn("page-wrapper", isDark && "page-wrapper-dark")}>
       {!hideNav && <FloatingNavbar variant={variant} />}
+      <FloatingSessionWidget />
       <main className={cn(
         centered ? "page-content-centered" : "page-content",
         hideNav && "!pt-0",
