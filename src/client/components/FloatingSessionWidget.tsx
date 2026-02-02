@@ -23,9 +23,6 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
   const [isDismissed, setIsDismissed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
-  // Check if user is currently on a focus page
-  const isOnFocusPage = location.pathname.startsWith('/focus/');
-
   const { data: activeSession } = useQuery({
     ...modelenceQuery<{
       sessionId: string;
@@ -85,8 +82,10 @@ export default function FloatingSessionWidget({ className }: FloatingSessionWidg
   // Don't show widget if:
   // 1. No active session or not an active participant
   // 2. User dismissed the widget
-  // 3. User is on a focus page (they're already viewing their session)
-  if (!activeSession || !activeSession.isActiveParticipant || isDismissed || isOnFocusPage) {
+  // 3. User is currently viewing the SAME session page (not summary)
+  const isViewingSameSession = activeSession && location.pathname === `/focus/${activeSession.sessionId}`;
+  
+  if (!activeSession || !activeSession.isActiveParticipant || isDismissed || isViewingSameSession) {
     return null;
   }
 
