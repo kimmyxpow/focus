@@ -8,13 +8,10 @@ import { router } from './router';
 import favicon from './assets/favicon.svg';
 import './index.css';
 import LoadingSpinner from './components/LoadingSpinner';
-import { useAutoLogin } from './lib/autoLogin';
 
 const queryClient = new QueryClient();
 
 function App() {
-  useAutoLogin();
-
   return (
     <Suspense fallback={<LoadingSpinner fullScreen />}>
       <Toaster position="top-right" />
