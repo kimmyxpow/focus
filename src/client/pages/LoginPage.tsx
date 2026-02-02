@@ -1,4 +1,8 @@
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useMutation } from '@tanstack/react-query';
+import { modelenceMutation } from '@modelence/react-query';
+import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 
 function GoogleIcon() {
@@ -36,9 +40,79 @@ function GitHubIcon() {
   );
 }
 
+function MailIcon() {
+  return (
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+      />
+    </svg>
+  );
+}
+
+function ArrowLeftIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+    </svg>
+  );
+}
+
+type Step = 'method' | 'email' | 'otp';
+
 export default function LoginPage() {
   const [searchParams] = useSearchParams();
   const redirect = searchParams.get('_redirect') || '/';
+  
+  const [step, setStep] = useState<Step>('method');
+  const [email, setEmail] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Cooldown timer effect
+  useEffect(() => {
+    if (resendCooldown > 0) {
+      const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCooldown]);
+
+  const sendOTPMutation = useMutation({
+    ...modelenceMutation('auth.sendOTP'),
+    onSuccess: (data) => {
+      const result = data as { cooldown?: number };
+      setStep('otp');
+      setResendCooldown(result.cooldown || 60);
+      toast.success('Code sent! Check your email.');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Failed to send code');
+    },
+  });
+
+  const verifyOTPMutation = useMutation({
+    ...modelenceMutation('auth.verifyOTP'),
+    onSuccess: (data) => {
+      const result = data as { isNewUser: boolean };
+      if (result.isNewUser) {
+        toast.success('Welcome to Focus!');
+      } else {
+        toast.success('Welcome back!');
+      }
+      // Reload the page to update the session state
+      window.location.href = redirect;
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Invalid code');
+      // Clear OTP inputs on error
+      setOtp(['', '', '', '', '', '']);
+      otpInputRefs.current[0]?.focus();
+    },
+  });
 
   const handleGoogleSignIn = () => {
     const redirectParam = redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : '';
@@ -50,6 +124,63 @@ export default function LoginPage() {
     window.location.href = `/api/_internal/auth/github${redirectParam}`;
   };
 
+  const handleEmailSubmit = useCallback((e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    
+    sendOTPMutation.mutate({ email: email.trim() });
+  }, [email, sendOTPMutation]);
+
+  const handleOTPChange = useCallback((index: number, value: string) => {
+    // Only allow digits
+    const digit = value.replace(/\D/g, '').slice(-1);
+    
+    const newOtp = [...otp];
+    newOtp[index] = digit;
+    setOtp(newOtp);
+
+    // Auto-focus next input
+    if (digit && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-submit when all digits are filled
+    if (digit && index === 5) {
+      const fullCode = newOtp.join('');
+      if (fullCode.length === 6) {
+        verifyOTPMutation.mutate({ email: email.trim(), code: fullCode });
+      }
+    }
+  }, [otp, email, verifyOTPMutation]);
+
+  const handleOTPKeyDown = useCallback((index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  }, [otp]);
+
+  const handleOTPPaste = useCallback((e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    
+    if (pastedData.length === 6) {
+      const newOtp = pastedData.split('');
+      setOtp(newOtp);
+      verifyOTPMutation.mutate({ email: email.trim(), code: pastedData });
+    }
+  }, [email, verifyOTPMutation]);
+
+  const handleResendCode = useCallback(() => {
+    sendOTPMutation.mutate({ email: email.trim() });
+  }, [email, sendOTPMutation]);
+
+  // Focus first OTP input when entering OTP step
+  useEffect(() => {
+    if (step === 'otp') {
+      setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
+    }
+  }, [step]);
+
   return (
     <Page variant="dark">
       <div className="container-xs flex items-center justify-center min-h-[70vh]">
@@ -59,42 +190,165 @@ export default function LoginPage() {
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center mx-auto mb-5">
               <span className="text-2xl font-bold text-stone-900">F</span>
             </div>
-            <h1 className="text-display-sm text-white mb-2">Welcome to Focus</h1>
+            <h1 className="text-display-sm text-white mb-2">
+              {step === 'otp' ? 'Enter your code' : 'Welcome to Focus'}
+            </h1>
             <p className="text-white/50 text-sm">
-              Sign in to start focusing with others
+              {step === 'otp' 
+                ? `We sent a 6-digit code to ${email}`
+                : 'Sign in to start focusing with others'
+              }
             </p>
           </div>
 
-          {/* OAuth Buttons */}
-          <div className="space-y-3">
-            <button
-              onClick={handleGoogleSignIn}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white text-stone-900 font-medium text-sm hover:bg-white/90 transition-colors"
-            >
-              <GoogleIcon />
-              Continue with Google
-            </button>
+          {/* Method Selection */}
+          {step === 'method' && (
+            <>
+              {/* OAuth Buttons */}
+              <div className="space-y-3">
+                <button
+                  onClick={handleGoogleSignIn}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white text-stone-900 font-medium text-sm hover:bg-white/90 transition-colors"
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </button>
 
-            <button
-              onClick={handleGitHubSignIn}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white font-medium text-sm hover:bg-white/15 transition-colors border border-white/10"
-            >
-              <GitHubIcon />
-              Continue with GitHub
-            </button>
-          </div>
+                <button
+                  onClick={handleGitHubSignIn}
+                  className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white/10 text-white font-medium text-sm hover:bg-white/15 transition-colors border border-white/10"
+                >
+                  <GitHubIcon />
+                  Continue with GitHub
+                </button>
+              </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-4 my-6">
-            <div className="flex-1 h-px bg-white/10" />
-            <span className="text-xs text-white/40">Quick and secure sign-in</span>
-            <div className="flex-1 h-px bg-white/10" />
-          </div>
+              {/* Divider */}
+              <div className="flex items-center gap-4 my-6">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-white/40">or</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
 
-          {/* Info */}
-          <p className="text-xs text-white/40 text-center">
-            We use secure OAuth authentication. No passwords to remember.
-          </p>
+              {/* Email Option */}
+              <button
+                onClick={() => setStep('email')}
+                className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-white font-medium text-sm hover:bg-white/10 transition-colors border border-white/10"
+              >
+                <MailIcon />
+                Continue with Email
+              </button>
+
+              {/* Info */}
+              <p className="text-xs text-white/40 text-center mt-6">
+                No password needed - we'll send you a login code.
+              </p>
+            </>
+          )}
+
+          {/* Email Input Step */}
+          {step === 'email' && (
+            <>
+              <button
+                onClick={() => setStep('method')}
+                className="flex items-center gap-1 text-white/50 hover:text-white text-sm mb-6 transition-colors"
+              >
+                <ArrowLeftIcon />
+                Back
+              </button>
+
+              <form onSubmit={handleEmailSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-white/70 mb-2">
+                    Email address
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all"
+                    autoFocus
+                    disabled={sendOTPMutation.isPending}
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!email.trim() || sendOTPMutation.isPending}
+                  className="w-full px-4 py-3 rounded-lg bg-white text-stone-900 font-medium text-sm hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {sendOTPMutation.isPending ? 'Sending...' : 'Send login code'}
+                </button>
+              </form>
+
+              <p className="text-xs text-white/40 text-center mt-6">
+                We'll send you a 6-digit code to sign in.
+              </p>
+            </>
+          )}
+
+          {/* OTP Input Step */}
+          {step === 'otp' && (
+            <>
+              <button
+                onClick={() => {
+                  setStep('email');
+                  setOtp(['', '', '', '', '', '']);
+                }}
+                className="flex items-center gap-1 text-white/50 hover:text-white text-sm mb-6 transition-colors"
+              >
+                <ArrowLeftIcon />
+                Change email
+              </button>
+
+              <div className="space-y-6">
+                {/* OTP Input Grid */}
+                <div className="flex justify-center gap-2">
+                  {otp.map((digit, index) => (
+                    <input
+                      key={index}
+                      ref={(el) => {otpInputRefs.current[index] = el}}
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={1}
+                      value={digit}
+                      onChange={(e) => handleOTPChange(index, e.target.value)}
+                      onKeyDown={(e) => handleOTPKeyDown(index, e)}
+                      onPaste={index === 0 ? handleOTPPaste : undefined}
+                      disabled={verifyOTPMutation.isPending}
+                      className="w-12 h-14 text-center text-xl font-semibold rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-white/20 focus:border-transparent transition-all disabled:opacity-50"
+                    />
+                  ))}
+                </div>
+
+                {verifyOTPMutation.isPending && (
+                  <p className="text-white/50 text-sm text-center">Verifying...</p>
+                )}
+
+                {/* Resend Code */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={sendOTPMutation.isPending || resendCooldown > 0}
+                    className="text-white/50 hover:text-white text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendOTPMutation.isPending 
+                      ? 'Sending...' 
+                      : resendCooldown > 0 
+                        ? `Resend code in ${resendCooldown}s`
+                        : "Didn't receive the code? Resend"}
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-xs text-white/40 text-center mt-6">
+                Code expires in 10 minutes.
+              </p>
+            </>
+          )}
 
           {/* Terms */}
           <p className="text-xs text-white/40 text-center mt-6">
