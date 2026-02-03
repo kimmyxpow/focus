@@ -2,9 +2,12 @@ import { startApp } from 'modelence/server';
 import resendProvider from '@modelence/resend';
 import focusModule from '@/server/focus';
 import authModule from '@/server/auth';
+import flashcardModule from '@/server/flashcard';
+import quizModule from '@/server/quiz';
+import aiModule from '@/server/ai';
 
 startApp({
-  modules: [focusModule, authModule],
+  modules: [aiModule, focusModule, authModule, flashcardModule, quizModule],
   migrations: [],
   email: {
     provider: resendProvider,

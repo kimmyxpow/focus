@@ -43,6 +43,10 @@ const publicRoutes: RouteObject[] = [
     Component: lazy(() => import('./pages/HomePage'))
   },
   {
+    path: '/sessions',
+    Component: lazy(() => import('./pages/SessionsPage'))
+  },
+  {
     path: '/focus/:sessionId',
     Component: lazy(() => import('./pages/FocusRoomPage'))
   },
@@ -57,6 +61,22 @@ const publicRoutes: RouteObject[] = [
   {
     path: '/leaderboard',
     Component: lazy(() => import('./pages/LeaderboardPage'))
+  },
+  {
+    path: '/flashcards',
+    Component: lazy(() => import('./pages/PublicFlashcardsPage'))
+  },
+  {
+    path: '/flashcards/:setId/study',
+    Component: lazy(() => import('./pages/FlashcardStudyPage'))
+  },
+  {
+    path: '/quiz',
+    Component: lazy(() => import('./pages/QuizListPage'))
+  },
+  {
+    path: '/quiz/:quizId',
+    Component: lazy(() => import('./pages/TakeQuizPage'))
   },
   {
     path: '/terms',
@@ -95,12 +115,28 @@ const privateRoutes: RouteObject[] = [
     Component: lazy(() => import('./pages/SessionSummaryPage'))
   },
   {
-    path: '/focus-overview',
+    path: '/my-sessions',
     Component: lazy(() => import('./pages/FocusOverviewPage'))
   },
   {
     path: '/profile',
     Component: lazy(() => import('./pages/ProfilePage'))
+  },
+  {
+    path: '/my-flashcards',
+    Component: lazy(() => import('./pages/FlashcardsPage'))
+  },
+  {
+    path: '/create-flashcard',
+    Component: lazy(() => import('./pages/CreateFlashcardPage'))
+  },
+  {
+    path: '/my-quizzes',
+    Component: lazy(() => import('./pages/MyQuizzesPage'))
+  },
+  {
+    path: '/create-quiz',
+    Component: lazy(() => import('./pages/CreateQuizPage'))
   }
 ];
 
