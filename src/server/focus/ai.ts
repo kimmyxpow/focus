@@ -7,9 +7,9 @@
 
 import { generateText } from '@modelence/ai';
 
-// AI Provider configuration - uses OpenAI by default
-const AI_PROVIDER = 'openai' as const;
-const AI_MODEL = 'gpt-4o-mini'; // Cost-effective model for focus app
+// AI Provider configuration - uses Google Gemini
+const AI_PROVIDER = 'google' as const;
+const AI_MODEL = 'gemini-2.0-flash'; // Cost-effective Gemini model for focus app
 
 interface FocusPatterns {
   preferredDurationRange: number[];
