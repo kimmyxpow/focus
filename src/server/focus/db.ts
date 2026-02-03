@@ -102,6 +102,9 @@ export const dbSessionParticipants = new Store('sessionParticipants', {
 
     // Post-session outcome
     outcome: schema.string().optional(),       // 'completed' | 'partial' | 'interrupted'
+    
+    // Flag to track if focus ledger has been updated for this participant
+    ledgerUpdated: schema.boolean().optional(),
 
     // Anonymous user reference (hashed)
     userHash: schema.string(),

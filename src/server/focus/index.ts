@@ -48,6 +48,32 @@ function formatDateKey(date: Date): string {
   return date.toISOString().split('T')[0];
 }
 
+// Helper to find userId from userHash by checking all users' profiles
+// This is used to update focus ledger when we only have the userHash
+async function findUserIdFromHash(userHash: string, sessionId: string): Promise<string | null> {
+  // Get all user profiles to find matching userId
+  const profiles = await dbUserProfiles.fetch({}, { limit: 1000 });
+  
+  for (const profile of profiles) {
+    const testHash = createUserHash(profile.userId.toString(), sessionId);
+    if (testHash === userHash) {
+      return profile.userId.toString();
+    }
+  }
+  
+  // If no profile found, try to match against focus ledgers
+  const ledgers = await dbFocusLedger.fetch({}, { limit: 1000 });
+  
+  for (const ledger of ledgers) {
+    const testHash = createUserHash(ledger.userId.toString(), sessionId);
+    if (testHash === userHash) {
+      return ledger.userId.toString();
+    }
+  }
+  
+  return null;
+}
+
 // Helper to check if user has an active session in another session
 async function hasActiveSessionElsewhere(userId: string, excludeSessionId?: string): Promise<{ hasActive: boolean; activeSessionId?: string }> {
   // Get all participations for this user
@@ -489,6 +515,17 @@ export default new Module('focus', {
         throw new AuthError('Not a participant of this session');
       }
 
+      // Auto-update focus ledger if participant has an outcome but ledger hasn't been updated yet
+      // This ensures stats are recorded even if user skips the outcome selection
+      if (participant.outcome && !participant.ledgerUpdated) {
+        await updateFocusLedger(user.id, session, participant.outcome);
+        // Mark ledger as updated to prevent duplicate updates
+        await dbSessionParticipants.updateOne(
+          { _id: participant._id },
+          { $set: { ledgerUpdated: true } }
+        );
+      }
+
       // Get participant count for summary
       const allParticipants = await dbSessionParticipants.fetch({
         sessionId: new ObjectId(sessionId),
@@ -788,6 +825,10 @@ export default new Module('focus', {
           focusMinutes = recentStats.reduce((sum: number, w: { focusMinutes: number }) => sum + w.focusMinutes, 0);
           sessions = recentStats.reduce((sum: number, w: { sessionCount: number }) => sum + w.sessionCount, 0);
         }
+
+        // Only include users who have actual focus data
+        // Filter out users with 0 focus minutes or 0 sessions
+        if (focusMinutes === 0 && sessions === 0) return null;
 
         return {
           nickname: profile.nickname,
@@ -1198,7 +1239,7 @@ export default new Module('focus', {
         throw new Error('Not a participant');
       }
 
-      // Get session for participant count
+      // Get session for participant count and to check if focus was in progress
       const session = await dbFocusSessions.findOne({ _id: new ObjectId(sessionId) });
 
       await dbSessionParticipants.updateOne(
@@ -1208,6 +1249,7 @@ export default new Module('focus', {
             isActive: false,
             leftAt: new Date(),
             outcome: 'interrupted',
+            ledgerUpdated: true,
           }
         }
       );
@@ -1216,6 +1258,12 @@ export default new Module('focus', {
         { _id: new ObjectId(sessionId) },
         { $inc: { participantCount: -1 } }
       );
+
+      // Update focus ledger if session was in focusing state
+      // This records partial progress when user leaves mid-session
+      if (session && session.status === 'focusing') {
+        await updateFocusLedger(user.id, session, 'interrupted');
+      }
 
       // Broadcast participant left event
       sessionServerChannel.broadcast(sessionId, {
@@ -1288,6 +1336,13 @@ export default new Module('focus', {
         throw new Error('Session not found');
       }
 
+      // Get all active participants before updating status
+      const activeParticipants = await dbSessionParticipants.fetch({
+        sessionId: new ObjectId(sessionId),
+        isActive: true,
+        outcome: { $exists: false },
+      });
+
       await dbFocusSessions.updateOne(
         { _id: new ObjectId(sessionId) },
         {
@@ -1298,11 +1353,20 @@ export default new Module('focus', {
         }
       );
 
-      // Update all remaining active participants to completed
+      // Update all remaining active participants to completed and mark ledger as updated
       await dbSessionParticipants.updateMany(
         { sessionId: new ObjectId(sessionId), isActive: true, outcome: { $exists: false } },
-        { $set: { outcome: 'completed' } }
+        { $set: { outcome: 'completed', ledgerUpdated: true } }
       );
+
+      // Update focus ledger for all completed participants
+      // This ensures stats are recorded even if users don't visit the summary page
+      for (const participant of activeParticipants) {
+        const userId = await findUserIdFromHash(participant.userHash, sessionId);
+        if (userId) {
+          await updateFocusLedger(userId, session, 'completed');
+        }
+      }
 
       // Broadcast session completed event
       sessionServerChannel.broadcast(sessionId, {
@@ -1342,13 +1406,19 @@ export default new Module('focus', {
         throw new Error('Not a participant');
       }
 
+      // Check if ledger was already updated (e.g., from getSessionSummary auto-update)
+      const alreadyUpdated = participant.ledgerUpdated === true;
+
+      // Update participant outcome and mark ledger as updated
       await dbSessionParticipants.updateOne(
         { _id: participant._id },
-        { $set: { outcome } }
+        { $set: { outcome, ledgerUpdated: true } }
       );
 
-      // Update focus ledger
-      await updateFocusLedger(user.id, session, outcome);
+      // Only update focus ledger if it hasn't been updated yet
+      if (!alreadyUpdated) {
+        await updateFocusLedger(user.id, session, outcome);
+      }
 
       return { success: true };
     },

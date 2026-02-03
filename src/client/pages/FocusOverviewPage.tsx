@@ -6,6 +6,7 @@ import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/re
 import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import FocusOverviewSkeleton from '@/client/components/skeletons/FocusOverviewSkeleton';
+import FocusHeatmap from '@/client/components/FocusHeatmap';
 import Tooltip from '@/client/components/ui/Tooltip';
 import { cn } from '@/client/lib/utils';
 
@@ -309,6 +310,15 @@ export default function FocusOverviewPage() {
             <h3 className="text-white font-semibold mb-1">Your Focus Journey</h3>
             <p className="text-white/40 text-xs mb-4">Activity over the past {Math.min(overview.weeklyStats.length, 8)} weeks</p>
             <WeeklyChart stats={overview.weeklyStats} />
+          </section>
+        )}
+
+        {/* Focus Heatmap */}
+        {hasStats && (
+          <section className="py-6 border-t border-white/10 fade-in">
+            <h3 className="text-white font-semibold mb-1">Focus Activity</h3>
+            <p className="text-white/40 text-xs mb-4">Your focus patterns throughout the year</p>
+            <FocusHeatmap />
           </section>
         )}
 
