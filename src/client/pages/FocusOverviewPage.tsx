@@ -239,7 +239,7 @@ export default function FocusOverviewPage() {
             <p className="text-white/50 text-sm mb-6">
               Sign in to see your personal focus journey and track your progress over time.
             </p>
-            <Link to={`/login?_redirect=${encodeURIComponent('/focus-overview')}`} className="btn-light">
+            <Link to={`/login?_redirect=${encodeURIComponent('/my-sessions')}`} className="btn-light">
               Sign In
             </Link>
           </div>
@@ -267,7 +267,7 @@ export default function FocusOverviewPage() {
         {/* Header */}
         <div className="flex items-center justify-between fade-in">
           <div>
-            <h1 className="text-display-md text-white mb-1">My Focus</h1>
+            <h1 className="text-display-md text-white mb-1">My Sessions</h1>
             <p className="text-white/50 text-sm">Your private focus history and stats</p>
           </div>
           <Link to="/create-session" className="btn-light">

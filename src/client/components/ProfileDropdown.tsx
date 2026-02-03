@@ -99,9 +99,9 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
             <span>Profile</span>
           </Link>
 
-          {/* My Focus */}
+          {/* My Sessions */}
           <Link
-            to="/focus-overview"
+            to="/my-sessions"
             onClick={() => setIsOpen(false)}
             className={cn(
               "flex items-center gap-3 px-4 py-3",
@@ -111,10 +111,46 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
             )}
           >
             <svg className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
-              <title>My Focus</title>
+              <title>My Sessions</title>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605" />
             </svg>
-            <span>My Focus</span>
+            <span>My Sessions</span>
+          </Link>
+
+          {/* My Flashcards */}
+          <Link
+            to="/my-flashcards"
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3",
+              "text-sm font-medium text-white/80",
+              "hover:bg-white/5",
+              "transition-colors"
+            )}
+          >
+            <svg className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <title>My Flashcards</title>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3" />
+            </svg>
+            <span>My Flashcards</span>
+          </Link>
+
+          {/* My Quizzes */}
+          <Link
+            to="/my-quizzes"
+            onClick={() => setIsOpen(false)}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3",
+              "text-sm font-medium text-white/80",
+              "hover:bg-white/5",
+              "transition-colors"
+            )}
+          >
+            <svg className="w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
+              <title>My Quizzes</title>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+            </svg>
+            <span>My Quizzes</span>
           </Link>
 
           {/* Divider */}

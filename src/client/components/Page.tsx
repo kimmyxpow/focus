@@ -60,14 +60,34 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
         {/* Navigation - subtle active indicator */}
         <div className="flex items-center gap-0.5">
           <Link
-            to="/"
+            to="/sessions"
             className={cn(
               "nav-link",
               isDark && "nav-link-dark",
-              isActive('/') && "nav-link-active"
+              isActive('/sessions') && "nav-link-active"
             )}
           >
             Sessions
+          </Link>
+          <Link
+            to="/quiz"
+            className={cn(
+              "nav-link",
+              isDark && "nav-link-dark",
+              isActive('/quiz') && "nav-link-active"
+            )}
+          >
+            Quizzes
+          </Link>
+          <Link
+            to="/flashcards"
+            className={cn(
+              "nav-link",
+              isDark && "nav-link-dark",
+              isActive('/flashcards') && "nav-link-active"
+            )}
+          >
+            Flashcards
           </Link>
           <Link
             to="/leaderboard"
