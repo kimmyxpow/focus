@@ -113,6 +113,7 @@ export const dbSessionParticipants = new Store('sessionParticipants', {
     { key: { sessionId: 1 } },
     { key: { userHash: 1, sessionId: 1 } },
     { key: { sessionId: 1, isActive: 1 } },
+    { key: { sessionId: 1, outcome: 1 } }, // Index for counting completed participants
   ]
 });
 

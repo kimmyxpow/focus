@@ -7,8 +7,6 @@ import {
   generateCohortMatches,
   generateWarmupPrompt,
   generateCooldownPrompt,
-  generateSessionSummary,
-  generateNextStepSuggestion,
   predictOptimalDuration,
 } from './ai';
 import { sessionServerChannel, chatServerChannel } from '../channels';
@@ -526,33 +524,49 @@ export default new Module('focus', {
         );
       }
 
-      // Get participant count for summary
-      const allParticipants = await dbSessionParticipants.fetch({
-        sessionId: new ObjectId(sessionId),
-      });
-      const totalParticipants = allParticipants.length;
+      // Get participant stats in parallel
+      const [totalParticipants, completedParticipants] = await Promise.all([
+        dbSessionParticipants.countDocuments({ sessionId: new ObjectId(sessionId) }),
+        dbSessionParticipants.countDocuments({ 
+          sessionId: new ObjectId(sessionId), 
+          outcome: 'completed' 
+        }),
+      ]);
 
-      const completedParticipantsList = await dbSessionParticipants.fetch({
-        sessionId: new ObjectId(sessionId),
-        outcome: 'completed',
-      });
-      const completedParticipants = completedParticipantsList.length;
+      const cohortCompletionRate = totalParticipants > 0 
+        ? completedParticipants / totalParticipants 
+        : 1;
 
-      // Generate AI summary
-      const summary = await generateSessionSummary({
-        intent: session.intent,
-        topic: session.topic,
-        duration: session.actualDuration || session.maxDuration,
-        participantOutcome: participant.outcome || 'completed',
-        cohortCompletionRate: totalParticipants > 0 ? completedParticipants / totalParticipants : 1,
-      });
+      // Generate template-based summary and next step (fast, no AI cost)
+      const duration = session.actualDuration || session.maxDuration;
+      const outcome = participant.outcome || 'completed';
+      const completionPercent = Math.round(cohortCompletionRate * 100);
+      
+      // Template-based summary based on outcome
+      let summary: string;
+      if (outcome === 'completed') {
+        summary = `You completed ${duration} minutes of focused ${session.topic} work${session.intent ? ` on "${session.intent}"` : ''}. ${completionPercent}% of your cohort finished together. Great discipline staying on task!`;
+      } else if (outcome === 'partial') {
+        summary = `You made progress on ${session.topic}${session.intent ? ` - "${session.intent}"` : ''}. Every minute of focused work counts toward building your practice.`;
+      } else {
+        summary = `Session interrupted, but every attempt at focus builds the habit. Consider a shorter session next time to rebuild momentum.`;
+      }
 
-      // Generate next step suggestion
-      const nextStep = await generateNextStepSuggestion({
-        topic: session.topic,
-        completedDuration: session.actualDuration || session.maxDuration,
-        outcome: participant.outcome || 'completed',
-      });
+      // Template-based next step suggestion
+      let nextStep: string;
+      if (outcome === 'completed') {
+        if (duration >= 45) {
+          nextStep = `After ${duration} minutes of deep focus, take a 10-15 minute break. Your brain needs time to consolidate what you've learned.`;
+        } else if (duration >= 25) {
+          nextStep = `Great ${duration}-minute session! Take a 5-minute break, then consider another round if you're still in flow.`;
+        } else {
+          nextStep = `Quick win completed! Ready for another short burst of ${session.topic} focus, or time to switch to something new?`;
+        }
+      } else if (outcome === 'partial') {
+        nextStep = `Try a shorter session (15-20 min) next time. Building consistency with shorter bursts matters more than long durations.`;
+      } else {
+        nextStep = `No worries about the interruption. When you're ready, start with a 15-minute ${session.topic} session to rebuild momentum.`;
+      }
 
       return {
         sessionId: session._id.toString(),

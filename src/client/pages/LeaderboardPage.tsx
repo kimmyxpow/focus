@@ -272,12 +272,6 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        {/* Privacy note */}
-        <p className="text-center text-white/30 text-xs">
-          Only users with public profiles appear here. Your privacy is always in your control.
-          <br />
-          You can change your visibility settings anytime from your profile page.
-        </p>
       </div>
     </Page>
   );

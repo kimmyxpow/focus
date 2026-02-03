@@ -39,6 +39,10 @@ export default function SessionSummaryPage() {
   const { data: summary, isLoading, error } = useQuery({
     ...modelenceQuery<SessionSummary>('focus.getSessionSummary', { sessionId }),
     enabled: !!sessionId && !!user,
+    staleTime: 30 * 60 * 1000, // Cache for 30 minutes - template-based summary is static
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour
   });
 
   const { mutate: recordOutcome, isPending: isRecording } = useMutation({
@@ -196,21 +200,15 @@ export default function SessionSummaryPage() {
           </div>
         )}
 
-        {/* AI Summary */}
+        {/* Session Insights */}
         <section className="py-6 border-t border-white/10">
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-base font-semibold text-white">Session insights</h2>
-            <span className="chip bg-white/10 text-white/50 text-xs">AI</span>
-          </div>
+          <h2 className="text-base font-semibold text-white mb-3">Session insights</h2>
           <p className="text-white/70 leading-relaxed">{summary.aiSummary}</p>
         </section>
 
-        {/* AI Next Step */}
+        {/* Next Step */}
         <section className="py-6 border-t border-white/10">
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-base font-semibold text-white">What to do next</h2>
-            <span className="chip bg-white/10 text-white/50 text-xs">AI</span>
-          </div>
+          <h2 className="text-base font-semibold text-white mb-3">What to do next</h2>
           <p className="text-white/70 leading-relaxed">{summary.aiNextStep}</p>
         </section>
 
@@ -230,11 +228,6 @@ export default function SessionSummaryPage() {
             Start another session
           </Link>
         </div>
-
-        {/* Privacy note */}
-        <p className="text-xs text-white/40 text-center pb-4">
-          We only save your focus time and outcomes. Session details disappear after it ends.
-        </p>
       </div>
     </Page>
   );

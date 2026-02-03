@@ -20,21 +20,7 @@ export default function TermsPage() {
             </section>
 
             <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-white">2. Your Privacy</h2>
-              <p>
-                We take privacy seriously. Your focus sessions are private and ephemeral—we don't store your session notes or detailed activity. We only keep anonymized summaries to help improve your experience and show you relevant stats.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-white">3. Your Data</h2>
-              <p>
-                You own your data. You can view, export, or delete your focus history at any time from your profile settings. We only retain data you've chosen to keep.
-              </p>
-            </section>
-
-            <section className="space-y-2">
-              <h2 className="text-lg font-semibold text-white">4. Community Guidelines</h2>
+              <h2 className="text-lg font-semibold text-white">2. Community Guidelines</h2>
               <p>
                 Be kind, be focused, be respectful. Don't disrupt others' focus sessions or use the platform for anything harmful. We're all here to help each other do better work.
               </p>
