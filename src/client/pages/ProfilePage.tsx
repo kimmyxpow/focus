@@ -143,7 +143,7 @@ export default function ProfilePage() {
 
   return (
     <Page variant="dark">
-      <div className="container-md py-8 space-y-8">
+      <div className="container-md py-8 space-y-8 fade-in">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

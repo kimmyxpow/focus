@@ -240,7 +240,7 @@ export default function FlashcardStudyPage() {
     
     return (
       <Page variant="dark">
-        <div className="container-sm py-8">
+        <div className="container-sm py-8 fade-in">
           <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
             <div className="w-16 h-16 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
               <span className="text-2xl font-bold text-white">{score}%</span>
@@ -280,7 +280,7 @@ export default function FlashcardStudyPage() {
 
   return (
     <Page variant="dark">
-      <div className="container-sm py-6">
+      <div className="container-sm py-6 fade-in">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Link 
