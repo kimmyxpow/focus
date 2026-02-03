@@ -39,11 +39,12 @@ function fileToBase64(file: File): Promise<string> {
 }
 
 // Helper to get file type
-function getFileType(file: File): 'txt' | 'pdf' | 'docx' | null {
+function getFileType(file: File): 'txt' | 'pdf' | 'docx' | 'md' | null {
   const name = file.name.toLowerCase();
   if (name.endsWith('.txt') || file.type === 'text/plain') return 'txt';
   if (name.endsWith('.pdf') || file.type === 'application/pdf') return 'pdf';
   if (name.endsWith('.docx') || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') return 'docx';
+  if (name.endsWith('.md') || file.type === 'text/markdown' || file.type === 'text/x-markdown') return 'md';
   return null;
 }
 
@@ -274,7 +275,7 @@ export default function CreateFlashcardPage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".txt,.pdf,.docx"
+                  accept=".txt,.pdf,.docx,.md"
                   onChange={handleFileChange}
                   className="hidden"
                 />

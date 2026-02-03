@@ -217,7 +217,7 @@ export default new Module('quiz', {
       const { content, fileContent, sourceType, sourceFileName, maxQuestions, difficulty, questionTypes, isPublic, creatorName } = z.object({
         content: z.string().optional(),
         fileContent: z.string().optional(),
-        sourceType: z.enum(['text', 'pdf', 'docx', 'txt']),
+        sourceType: z.enum(['text', 'pdf', 'docx', 'txt', 'md']),
         sourceFileName: z.string().optional(),
         maxQuestions: z.number().min(5).max(30).optional(),
         difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
@@ -247,7 +247,7 @@ export default new Module('quiz', {
           throw new Error('File size must be less than 5MB');
         }
         
-        textContent = await parseFile(buffer, sourceType as 'pdf' | 'docx' | 'txt');
+        textContent = await parseFile(buffer, sourceType as 'pdf' | 'docx' | 'txt' | 'md', sourceFileName);
         
         if (textContent.length < 50) {
           throw new Error('Extracted content is too short.');

@@ -285,7 +285,7 @@ export default new Module('flashcard', {
       const { content, fileContent, sourceType, sourceFileName, maxCards, difficulty, isPublic, creatorName } = z.object({
         content: z.string().optional(),
         fileContent: z.string().optional(), // Base64 encoded file content
-        sourceType: z.enum(['text', 'pdf', 'docx', 'txt']),
+        sourceType: z.enum(['text', 'pdf', 'docx', 'txt', 'md']),
         sourceFileName: z.string().optional(),
         maxCards: z.number().min(5).max(50).optional(),
         difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
@@ -316,7 +316,7 @@ export default new Module('flashcard', {
           throw new Error('File size must be less than 5MB');
         }
         
-        textContent = await parseFile(buffer, sourceType);
+        textContent = await parseFile(buffer, sourceType, sourceFileName);
         
         if (textContent.length < 50) {
           throw new Error('Extracted content is too short. Please upload a file with more text content.');
