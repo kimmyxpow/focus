@@ -1,15 +1,13 @@
 /**
  * AI utilities for the Focus app
  *
- * Uses @modelence/ai for real LLM-powered analysis and generation.
+ * Uses Z.AI's GLM-4.7-Flash model via HTTP API for real LLM-powered analysis and generation.
+ * API Docs: https://docs.z.ai/guides/develop/http/introduction.md
+ * Model: glm-4.7-flash (lightweight, completely free)
  * All AI outputs are designed to be concise, explainable, and skippable.
  */
 
-import { generateText } from '@modelence/ai';
-
-// AI Provider configuration - uses Google Gemini
-const AI_PROVIDER = 'google' as const;
-const AI_MODEL = 'gemini-2.0-flash'; // Cost-effective Gemini model for focus app
+import { generateText } from '../lib/zai';
 
 interface FocusPatterns {
   preferredDurationRange: number[];
@@ -76,8 +74,6 @@ export async function generateCohortMatches(input: CohortMatchInput): Promise<Co
     ].filter(Boolean).join('\n');
 
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -223,8 +219,6 @@ export async function generateWarmupPrompt(input: WarmupPromptInput): Promise<st
 
   try {
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -271,8 +265,6 @@ export async function generateCooldownPrompt(input: CooldownPromptInput): Promis
 
   try {
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -321,8 +313,6 @@ export async function generateSessionSummary(input: SessionSummaryInput): Promis
 
   try {
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -384,8 +374,6 @@ export async function generateNextStepSuggestion(input: NextStepInput): Promise<
       : 'No historical patterns available.';
 
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -452,8 +440,6 @@ export async function predictOptimalDuration(input: DurationPredictionInput): Pr
 
   try {
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -549,8 +535,6 @@ export async function generateFocusInsights(input: FocusInsightsInput): Promise<
     ).join('\n');
 
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
@@ -624,8 +608,6 @@ export async function analyzeIntent(intent: string): Promise<{
 }> {
   try {
     const response = await generateText({
-      provider: AI_PROVIDER,
-      model: AI_MODEL,
       messages: [
         {
           role: 'system',
