@@ -32,11 +32,10 @@ type SessionData = {
   minDuration: number;
   maxDuration: number;
   actualDuration?: number;
-  status: 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled';
+  status: 'waiting' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled';
   createdAt: string;
   startedAt?: string;
   endedAt?: string;
-  warmupPrompt?: string;
   cooldownPrompt?: string;
   participantCount: number;
   repetitions: number;
@@ -220,18 +219,6 @@ export default function FocusRoomPage() {
       queryClient.invalidateQueries({ queryKey: createQueryKey('focus.getSession', { sessionId }) });
       toast.success(data.rejoined ? 'Welcome back!' : 'Joined session!');
     },
-    onError: (err: Error) => toast.error(err.message),
-  });
-
-  const { mutate: startWarmup, isPending: isStartingWarmup } = useMutation({
-    ...modelenceMutation('focus.startWarmup'),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: createQueryKey('focus.getSession', { sessionId }) }),
-    onError: (err: Error) => toast.error(err.message),
-  });
-
-  const { mutate: skipWarmup, isPending: isSkippingWarmup } = useMutation({
-    ...modelenceMutation('focus.skipWarmup'),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: createQueryKey('focus.getSession', { sessionId }) }),
     onError: (err: Error) => toast.error(err.message),
   });
 
@@ -505,24 +492,14 @@ export default function FocusRoomPage() {
                   {!user ? 'Sign in to Join' : isJoining ? 'Joining...' : 'Join Session'}
                 </button>
               ) : isCreator ? (
-                <>
-                  <button
-                    type="button"
-                    className="btn-light w-full"
-                    onClick={() => startWarmup({ sessionId })}
-                    disabled={isStartingWarmup || isSkippingWarmup}
-                  >
-                    {isStartingWarmup ? 'Starting...' : 'Start Warmup'}
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-outline-light w-full"
-                    onClick={() => skipWarmup({ sessionId })}
-                    disabled={isSkippingWarmup || isStartingWarmup}
-                  >
-                    Skip warmup and start now
-                  </button>
-                </>
+                <button
+                  type="button"
+                  className="btn-light w-full"
+                  onClick={() => startSession({ sessionId })}
+                  disabled={isStarting}
+                >
+                  {isStarting ? 'Starting...' : 'Start Session'}
+                </button>
               ) : (
                 <div className="text-center py-4">
                   <div className="inline-flex items-center gap-2 text-white/40">
@@ -545,68 +522,6 @@ export default function FocusRoomPage() {
         </div>
 
         {/* Chat Panel for waiting state */}
-        {sessionId && (
-          <ChatPanel
-            sessionId={sessionId}
-            isOpen={isChatOpen}
-            onToggle={() => setIsChatOpen(!isChatOpen)}
-            chatEnabled={session.chatEnabled}
-            isCreator={isCreator}
-            isActiveParticipant={isActiveParticipant}
-            currentOdonym={currentOdonym}
-          />
-        )}
-      </Page>
-    );
-  }
-
-  // Warmup state
-  if (session.status === 'warmup') {
-    return (
-      <Page variant="dark" hideNav>
-        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
-          <div className="container-md text-center space-y-8 fade-in">
-            <div>
-              <span className="chip bg-white/10 text-white/70 mb-3 inline-block">Warmup time</span>
-              <h1 className="text-display-md text-white mb-2">{session.topic}</h1>
-              <p className="text-white/60">{session.intent}</p>
-            </div>
-
-            {session.warmupPrompt && (
-              <div className="p-6 bg-white/5 rounded-xl text-left border border-white/5">
-                <p className="text-lg text-white/90 leading-relaxed italic">
-                  "{session.warmupPrompt}"
-                </p>
-                <p className="text-xs text-white/40 mt-4">Let's get in the zone</p>
-              </div>
-            )}
-
-            <div className="flex justify-center gap-4">
-              {session.participants.map((p) => (
-                <ParticipantAvatar
-                  key={p.odonym}
-                  participant={p}
-                  isCurrentUser={p.odonym === currentOdonym}
-                />
-              ))}
-            </div>
-
-            {isCreator ? (
-              <button
-                type="button"
-                className="btn-light"
-                onClick={() => startSession({ sessionId })}
-                disabled={isStarting}
-              >
-                {isStarting ? 'Starting...' : 'Start focusing'}
-              </button>
-            ) : (
-              <p className="text-white/40">Almost there...</p>
-            )}
-          </div>
-        </div>
-
-        {/* Chat Panel for warmup state */}
         {sessionId && (
           <ChatPanel
             sessionId={sessionId}

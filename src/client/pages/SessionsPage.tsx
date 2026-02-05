@@ -13,7 +13,7 @@ type FocusSession = {
   topic: string;
   minDuration: number;
   maxDuration: number;
-  status: 'waiting' | 'warmup' | 'focusing';
+  status: 'waiting' | 'focusing';
   participantCount: number;
   createdAt: string;
   scheduledStartAt?: string;
@@ -30,7 +30,6 @@ type FocusSession = {
 function StatusIndicator({ status }: { status: string }) {
   const config = {
     waiting: { label: 'Waiting', className: 'text-white/50' },
-    warmup: { label: 'Starting', className: 'text-amber-300/80' },
     focusing: { label: 'Live', className: 'text-emerald-300/80' },
   }[status] || { label: status, className: 'text-white/50' };
 

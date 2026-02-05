@@ -28,7 +28,7 @@ export interface SessionEvent {
   type: SessionEventType;
   sessionId: string;
   timestamp: number;
-  status?: 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled';
+  status?: 'waiting' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled';
   previousStatus?: string;
   participant?: SessionParticipant;
   odonym?: string;

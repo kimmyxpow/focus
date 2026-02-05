@@ -5,13 +5,12 @@ import { cn } from '@/client/lib/utils';
 type ActiveSessionIndicatorProps = {
   sessionId: string;
   topic: string;
-  status: 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown';
+  status: 'waiting' | 'focusing' | 'break' | 'cooldown';
   remainingSeconds?: number;
 };
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   waiting: { label: 'Waiting', className: 'bg-white/10 text-white/70' },
-  warmup: { label: 'Starting', className: 'bg-emerald-500/20 text-emerald-300' },
   focusing: { label: 'Focus', className: 'bg-emerald-500/20 text-emerald-300' },
   break: { label: 'Break', className: 'bg-amber-500/20 text-amber-300' },
   cooldown: { label: 'Ending', className: 'bg-blue-500/20 text-blue-300' },

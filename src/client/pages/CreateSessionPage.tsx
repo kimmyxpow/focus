@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
-import { modelenceMutation } from '@modelence/react-query';
+import { modelenceMutation, createQueryKey } from '@modelence/react-query';
 import toast from 'react-hot-toast';
 import Page from '@/client/components/Page';
 import { cn } from '@/client/lib/utils';
@@ -110,6 +110,7 @@ export default function CreateSessionPage() {
   const navigate = useNavigate();
   const { user } = useSession();
   const { hasActiveSession, activeSession } = useActiveSession();
+  const queryClient = useQueryClient();
 
   // Core session info
   const [intent, setIntent] = useState('');
@@ -132,6 +133,7 @@ export default function CreateSessionPage() {
   const { mutate: createSession, isPending } = useMutation({
     ...modelenceMutation<{ sessionId: string }>('focus.createSession'),
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: createQueryKey('focus.getActiveSession', {}) });
       toast.success('Session created!');
       navigate(`/focus/${data.sessionId}`);
     },

@@ -4,7 +4,7 @@ import { modelenceQuery } from '@modelence/react-query';
 type ActiveSessionData = {
   sessionId: string;
   topic: string;
-  status: 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown';
+  status: 'waiting' | 'focusing' | 'break' | 'cooldown';
   isActiveParticipant: boolean;
 } | null;
 

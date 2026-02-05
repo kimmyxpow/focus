@@ -57,7 +57,6 @@ function EmptyState() {
 function SessionRow({ session }: { session: UserSession }) {
   const statusConfig: Record<string, { label: string; className: string }> = {
     waiting: { label: 'Waiting', className: 'bg-white/10 text-white/70' },
-    warmup: { label: 'Starting', className: 'bg-white/10 text-white/70' },
     focusing: { label: 'Live', className: 'bg-green-500/20 text-green-300' },
     cooldown: { label: 'Ending', className: 'bg-white/10 text-white/70' },
     completed: { label: 'Completed', className: 'bg-white/5 text-white/50' },
@@ -65,7 +64,7 @@ function SessionRow({ session }: { session: UserSession }) {
   };
 
   const status = statusConfig[session.status] || { label: session.status, className: 'bg-white/10 text-white/70' };
-  const isActive = ['waiting', 'warmup', 'focusing', 'cooldown'].includes(session.status);
+  const isActive = ['waiting', 'focusing', 'cooldown'].includes(session.status);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
