@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
-import Tooltip from '@/client/components/ui/Tooltip';
+import Tooltip from '@/client/components/ui/tooltip';
 import { cn } from '@/client/lib/utils';
 
 type HeatmapData = {

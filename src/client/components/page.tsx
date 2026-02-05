@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSession } from 'modelence/client';
-import LoadingSpinner from '@/client/components/LoadingSpinner';
-import FloatingSessionWidget from '@/client/components/FloatingSessionWidget';
-import ProfileDropdown from '@/client/components/ProfileDropdown';
+import LoadingSpinner from '@/client/components/loading-spinner';
+import FloatingSessionWidget from '@/client/components/floating-session-widget';
+import ProfileDropdown from '@/client/components/profile-dropdown';
 import { cn } from '@/client/lib/utils';
 
 interface PageProps {

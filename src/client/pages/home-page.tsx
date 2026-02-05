@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
-import Page from '@/client/components/Page';
+import Page from '@/client/components/page';
 
 const ClockIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>

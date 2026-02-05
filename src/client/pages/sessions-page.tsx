@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
 import toast from 'react-hot-toast';
-import Page from '@/client/components/Page';
-import { useActiveSession } from '@/client/hooks/useActiveSession';
+import Page from '@/client/components/page';
+import { useActiveSession } from '@/client/hooks/use-active-session';
 import { cn } from '@/client/lib/utils';
 
 type FocusSession = {

@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { logout } from 'modelence/client';
-import Page from '@/client/components/Page';
+import Page from '@/client/components/page';
 
 export default function LogoutPage() {
   useEffect(() => {

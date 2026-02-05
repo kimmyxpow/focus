@@ -3,8 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceQuery } from '@modelence/react-query';
-import Page from '@/client/components/Page';
-import JoinSessionSkeleton from '@/client/components/skeletons/JoinSessionSkeleton';
+import Page from '@/client/components/page';
+import JoinSessionSkeleton from '@/client/components/skeletons/join-session-skeleton';
 
 type InviteSession = {
   sessionId: string;

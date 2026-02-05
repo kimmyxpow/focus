@@ -3,7 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { modelenceMutation } from '@modelence/react-query';
 import toast from 'react-hot-toast';
-import Page from '@/client/components/Page';
+import Page from '@/client/components/page';
 
 function GoogleIcon() {
   return (

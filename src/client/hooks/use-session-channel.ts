@@ -7,7 +7,7 @@ import {
   type SessionEvent,
   type ChatEvent,
 } from '@/client/channels';
-import { useWebSocketStatus } from './useWebSocketStatus';
+import { useWebSocketStatus } from './use-web-socket-status';
 
 interface UseSessionChannelOptions {
   sessionId: string | undefined;

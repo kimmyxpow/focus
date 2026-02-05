@@ -4,12 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/react-query';
 import toast from 'react-hot-toast';
-import Page from '@/client/components/Page';
-import ChatPanel from '@/client/components/ChatPanel';
-import ConnectionStatusIndicator from '@/client/components/ConnectionStatusIndicator';
+import Page from '@/client/components/page';
+import ChatPanel from '@/client/components/chat-panel';
+import ConnectionStatusIndicator from '@/client/components/connection-status-indicator';
 import { cn } from '@/client/lib/utils';
-import { useSessionNotifications } from '@/client/hooks/useSessionNotifications';
-import { useSessionChannel } from '@/client/hooks/useSessionChannel';
+import { useSessionNotifications } from '@/client/hooks/use-session-notifications';
+import { useSessionChannel } from '@/client/hooks/use-session-channel';
 import type { SessionEvent } from '@/client/channels';
 
 type Participant = {

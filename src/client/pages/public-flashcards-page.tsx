@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
 import { useSession } from 'modelence/client';
-import Page from '@/client/components/Page';
+import Page from '@/client/components/page';
 
 type PublicFlashcardSet = {
   _id: string;

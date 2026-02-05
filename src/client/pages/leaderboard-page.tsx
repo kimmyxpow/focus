@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceQuery } from '@modelence/react-query';
-import Page from '@/client/components/Page';
+import Page from '@/client/components/page';
 import { cn } from '@/client/lib/utils';
 
 type LeaderboardEntry = {

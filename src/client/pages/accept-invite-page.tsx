@@ -4,8 +4,8 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceQuery, modelenceMutation } from '@modelence/react-query';
 import toast from 'react-hot-toast';
-import Page from '@/client/components/Page';
-import JoinSessionSkeleton from '@/client/components/skeletons/JoinSessionSkeleton';
+import Page from '@/client/components/page';
+import JoinSessionSkeleton from '@/client/components/skeletons/join-session-skeleton';
 
 type InviteSession = {
   sessionId: string;

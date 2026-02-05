@@ -3,8 +3,8 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { modelenceQuery, modelenceMutation } from '@modelence/react-query';
 import { useSession } from 'modelence/client';
-import Page from '@/client/components/Page';
-import { Button } from '@/client/components/ui/Button';
+import Page from '@/client/components/page';
+import { Button } from '@/client/components/ui/button';
 import { cn } from '@/client/lib/utils';
 
 type Question = {

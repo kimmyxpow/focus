@@ -1,5 +1,5 @@
-export { default as sessionClientChannel, onSessionEvent } from './sessionClientChannel';
-export type { SessionEvent, SessionEventType, SessionParticipant, SessionTimerData } from './sessionClientChannel';
+export { default as sessionClientChannel, onSessionEvent } from './session-client-channel';
+export type { SessionEvent, SessionEventType, SessionParticipant, SessionTimerData } from './session-client-channel';
 
-export { default as chatClientChannel, onChatEvent } from './chatClientChannel';
-export type { ChatEvent, ChatEventType, ChatMessage } from './chatClientChannel';
+export { default as chatClientChannel, onChatEvent } from './chat-client-channel';
+export type { ChatEvent, ChatEventType, ChatMessage } from './chat-client-channel';

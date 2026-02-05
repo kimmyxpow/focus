@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
-import Page from '@/client/components/Page';
+import Page from '@/client/components/page';
 
 type PublicQuiz = {
   _id: string;

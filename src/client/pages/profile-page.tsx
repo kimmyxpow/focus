@@ -4,9 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceQuery, modelenceMutation, createQueryKey } from '@modelence/react-query';
 import toast from 'react-hot-toast';
-import Page from '@/client/components/Page';
-import FocusHeatmap from '@/client/components/FocusHeatmap';
-import ProfileSkeleton from '@/client/components/skeletons/ProfileSkeleton';
+import Page from '@/client/components/page';
+import FocusHeatmap from '@/client/components/focus-heatmap';
+import ProfileSkeleton from '@/client/components/skeletons/profile-skeleton';
 import { cn } from '@/client/lib/utils';
 
 type Profile = {

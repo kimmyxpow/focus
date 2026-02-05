@@ -37,101 +37,101 @@ function PrivateRoute() {
 const publicRoutes: RouteObject[] = [
   {
     path: '/',
-    Component: lazy(() => import('./pages/HomePage'))
+    Component: lazy(() => import('./pages/home-page'))
   },
   {
     path: '/sessions',
-    Component: lazy(() => import('./pages/SessionsPage'))
+    Component: lazy(() => import('./pages/sessions-page'))
   },
   {
     path: '/focus/:sessionId',
-    Component: lazy(() => import('./pages/FocusRoomPage'))
+    Component: lazy(() => import('./pages/focus-room-page'))
   },
   {
     path: '/join/:inviteCode',
-    Component: lazy(() => import('./pages/JoinByInvitePage'))
+    Component: lazy(() => import('./pages/join-by-invite-page'))
   },
   {
     path: '/invite/:inviteCode',
-    Component: lazy(() => import('./pages/AcceptInvitePage'))
+    Component: lazy(() => import('./pages/accept-invite-page'))
   },
   {
     path: '/leaderboard',
-    Component: lazy(() => import('./pages/LeaderboardPage'))
+    Component: lazy(() => import('./pages/leaderboard-page'))
   },
   {
     path: '/flashcards',
-    Component: lazy(() => import('./pages/PublicFlashcardsPage'))
+    Component: lazy(() => import('./pages/public-flashcards-page'))
   },
   {
     path: '/flashcards/:setId/study',
-    Component: lazy(() => import('./pages/FlashcardStudyPage'))
+    Component: lazy(() => import('./pages/flashcard-study-page'))
   },
   {
     path: '/quiz',
-    Component: lazy(() => import('./pages/QuizListPage'))
+    Component: lazy(() => import('./pages/quiz-list-page'))
   },
   {
     path: '/quiz/:quizId',
-    Component: lazy(() => import('./pages/TakeQuizPage'))
+    Component: lazy(() => import('./pages/take-quiz-page'))
   },
   {
     path: '/terms',
-    Component: lazy(() => import('./pages/TermsPage'))
+    Component: lazy(() => import('./pages/terms-page'))
   },
   {
     path: '/logout',
-    Component: lazy(() => import('./pages/LogoutPage'))
+    Component: lazy(() => import('./pages/logout-page'))
   },
   {
     path: '*',
-    Component: lazy(() => import('./pages/NotFoundPage'))
+    Component: lazy(() => import('./pages/not-found-page'))
   }
 ];
 
 const guestRoutes: RouteObject[] = [
   {
     path: '/login',
-    Component: lazy(() => import('./pages/LoginPage'))
+    Component: lazy(() => import('./pages/login-page'))
   },
   {
     path: '/signup',
-    Component: lazy(() => import('./pages/SignupPage'))
+    Component: lazy(() => import('./pages/signup-page'))
   }
 ];
 
 const privateRoutes: RouteObject[] = [
   {
     path: '/create-session',
-    Component: lazy(() => import('./pages/CreateSessionPage'))
+    Component: lazy(() => import('./pages/create-session-page'))
   },
   {
     path: '/focus/:sessionId/summary',
-    Component: lazy(() => import('./pages/SessionSummaryPage'))
+    Component: lazy(() => import('./pages/session-summary-page'))
   },
   {
     path: '/my-sessions',
-    Component: lazy(() => import('./pages/FocusOverviewPage'))
+    Component: lazy(() => import('./pages/focus-overview-page'))
   },
   {
     path: '/profile',
-    Component: lazy(() => import('./pages/ProfilePage'))
+    Component: lazy(() => import('./pages/profile-page'))
   },
   {
     path: '/my-flashcards',
-    Component: lazy(() => import('./pages/FlashcardsPage'))
+    Component: lazy(() => import('./pages/flashcards-page'))
   },
   {
     path: '/create-flashcard',
-    Component: lazy(() => import('./pages/CreateFlashcardPage'))
+    Component: lazy(() => import('./pages/create-flashcard-page'))
   },
   {
     path: '/my-quizzes',
-    Component: lazy(() => import('./pages/MyQuizzesPage'))
+    Component: lazy(() => import('./pages/my-quizzes-page'))
   },
   {
     path: '/create-quiz',
-    Component: lazy(() => import('./pages/CreateQuizPage'))
+    Component: lazy(() => import('./pages/create-quiz-page'))
   }
 ];
 

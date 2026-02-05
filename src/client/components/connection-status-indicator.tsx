@@ -1,6 +1,6 @@
 import { cn } from '@/client/lib/utils';
-import { useWebSocketStatus, type ConnectionStatus } from '@/client/hooks/useWebSocketStatus';
-import Tooltip from '@/client/components/ui/Tooltip';
+import { useWebSocketStatus, type ConnectionStatus } from '@/client/hooks/use-web-socket-status';
+import Tooltip from '@/client/components/ui/tooltip';
 
 interface ConnectionStatusIndicatorProps {
   sessionId?: string;

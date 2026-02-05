@@ -4,9 +4,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'modelence/client';
 import { modelenceMutation, createQueryKey } from '@modelence/react-query';
 import toast from 'react-hot-toast';
-import Page from '@/client/components/Page';
+import Page from '@/client/components/page';
 import { cn } from '@/client/lib/utils';
-import { useActiveSession } from '@/client/hooks/useActiveSession';
+import { useActiveSession } from '@/client/hooks/use-active-session';
 
 const TOPICS = [
   { id: 'writing', label: 'Writing' },

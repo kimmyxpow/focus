@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { router } from './router';
 import favicon from './assets/favicon.svg';
 import './index.css';
-import LoadingSpinner from './components/LoadingSpinner';
+import LoadingSpinner from './components/loading-spinner';
 import { sessionClientChannel, chatClientChannel } from './channels';
 
 startWebsockets({
