@@ -2,7 +2,7 @@ import z from 'zod';
 import crypto from 'crypto';
 import { AuthError } from 'modelence';
 import { Module, ObjectId, UserInfo } from 'modelence/server';
-import { dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbCohortMetrics, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity } from './db';
+import { dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity } from './db';
 import {
   generateCohortMatches,
   generateCooldownPrompt,
@@ -101,7 +101,7 @@ async function hasActiveSessionElsewhere(userId: string, excludeSessionId?: stri
 }
 
 export default new Module('focus', {
-  stores: [dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbCohortMetrics, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity],
+  stores: [dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity],
   channels: [sessionServerChannel, chatServerChannel],
 
   queries: {

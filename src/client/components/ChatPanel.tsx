@@ -64,7 +64,6 @@ export default function ChatPanel({
   // FIXED: Handle incoming WebSocket chat messages - use ref instead of closure
   // This ensures the callback is stable and doesn't cause effect re-runs
   const handleChatMessage = useCallback((event: ChatEvent) => {
-    console.log('[ChatPanel] WebSocket event received:', event);
     if (event.type === 'message' && event.message) {
       const newMessage: ChatMessage = {
         id: event.message.id,
@@ -73,15 +72,12 @@ export default function ChatPanel({
         sentAt: event.message.sentAt,
         isOwn: event.message.odonym === currentOdonymRef.current,
       };
-      console.log('[ChatPanel] Processing WebSocket message:', newMessage, 'currentOdonym:', currentOdonymRef.current);
-      
+
       // Add message if not already present (avoid duplicates)
       setRealtimeMessages((prev) => {
         if (prev.some(m => m.id === newMessage.id)) {
-          console.log('[ChatPanel] WebSocket message already exists, skipping');
           return prev;
         }
-        console.log('[ChatPanel] Added WebSocket message, new count:', prev.length + 1);
         return [...prev, newMessage];
       });
     }
@@ -131,7 +127,6 @@ export default function ChatPanel({
   const { mutate: sendMessageMutation, isPending: isSending } = useMutation({
     ...modelenceMutation<{ success: boolean; message: ChatMessage }>('focus.sendMessage'),
     onSuccess: (data) => {
-      console.log('[ChatPanel] sendMessage onSuccess:', data);
       setMessage('');
       // Message will arrive via WebSocket, but add optimistically for immediate feedback
       if (data.message) {
@@ -139,18 +134,13 @@ export default function ChatPanel({
           ...data.message,
           isOwn: true,
         };
-        console.log('[ChatPanel] Adding optimistic message:', optimisticMessage);
         setRealtimeMessages((prev) => {
           // Only add if not already present (WebSocket may have already delivered it)
           if (prev.some(m => m.id === optimisticMessage.id)) {
-            console.log('[ChatPanel] Message already exists, skipping');
             return prev;
           }
-          console.log('[ChatPanel] Added message, new count:', prev.length + 1);
           return [...prev, optimisticMessage];
         });
-      } else {
-        console.warn('[ChatPanel] No message in response data');
       }
     },
     onError: (error) => {

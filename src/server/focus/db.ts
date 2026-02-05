@@ -167,25 +167,3 @@ export const dbSessionMessages = new Store('sessionMessages', {
   ]
 });
 
-// Cohort effectiveness metrics - anonymized aggregate data
-export const dbCohortMetrics = new Store('cohortMetrics', {
-  schema: {
-    // Time bucket for aggregation
-    dateBucket: schema.date(),  // Start of day/week
-
-    // Aggregated metrics
-    topic: schema.string(),
-    durationRange: schema.string(),  // e.g., "25-30"
-
-    // Effectiveness metrics
-    totalSessions: schema.number(),
-    avgParticipants: schema.number(),
-    avgCompletionRate: schema.number(),
-    avgDropOffTime: schema.number().optional(),  // Minutes until first drop-off
-
-    // No individual user data
-  },
-  indexes: [
-    { key: { dateBucket: 1, topic: 1 } },
-  ]
-});

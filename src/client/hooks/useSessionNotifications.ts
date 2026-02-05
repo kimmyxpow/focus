@@ -82,7 +82,7 @@ function playToneSequence(
       startTime += duration + 0.05; // Small gap between notes
     });
   } catch (error) {
-    console.warn('Failed to play notification sound:', error);
+    // Silently fail if audio is not supported
   }
 }
 
@@ -132,7 +132,7 @@ function showBrowserNotification(title: string, body: string, icon?: string): vo
       notification.close();
     };
   } catch (error) {
-    console.warn('Failed to show notification:', error);
+    // Silently fail if notifications are not supported
   }
 }
 

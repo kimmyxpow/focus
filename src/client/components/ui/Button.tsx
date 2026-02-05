@@ -4,11 +4,10 @@ import { cn } from "@/client/lib/utils"
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
   size?: "default" | "sm" | "lg" | "icon"
-  asChild?: boolean
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "default", size = "default", asChild = false, ...props }, ref) => {
+  ({ className, variant = "default", size = "default", ...props }, ref) => {
     // Base styles with standardized radius (8px = rounded-lg)
     const baseClasses = "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 
@@ -35,12 +34,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       sizeClasses[size],
       className
     )
-
-    if (asChild) {
-      // For asChild functionality, you'd need to implement Slot from Radix
-      // For now, we'll just render as a button
-      console.warn("asChild prop is not supported in this custom Button implementation")
-    }
 
     return (
       <button

@@ -69,7 +69,6 @@ function dispatchChatEvent(event: ChatEvent) {
 const chatClientChannel = new ClientChannel<ChatEvent>(
   "chat",
   async (event) => {
-    console.log('[ChatChannel] Received event:', event.type, event);
     dispatchChatEvent(event);
   }
 );

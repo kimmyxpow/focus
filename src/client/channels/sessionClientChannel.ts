@@ -86,7 +86,6 @@ function dispatchSessionEvent(event: SessionEvent) {
 const sessionClientChannel = new ClientChannel<SessionEvent>(
   "session",
   async (event) => {
-    console.log('[SessionChannel] Received event:', event.type, event);
     dispatchSessionEvent(event);
   }
 );
