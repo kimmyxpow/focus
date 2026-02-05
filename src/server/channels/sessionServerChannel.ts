@@ -6,7 +6,7 @@ import { ServerChannel } from "modelence/server";
  * Channel pattern: session:[sessionId]
  * 
  * Events broadcast:
- * - status_changed: Session status transitions (waiting -> warmup -> focusing, etc.)
+ * - status_changed: Session status transitions (waiting -> focusing, etc.)
  * - participant_joined: New participant joined the session
  * - participant_left: Participant left the session
  * - participant_reaction: Participant sent a reaction
@@ -41,7 +41,7 @@ export interface SessionEvent {
   timestamp: number;
   
   // Status change data
-  status?: 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled';
+  status?: 'waiting' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled';
   previousStatus?: string;
   
   // Participant data

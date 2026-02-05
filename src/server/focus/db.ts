@@ -49,14 +49,13 @@ export const dbFocusSessions = new Store('focusSessions', {
     currentRepetition: schema.number().optional(), // Current repetition (1-indexed)
 
     // Session state
-    status: schema.string(),           // 'waiting' | 'warmup' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled'
+    status: schema.string(),           // 'waiting' | 'focusing' | 'break' | 'cooldown' | 'completed' | 'cancelled'
     createdAt: schema.date(),
     scheduledStartAt: schema.date().optional(),
     startedAt: schema.date().optional(),
     endedAt: schema.date().optional(),
 
     // AI-generated content
-    warmupPrompt: schema.string().optional(),
     cooldownPrompt: schema.string().optional(),
 
     // Cohort info

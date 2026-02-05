@@ -205,52 +205,6 @@ function fallbackCohortMatching(input: CohortMatchInput): CohortMatch[] {
   return matches.sort((a, b) => b.matchScore - a.matchScore).slice(0, 5);
 }
 
-interface WarmupPromptInput {
-  intent: string;
-  topic: string;
-  duration: number;
-}
-
-/**
- * Generate AI-powered warmup prompt to help users transition into focus mode
- */
-export async function generateWarmupPrompt(input: WarmupPromptInput): Promise<string> {
-  const { intent, topic, duration } = input;
-
-  try {
-    const response = await generateText({
-      messages: [
-        {
-          role: 'system',
-          content: `You are a mindfulness coach helping people transition into deep focus work.
-
-Generate a brief, calming warmup prompt (2-3 sentences max) that:
-- Acknowledges what they're about to work on
-- Suggests one practical preparation action
-- Sets a positive, focused tone
-
-Keep it concise and actionable. No emojis. Direct address ("you").`
-        },
-        {
-          role: 'user',
-          content: `Create a warmup prompt for someone about to focus on:
-Topic: ${topic}
-Intent: "${intent}"
-Duration: ${duration} minutes`
-        }
-      ],
-      temperature: 0.7,
-      maxTokens: 150,
-    });
-
-    return response.text.trim();
-
-  } catch (error) {
-    console.error('AI warmup prompt generation failed:', error);
-    return `Take a deep breath. For the next ${duration} minutes, your focus is on: "${intent}". Close any tabs you won't need.`;
-  }
-}
-
 interface CooldownPromptInput {
   intent: string;
   topic: string;
