@@ -5,7 +5,6 @@ import { Module, ObjectId, UserInfo } from 'modelence/server';
 import { dbFocusSessions, dbSessionParticipants, dbFocusLedger, dbCohortMetrics, dbSessionMessages, dbUserProfiles, dbDailyFocusActivity } from './db';
 import {
   generateCohortMatches,
-  generateWarmupPrompt,
   generateCooldownPrompt,
   predictOptimalDuration,
 } from './ai';
@@ -89,7 +88,7 @@ async function hasActiveSessionElsewhere(userId: string, excludeSessionId?: stri
       // Check if the session is still active (not completed/cancelled)
       const session = await dbFocusSessions.findOne({
         _id: p.sessionId,
-        status: { $in: ['waiting', 'warmup', 'focusing', 'break', 'cooldown'] },
+        status: { $in: ['waiting', 'focusing', 'break', 'cooldown'] },
       });
       
       if (session) {
@@ -109,54 +108,58 @@ export default new Module('focus', {
     // Get user's active session (for navbar indicator)
     getActiveSession: async (_args: unknown, { user }: { user: UserInfo | null }) => {
       if (!user) {
+        console.log('[getActiveSession] No user');
         return null;
       }
 
-      // Get all sessions where user is a participant
-      const participations = await dbSessionParticipants.fetch({}, { limit: 500 });
+      console.log('[getActiveSession] Looking for user:', user.id);
 
-      // Find user's active participation
-      let activeParticipation = null;
-      for (const p of participations) {
-        const userHash = createUserHash(user.id, p.sessionId.toString());
-        if (p.userHash === userHash && p.isActive) {
-          activeParticipation = p;
-          break;
+      // Get active sessions first (much smaller set than all participations)
+      const activeSessions = await dbFocusSessions.fetch({
+        status: { $in: ['waiting', 'focusing', 'break', 'cooldown'] }
+      }, { limit: 50, sort: { createdAt: -1 } });
+
+      console.log('[getActiveSession] Found', activeSessions.length, 'active sessions');
+
+      // Check if user is active participant in any of them
+      for (const session of activeSessions) {
+        const userHash = createUserHash(user.id, session._id.toString());
+        console.log('[getActiveSession] Checking session:', session._id.toString(), 'hash:', userHash);
+        
+        const participation = await dbSessionParticipants.findOne({
+          sessionId: session._id,
+          userHash: userHash,
+          isActive: true
+        });
+        
+        if (participation) {
+          console.log('[getActiveSession] Found active participation in session:', session._id.toString());
+          
+          // Calculate timer if focusing
+          let remainingSeconds = 0;
+          if (session.startedAt && session.status === 'focusing') {
+            const targetDuration = session.actualDuration || session.maxDuration;
+            const elapsedSeconds = Math.floor((Date.now() - session.startedAt.getTime()) / 1000);
+            remainingSeconds = Math.max(0, targetDuration * 60 - elapsedSeconds);
+          }
+
+          return {
+            sessionId: session._id.toString(),
+            topic: session.topic,
+            status: session.status,
+            isActiveParticipant: true,
+            intent: session.intent,
+            isCreator: session.creatorId.toString() === user.id,
+            timer: {
+              remainingSeconds,
+              serverTimestamp: Date.now(),
+            },
+          };
         }
       }
 
-      if (!activeParticipation) {
-        return null;
-      }
-
-      // Get the session details
-      const session = await dbFocusSessions.findOne({
-        _id: activeParticipation.sessionId,
-        status: { $in: ['waiting', 'warmup', 'focusing', 'break', 'cooldown'] },
-      });
-
-      if (!session) {
-        return null;
-      }
-
-      // Calculate timer if focusing
-      let remainingSeconds = 0;
-      if (session.startedAt && session.status === 'focusing') {
-        const targetDuration = session.actualDuration || session.maxDuration;
-        const elapsedSeconds = Math.floor((Date.now() - session.startedAt.getTime()) / 1000);
-        remainingSeconds = Math.max(0, targetDuration * 60 - elapsedSeconds);
-      }
-
-      return {
-        sessionId: session._id.toString(),
-        topic: session.topic,
-        status: session.status,
-        isActiveParticipant: true,
-        timer: {
-          remainingSeconds,
-          serverTimestamp: Date.now(),
-        },
-      };
+      console.log('[getActiveSession] No active participation found in any session');
+      return null;
     },
 
     // Get active/waiting sessions for the landing page
@@ -164,7 +167,7 @@ export default new Module('focus', {
       // Get public sessions (not private) for the main feed
       const sessions = await dbFocusSessions.fetch(
         {
-          status: { $in: ['waiting', 'warmup', 'focusing'] },
+          status: { $in: ['waiting', 'focusing'] },
           $or: [{ isPrivate: { $ne: true } }, { isPrivate: false }],
         },
         { sort: { createdAt: -1 }, limit: 20 }
@@ -210,7 +213,7 @@ export default new Module('focus', {
       const createdSessions = await dbFocusSessions.fetch(
         {
           creatorId: new ObjectId(user.id),
-          status: { $in: ['waiting', 'warmup', 'focusing'] },
+          status: { $in: ['waiting', 'focusing'] },
         },
         { sort: { createdAt: -1 }, limit: 10 }
       );
@@ -234,7 +237,7 @@ export default new Module('focus', {
         ? await dbFocusSessions.fetch(
             {
               _id: { $in: otherSessionIds.map(id => new ObjectId(id)) },
-              status: { $in: ['waiting', 'warmup', 'focusing'] },
+              status: { $in: ['waiting', 'focusing'] },
             },
             { sort: { createdAt: -1 }, limit: 10 }
           )
@@ -361,7 +364,6 @@ export default new Module('focus', {
         createdAt: session.createdAt,
         startedAt: session.startedAt,
         endedAt: session.endedAt,
-        warmupPrompt: session.warmupPrompt,
         cooldownPrompt: session.cooldownPrompt,
         participantCount: session.participantCount,
 
@@ -516,7 +518,10 @@ export default new Module('focus', {
       // Auto-update focus ledger if participant has an outcome but ledger hasn't been updated yet
       // This ensures stats are recorded even if user skips the outcome selection
       if (participant.outcome && !participant.ledgerUpdated) {
-        await updateFocusLedger(user.id, session, participant.outcome);
+        await updateFocusLedger(user.id, session, participant.outcome, {
+          joinedAt: participant.joinedAt,
+          leftAt: participant.leftAt,
+        });
         // Mark ledger as updated to prevent duplicate updates
         await dbSessionParticipants.updateOne(
           { _id: participant._id },
@@ -580,9 +585,12 @@ export default new Module('focus', {
         },
         aiSummary: summary,
         aiNextStep: nextStep,
-        focusMinutesEarned: participant.outcome === 'completed'
-          ? (session.actualDuration || session.maxDuration)
-          : Math.floor((session.actualDuration || session.maxDuration) * 0.5),
+        focusMinutesEarned: (() => {
+          const elapsedMinutes = calculateElapsedMinutes(session, participant);
+          return participant.outcome === 'completed'
+            ? elapsedMinutes
+            : Math.floor(elapsedMinutes * 0.5);
+        })(),
       };
     },
 
@@ -876,9 +884,9 @@ export default new Module('focus', {
       }
 
       // Check if user already has an active session
-      const { hasActive } = await hasActiveSessionElsewhere(user.id);
-      if (hasActive) {
-        throw new Error('You are already participating in an active session. Please leave your current session first before creating a new one.');
+      const { hasActive, activeSessionId } = await hasActiveSessionElsewhere(user.id);
+      if (hasActive && activeSessionId) {
+        throw new Error(`You are already participating in an active session. Please leave your current session first before creating a new one. Active session: ${activeSessionId}`);
       }
 
       const { intent, topic, minDuration, maxDuration, repetitions, breakDuration, breakInterval, isPrivate, chatEnabled } = z.object({
@@ -900,18 +908,15 @@ export default new Module('focus', {
       // Get user's focus patterns for AI optimization
       const ledger = await dbFocusLedger.findOne({ userId: new ObjectId(user.id) });
 
+      // Generate matching tags for cohort formation (non-blocking)
+      const matchingTags = generateMatchingTags(intent, topic);
+
       // Predict optimal duration based on patterns
       const predictedDuration = await predictOptimalDuration({
         requestedRange: [minDuration, maxDuration],
         userPatterns: ledger?.focusPatterns,
         topic,
       });
-
-      // Generate matching tags for cohort formation
-      const matchingTags = generateMatchingTags(intent, topic);
-
-      // Generate warmup prompt
-      const warmupPrompt = await generateWarmupPrompt({ intent, topic, duration: predictedDuration });
 
       const sessionId = new ObjectId();
       const inviteCode = generateInviteCode();
@@ -935,7 +940,6 @@ export default new Module('focus', {
         creatorId: new ObjectId(user.id),
         participantCount: 1,
         matchingTags,
-        warmupPrompt,
         isPrivate,
         inviteCode,
         chatEnabled,
@@ -944,6 +948,7 @@ export default new Module('focus', {
 
       // Auto-join creator as participant
       const userHash = createUserHash(user.id, sessionId.toString());
+      console.log('[createSession] Creator hash:', userHash, 'for user:', user.id, 'session:', sessionId.toString());
       await dbSessionParticipants.insertOne({
         sessionId,
         userHash,
@@ -981,9 +986,9 @@ export default new Module('focus', {
         // Rejoin if left
         if (!existing.isActive) {
           // Check if user has another active session before allowing rejoin
-          const { hasActive } = await hasActiveSessionElsewhere(user.id, sessionId);
-          if (hasActive) {
-            throw new Error('You are already in another active session. Please leave that session first before rejoining this one.');
+          const { hasActive, activeSessionId } = await hasActiveSessionElsewhere(user.id, sessionId);
+          if (hasActive && activeSessionId) {
+            throw new Error(`You are already in another active session (${activeSessionId}). Please leave that session first before rejoining this one.`);
           }
 
           await dbSessionParticipants.updateOne(
@@ -1007,15 +1012,15 @@ export default new Module('focus', {
         return { odonym: existing.odonym, rejoined: !existing.isActive };
       }
 
-      // New participant - only allow in waiting/warmup states
-      if (session.status !== 'waiting' && session.status !== 'warmup') {
+      // New participant - only allow in waiting state
+      if (session.status !== 'waiting') {
         throw new Error('Session is no longer accepting new participants');
       }
 
       // Check if user already has an active session elsewhere
-      const { hasActive } = await hasActiveSessionElsewhere(user.id, sessionId);
-      if (hasActive) {
-        throw new Error(`You are already participating in another active session. Please leave your current session first before joining a new one.`);
+      const { hasActive, activeSessionId } = await hasActiveSessionElsewhere(user.id, sessionId);
+      if (hasActive && activeSessionId) {
+        throw new Error(`You are already participating in another active session (${activeSessionId}). Please leave your current session first before joining a new one.`);
       }
 
       // For private sessions, check if user has accepted the invite (unless they're the creator)
@@ -1069,7 +1074,7 @@ export default new Module('focus', {
         throw new AuthError('Only the session creator can start the session');
       }
 
-      if (session.status !== 'waiting' && session.status !== 'warmup') {
+      if (session.status !== 'waiting') {
         throw new Error('Session cannot be started');
       }
 
@@ -1088,93 +1093,6 @@ export default new Module('focus', {
       const remainingSeconds = targetDuration * 60;
       
       // Broadcast session started event
-      sessionServerChannel.broadcast(sessionId, {
-        type: 'status_changed',
-        sessionId,
-        timestamp: Date.now(),
-        status: 'focusing',
-        previousStatus: session.status,
-        timer: {
-          remainingSeconds,
-          elapsedSeconds: 0,
-          targetDurationMinutes: targetDuration,
-          serverTimestamp: Date.now(),
-        },
-      });
-
-      return { success: true };
-    },
-
-    // Begin warmup phase
-    startWarmup: async (args: unknown, { user }: { user: UserInfo | null }) => {
-      if (!user) {
-        throw new AuthError('Not authenticated');
-      }
-
-      const { sessionId } = z.object({ sessionId: z.string() }).parse(args);
-
-      const session = await dbFocusSessions.findOne({ _id: new ObjectId(sessionId) });
-      if (!session) {
-        throw new Error('Session not found');
-      }
-
-      if (session.creatorId.toString() !== user.id) {
-        throw new AuthError('Only the session creator can start warmup');
-      }
-
-      if (session.status !== 'waiting') {
-        throw new Error('Session is not in waiting state');
-      }
-
-      await dbFocusSessions.updateOne(
-        { _id: new ObjectId(sessionId) },
-        { $set: { status: 'warmup' } }
-      );
-
-      // Broadcast warmup started event
-      sessionServerChannel.broadcast(sessionId, {
-        type: 'status_changed',
-        sessionId,
-        timestamp: Date.now(),
-        status: 'warmup',
-        previousStatus: 'waiting',
-      });
-
-      return { success: true };
-    },
-
-    // Skip warmup and start directly
-    skipWarmup: async (args: unknown, { user }: { user: UserInfo | null }) => {
-      if (!user) {
-        throw new AuthError('Not authenticated');
-      }
-
-      const { sessionId } = z.object({ sessionId: z.string() }).parse(args);
-
-      const session = await dbFocusSessions.findOne({ _id: new ObjectId(sessionId) });
-      if (!session) {
-        throw new Error('Session not found');
-      }
-
-      if (session.creatorId.toString() !== user.id) {
-        throw new AuthError('Only the session creator can skip warmup');
-      }
-
-      await dbFocusSessions.updateOne(
-        { _id: new ObjectId(sessionId) },
-        {
-          $set: {
-            status: 'focusing',
-            startedAt: new Date(),
-          }
-        }
-      );
-
-      // Calculate initial timer state for skip warmup
-      const targetDuration = session.actualDuration || session.maxDuration;
-      const remainingSeconds = targetDuration * 60;
-      
-      // Broadcast session started (skipped warmup) event
       sessionServerChannel.broadcast(sessionId, {
         type: 'status_changed',
         sessionId,
@@ -1276,7 +1194,10 @@ export default new Module('focus', {
       // Update focus ledger if session was in focusing state
       // This records partial progress when user leaves mid-session
       if (session && session.status === 'focusing') {
-        await updateFocusLedger(user.id, session, 'interrupted');
+        await updateFocusLedger(user.id, session, 'interrupted', {
+          joinedAt: participant.joinedAt,
+          leftAt: participant.leftAt,
+        });
       }
 
       // Broadcast participant left event
@@ -1378,7 +1299,10 @@ export default new Module('focus', {
       for (const participant of activeParticipants) {
         const userId = await findUserIdFromHash(participant.userHash, sessionId);
         if (userId) {
-          await updateFocusLedger(userId, session, 'completed');
+          await updateFocusLedger(userId, session, 'completed', {
+            joinedAt: participant.joinedAt,
+            leftAt: undefined, // Session completed normally
+          });
         }
       }
 
@@ -1431,7 +1355,10 @@ export default new Module('focus', {
 
       // Only update focus ledger if it hasn't been updated yet
       if (!alreadyUpdated) {
-        await updateFocusLedger(user.id, session, outcome);
+        await updateFocusLedger(user.id, session, outcome, {
+          joinedAt: participant.joinedAt,
+          leftAt: participant.leftAt,
+        });
       }
 
       return { success: true };
@@ -1759,17 +1686,63 @@ function generateMatchingTags(intent: string, topic: string): string[] {
   return [...new Set(tags)];
 }
 
+// Helper to calculate actual elapsed time for a session participant
+function calculateElapsedMinutes(
+  session: {
+    startedAt?: Date;
+    endedAt?: Date;
+    actualDuration?: number;
+    maxDuration: number;
+  },
+  participant?: {
+    joinedAt?: Date;
+    leftAt?: Date;
+  }
+): number {
+  // If session has started and ended, calculate actual elapsed time
+  if (session.startedAt && session.endedAt) {
+    const elapsedMs = session.endedAt.getTime() - session.startedAt.getTime();
+    const elapsedMinutes = Math.floor(elapsedMs / 60000);
+
+    // Ensure we don't exceed maxDuration (safety check)
+    if (elapsedMinutes > 0 && elapsedMinutes <= session.maxDuration) {
+      return elapsedMinutes;
+    }
+  }
+
+  // If participant left early but session hasn't ended yet
+  if (participant?.joinedAt && participant?.leftAt && session.startedAt) {
+    const elapsedMs = participant.leftAt.getTime() - session.startedAt.getTime();
+    const elapsedMinutes = Math.floor(elapsedMs / 60000);
+
+    // Ensure participant didn't leave before session started
+    if (elapsedMinutes > 0 && elapsedMinutes <= session.maxDuration) {
+      return elapsedMinutes;
+    }
+  }
+
+  // Backward compatibility: use actualDuration or maxDuration for legacy sessions
+  return session.actualDuration || session.maxDuration;
+}
+
 // Helper to update focus ledger after session
 async function updateFocusLedger(
   userId: string,
   session: {
+    _id: ObjectId;
     topic: string;
+    startedAt?: Date;
+    endedAt?: Date;
     actualDuration?: number;
     maxDuration: number;
   },
-  outcome: string
+  outcome: string,
+  participant?: {
+    joinedAt?: Date;
+    leftAt?: Date;
+  }
 ): Promise<void> {
-  const duration = session.actualDuration || session.maxDuration;
+  const duration = calculateElapsedMinutes(session, participant);
   const isCompleted = outcome === 'completed';
   const focusMinutes = isCompleted ? duration : Math.floor(duration * 0.5);
 
