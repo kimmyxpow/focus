@@ -38,7 +38,6 @@ function generateYearDays(year: number, activities: HeatmapData['activities']): 
   const startDate = new Date(year, 0, 1);
   const endDate = new Date(year, 11, 31);
 
-  // Find the first Sunday on or before the start date
   const firstDay = new Date(startDate);
   firstDay.setDate(firstDay.getDate() - firstDay.getDay());
 
@@ -152,7 +151,6 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Year selector and stats */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Tooltip label="Previous year">
@@ -185,10 +183,8 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
         </div>
       </div>
 
-      {/* Heatmap */}
       <div className="overflow-x-auto pb-2">
         <div className="min-w-[700px]">
-          {/* Month labels row */}
           <div className="flex gap-[3px] mb-1 ml-8 relative h-4">
             {monthLabels.map((label, i) => (
               <span
@@ -205,7 +201,6 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
 
           <div className="relative mt-4">
             <div className="flex">
-              {/* Day labels */}
               <div className="flex flex-col gap-[3px] mr-2 text-[10px] text-white/40">
                 {DAYS_OF_WEEK.map((day, i) => (
                   <div key={i} className="h-[11px] flex items-center">
@@ -214,7 +209,6 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
                 ))}
               </div>
 
-              {/* Grid */}
               <div className="flex-1">
                 <div
                   className="grid gap-[3px]"
@@ -250,7 +244,6 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
         </div>
       </div>
 
-      {/* Legend */}
       <div className="flex items-center justify-end gap-2 text-[10px] text-white/40">
         <span>Less</span>
         <div className="flex gap-[3px]">
@@ -263,7 +256,6 @@ export default function FocusHeatmap({ className }: FocusHeatmapProps) {
         <span>More</span>
       </div>
 
-      {/* Tooltip */}
       {hoveredDay && (
         <div
           className="fixed z-50 px-2.5 py-1.5 rounded-lg bg-stone-800 border border-white/10 shadow-lg text-sm pointer-events-none"

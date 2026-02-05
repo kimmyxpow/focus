@@ -51,7 +51,6 @@ type QuizResult = {
   bestScore: number;
 };
 
-// Icons
 const ArrowLeftIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -141,7 +140,6 @@ export default function TakeQuizPage() {
     : quiz?.questions.length || 0;
   const currentAnswer = currentQuestion ? answers.get(currentQuestion._id) : undefined;
 
-  // Update fill blank input when question changes
   useEffect(() => {
     if (currentQuestion?.type === 'fill_blank' && !isReviewMode) {
       setFillBlankInput(answers.get(currentQuestion._id) || '');
@@ -202,7 +200,6 @@ export default function TakeQuizPage() {
     setIsReviewMode(false);
   }, []);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!currentQuestion || (result && !isReviewMode)) return;
@@ -259,7 +256,6 @@ export default function TakeQuizPage() {
     );
   }
 
-  // Sign in prompt for non-logged in users
   if (!user && quiz) {
     return (
       <Page variant="dark">
@@ -281,7 +277,6 @@ export default function TakeQuizPage() {
     );
   }
 
-  // Review mode loading
   if (isReviewMode && reviewLoading) {
     return (
       <Page variant="dark">
@@ -295,7 +290,6 @@ export default function TakeQuizPage() {
     );
   }
 
-  // Result screen
   if (result && !isReviewMode) {
     return (
       <Page variant="dark">
@@ -362,7 +356,6 @@ export default function TakeQuizPage() {
     );
   }
 
-  // Review mode
   if (isReviewMode && reviewData) {
     const reviewQuestion = reviewData.questions[currentIndex] as QuestionWithAnswer;
     const userAnswer = reviewData.attempt.answers.find(a => a.questionId === reviewQuestion._id);
@@ -370,7 +363,6 @@ export default function TakeQuizPage() {
     return (
       <Page variant="dark">
         <div className="container-sm py-6">
-          {/* Header */}
           <div className="flex items-center gap-3 mb-6">
             <button 
               onClick={handleExitReview}
@@ -400,12 +392,10 @@ export default function TakeQuizPage() {
             </div>
           </div>
 
-          {/* Progress bar */}
           <div className="mb-8">
             <ProgressBar current={currentIndex + 1} total={totalQuestions} />
           </div>
 
-          {/* Question */}
           <div className="space-y-6">
             {/* Question Type Badge */}
             <div className="flex items-center gap-2">
@@ -421,7 +411,6 @@ export default function TakeQuizPage() {
               </span>
             </div>
 
-            {/* Question Text */}
             <div className="bg-stone-800 border border-white/10 rounded-2xl p-6 sm:p-8">
               <p className="text-lg sm:text-xl font-medium text-white leading-relaxed">
                 {reviewQuestion.question}
@@ -561,7 +550,6 @@ export default function TakeQuizPage() {
               </div>
             </div>
 
-            {/* Progress indicator */}
             <div className="flex items-center justify-center gap-1 pt-2">
               {reviewData.questions.map((q, i) => {
                 const answer = reviewData.attempt.answers.find(a => a.questionId === q._id);
@@ -592,7 +580,6 @@ export default function TakeQuizPage() {
     );
   }
 
-  // Quiz taking mode
   const answeredCount = answers.size;
   const allAnswered = answeredCount === totalQuestions;
 
@@ -635,7 +622,6 @@ export default function TakeQuizPage() {
               slideDirection === 'right' ? "animate-slide-in-right" : "animate-slide-in-left"
             )}
           >
-            {/* Question Type Badge */}
             <div className="flex items-center gap-2">
               <span className={cn(
                 "px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider",
@@ -649,14 +635,12 @@ export default function TakeQuizPage() {
               </span>
             </div>
 
-            {/* Question Text */}
             <div className="bg-stone-800 border border-white/10 rounded-2xl p-6 sm:p-8">
               <p className="text-lg sm:text-xl font-medium text-white leading-relaxed">
                 {currentQuestion.question}
               </p>
             </div>
 
-            {/* Answer Options */}
             <div className="space-y-3">
               {currentQuestion.type === 'multiple_choice' && currentQuestion.options?.map((option, index) => (
                 <button
@@ -714,7 +698,6 @@ export default function TakeQuizPage() {
               )}
             </div>
 
-            {/* Navigation */}
             <div className="flex items-center justify-between pt-4">
               <Button
                 onClick={handlePrev}
@@ -755,7 +738,6 @@ export default function TakeQuizPage() {
               </div>
             </div>
 
-            {/* Progress indicator */}
             <div className="flex items-center justify-center gap-1 pt-2">
               {quiz?.questions.map((q, i) => (
                 <button
@@ -776,7 +758,6 @@ export default function TakeQuizPage() {
           </div>
         )}
 
-        {/* Keyboard hints */}
         <p className="mt-6 text-center text-white/25 text-xs">
           {currentQuestion?.type === 'multiple_choice' && '1-4 to select · '}
           {currentQuestion?.type === 'true_false' && 'T/F to select · '}

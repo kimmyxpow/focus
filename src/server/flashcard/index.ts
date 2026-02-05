@@ -1,9 +1,3 @@
-/**
- * Flashcard Module
- * 
- * Provides AI-powered flashcard generation from text/PDF content,
- * with study and quiz modes for learning.
- */
 
 import { AuthError } from 'modelence';
 import { Module, ObjectId } from 'modelence/server';
@@ -12,17 +6,13 @@ import { dbFlashcardSets, dbFlashcards, dbFlashcardStudySessions } from './db';
 import { generateFlashcardsFromText, analyzeContent, GeneratedFlashcard } from './ai';
 import { parseFile } from './parser';
 
-// Validation constants
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const MAX_CONTENT_LENGTH = 100000; // 100K characters
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const MAX_CONTENT_LENGTH = 100000;
 
 export default new Module('flashcard', {
   stores: [dbFlashcardSets, dbFlashcards, dbFlashcardStudySessions],
   
   queries: {
-    /**
-     * Get all public flashcard sets for the directory
-     */
     async getPublicFlashcardSets(args) {
       const { limit = 50 } = z.object({
         limit: z.number().optional(),
@@ -46,9 +36,6 @@ export default new Module('flashcard', {
       }));
     },
 
-    /**
-     * Get all flashcard sets for the current user
-     */
     async getFlashcardSets(_args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -73,10 +60,6 @@ export default new Module('flashcard', {
       }));
     },
 
-    /**
-     * Get a single flashcard set with all cards
-     * Accessible to owner or if set is public
-     */
     async getFlashcardSet(args, { user }) {
       const { setId } = z.object({
         setId: z.string(),
@@ -90,7 +73,6 @@ export default new Module('flashcard', {
         throw new Error('Flashcard set not found');
       }
 
-      // Check access: owner OR public
       const isOwner = user && set.userId.toString() === user.id;
       if (!isOwner && !set.isPublic) {
         throw new Error('Flashcard set not found');
@@ -134,10 +116,6 @@ export default new Module('flashcard', {
       };
     },
 
-    /**
-     * Get cards for study mode (optionally filtered by due for review)
-     * Accessible to owner or if set is public
-     */
     async getCardsForStudy(args, { user }) {
       const { setId, limit = 20, shuffled = true } = z.object({
         setId: z.string(),
@@ -145,7 +123,6 @@ export default new Module('flashcard', {
         shuffled: z.boolean().optional(),
       }).parse(args);
 
-      // Verify access
       const set = await dbFlashcardSets.findOne({
         _id: new ObjectId(setId),
       });
@@ -154,7 +131,6 @@ export default new Module('flashcard', {
         throw new Error('Flashcard set not found');
       }
 
-      // Check access: owner OR public
       const isOwner = user && set.userId.toString() === user.id;
       if (!isOwner && !set.isPublic) {
         throw new Error('Flashcard set not found');
@@ -165,7 +141,6 @@ export default new Module('flashcard', {
         { sort: { order: 1 }, limit }
       );
 
-      // Shuffle if requested
       if (shuffled) {
         cards = [...cards].sort(() => Math.random() - 0.5);
       }
@@ -180,17 +155,12 @@ export default new Module('flashcard', {
       }));
     },
 
-    /**
-     * Get cards for quiz mode (with wrong options)
-     * Accessible to owner or if set is public
-     */
     async getCardsForQuiz(args, { user }) {
       const { setId, limit = 10 } = z.object({
         setId: z.string(),
         limit: z.number().optional(),
       }).parse(args);
 
-      // Verify access
       const set = await dbFlashcardSets.findOne({
         _id: new ObjectId(setId),
       });
@@ -199,7 +169,6 @@ export default new Module('flashcard', {
         throw new Error('Flashcard set not found');
       }
 
-      // Check access: owner OR public
       const isOwner = user && set.userId.toString() === user.id;
       if (!isOwner && !set.isPublic) {
         throw new Error('Flashcard set not found');
@@ -210,13 +179,11 @@ export default new Module('flashcard', {
         { sort: { order: 1 } }
       );
 
-      // Shuffle and limit
       const shuffledCards = [...allCards]
         .sort(() => Math.random() - 0.5)
         .slice(0, limit);
 
       return shuffledCards.map(card => {
-        // Shuffle options for each card
         const correctAnswer = card.back;
         const wrongOptions = card.wrongOptions || [];
         const allOptions = [correctAnswer, ...wrongOptions].sort(() => Math.random() - 0.5);
@@ -232,9 +199,6 @@ export default new Module('flashcard', {
       });
     },
 
-    /**
-     * Analyze content before generating flashcards
-     */
     async analyzeContentPreview(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -245,9 +209,6 @@ export default new Module('flashcard', {
       return await analyzeContent(content);
     },
 
-    /**
-     * Get study history for a set
-     */
     async getStudyHistory(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -276,15 +237,12 @@ export default new Module('flashcard', {
   },
 
   mutations: {
-    /**
-     * Generate flashcards from text content or file
-     */
     async generateFlashcards(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
       const { content, fileContent, sourceType, sourceFileName, maxCards, difficulty, isPublic, creatorName } = z.object({
         content: z.string().optional(),
-        fileContent: z.string().optional(), // Base64 encoded file content
+        fileContent: z.string().optional(),
         sourceType: z.enum(['text', 'pdf', 'docx', 'txt', 'md']),
         sourceFileName: z.string().optional(),
         maxCards: z.number().min(5).max(50).optional(),
@@ -293,7 +251,6 @@ export default new Module('flashcard', {
         creatorName: z.string().optional(),
       }).parse(args);
 
-      // Get text content - either directly or by parsing file
       let textContent: string;
       
       if (sourceType === 'text') {
@@ -305,12 +262,10 @@ export default new Module('flashcard', {
         }
         textContent = content;
       } else {
-        // Parse file content
         if (!fileContent) {
           throw new Error('File content is required for file uploads');
         }
         
-        // Validate file size (base64 is ~33% larger than binary)
         const buffer = Buffer.from(fileContent, 'base64');
         if (buffer.length > MAX_FILE_SIZE) {
           throw new Error('File size must be less than 5MB');
@@ -322,13 +277,11 @@ export default new Module('flashcard', {
           throw new Error('Extracted content is too short. Please upload a file with more text content.');
         }
         
-        // Also validate extracted content length
         if (textContent.length > MAX_CONTENT_LENGTH) {
           throw new Error(`Extracted content is too long. Maximum ${MAX_CONTENT_LENGTH.toLocaleString()} characters allowed. Try a shorter document.`);
         }
       }
 
-      // Generate flashcards using AI
       const result = await generateFlashcardsFromText(textContent, {
         maxCards: maxCards || 20,
         difficulty: difficulty || 'intermediate',
@@ -339,7 +292,6 @@ export default new Module('flashcard', {
         throw new Error('Could not generate flashcards from this content. Please try different material.');
       }
 
-      // Create the flashcard set
       const now = new Date();
       const userObjectId = new ObjectId(user.id);
       
@@ -362,7 +314,6 @@ export default new Module('flashcard', {
 
       const setId = setResult.insertedId;
 
-      // Insert all cards
       const cardsToInsert = result.cards.map((card: GeneratedFlashcard, index: number) => ({
         setId,
         userId: userObjectId,
@@ -371,7 +322,7 @@ export default new Module('flashcard', {
         hint: card.hint,
         explanation: card.explanation,
         wrongOptions: card.wrongOptions,
-        difficulty: 0.5,  // Start at medium difficulty
+        difficulty: 0.5,
         reviewCount: 0,
         correctCount: 0,
         order: index,
@@ -387,9 +338,6 @@ export default new Module('flashcard', {
       };
     },
 
-    /**
-     * Add a single card to an existing set
-     */
     async addCard(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -402,7 +350,6 @@ export default new Module('flashcard', {
         wrongOptions: z.array(z.string()).optional(),
       }).parse(args);
 
-      // Verify ownership
       const set = await dbFlashcardSets.findOne({
         _id: new ObjectId(setId),
         userId: new ObjectId(user.id),
@@ -412,7 +359,6 @@ export default new Module('flashcard', {
         throw new Error('Flashcard set not found');
       }
 
-      // Get next order number
       const lastCard = await dbFlashcards.findOne(
         { setId: new ObjectId(setId) },
         { sort: { order: -1 } }
@@ -435,7 +381,6 @@ export default new Module('flashcard', {
         createdAt: now,
       });
 
-      // Update card count
       await dbFlashcardSets.updateOne(
         { _id: new ObjectId(setId) },
         { $inc: { cardCount: 1 }, $set: { updatedAt: now } }
@@ -444,9 +389,6 @@ export default new Module('flashcard', {
       return { cardId: result.insertedId.toString() };
     },
 
-    /**
-     * Update a card
-     */
     async updateCard(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -480,7 +422,6 @@ export default new Module('flashcard', {
         { $set: updates }
       );
 
-      // Update set's updatedAt
       await dbFlashcardSets.updateOne(
         { _id: card.setId },
         { $set: { updatedAt: new Date() } }
@@ -489,9 +430,6 @@ export default new Module('flashcard', {
       return { success: true };
     },
 
-    /**
-     * Delete a card
-     */
     async deleteCard(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -510,7 +448,6 @@ export default new Module('flashcard', {
 
       await dbFlashcards.deleteOne({ _id: new ObjectId(cardId) });
 
-      // Update card count
       await dbFlashcardSets.updateOne(
         { _id: card.setId },
         { $inc: { cardCount: -1 }, $set: { updatedAt: new Date() } }
@@ -519,9 +456,6 @@ export default new Module('flashcard', {
       return { success: true };
     },
 
-    /**
-     * Delete an entire flashcard set
-     */
     async deleteFlashcardSet(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -529,7 +463,6 @@ export default new Module('flashcard', {
         setId: z.string(),
       }).parse(args);
 
-      // Verify ownership
       const set = await dbFlashcardSets.findOne({
         _id: new ObjectId(setId),
         userId: new ObjectId(user.id),
@@ -539,21 +472,15 @@ export default new Module('flashcard', {
         throw new Error('Flashcard set not found');
       }
 
-      // Delete all cards
       await dbFlashcards.deleteMany({ setId: new ObjectId(setId) });
 
-      // Delete all study sessions
       await dbFlashcardStudySessions.deleteMany({ setId: new ObjectId(setId) });
 
-      // Delete the set
       await dbFlashcardSets.deleteOne({ _id: new ObjectId(setId) });
 
       return { success: true };
     },
 
-    /**
-     * Update set metadata
-     */
     async updateFlashcardSet(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -586,9 +513,6 @@ export default new Module('flashcard', {
       return { success: true };
     },
 
-    /**
-     * Toggle flashcard set visibility (public/private)
-     */
     async toggleFlashcardSetVisibility(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -624,9 +548,6 @@ export default new Module('flashcard', {
       return { success: true, isPublic };
     },
 
-    /**
-     * Record study session completion
-     */
     async recordStudySession(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -640,7 +561,6 @@ export default new Module('flashcard', {
 
       const now = new Date();
 
-      // Record the session
       await dbFlashcardStudySessions.insertOne({
         setId: new ObjectId(setId),
         userId: new ObjectId(user.id),
@@ -653,7 +573,6 @@ export default new Module('flashcard', {
         durationSeconds,
       });
 
-      // Update set stats
       await dbFlashcardSets.updateOne(
         { _id: new ObjectId(setId), userId: new ObjectId(user.id) },
         {
@@ -665,9 +584,6 @@ export default new Module('flashcard', {
       return { success: true };
     },
 
-    /**
-     * Record quiz completion
-     */
     async recordQuizSession(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -682,7 +598,6 @@ export default new Module('flashcard', {
 
       const now = new Date();
 
-      // Record the session
       await dbFlashcardStudySessions.insertOne({
         setId: new ObjectId(setId),
         userId: new ObjectId(user.id),
@@ -696,7 +611,6 @@ export default new Module('flashcard', {
         durationSeconds,
       });
 
-      // Get current best score
       const set = await dbFlashcardSets.findOne({
         _id: new ObjectId(setId),
         userId: new ObjectId(user.id),
@@ -706,7 +620,6 @@ export default new Module('flashcard', {
         ? Math.max(set.bestScore, score)
         : score;
 
-      // Update set stats
       await dbFlashcardSets.updateOne(
         { _id: new ObjectId(setId), userId: new ObjectId(user.id) },
         {
@@ -723,9 +636,6 @@ export default new Module('flashcard', {
       return { success: true, bestScore: newBestScore };
     },
 
-    /**
-     * Update card difficulty after review
-     */
     async updateCardProgress(args, { user }) {
       if (!user) throw new AuthError('Authentication required');
 
@@ -747,8 +657,6 @@ export default new Module('flashcard', {
       const newReviewCount = card.reviewCount + 1;
       const newCorrectCount = card.correctCount + (correct ? 1 : 0);
       
-      // Adjust difficulty based on performance
-      // Lower difficulty = easier (more correct answers)
       const newDifficulty = 1 - (newCorrectCount / newReviewCount);
 
       await dbFlashcards.updateOne(

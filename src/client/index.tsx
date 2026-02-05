@@ -10,7 +10,6 @@ import './index.css';
 import LoadingSpinner from './components/LoadingSpinner';
 import { sessionClientChannel, chatClientChannel } from './channels';
 
-// Initialize WebSocket connection with registered channels
 startWebsockets({
   channels: [
     sessionClientChannel,

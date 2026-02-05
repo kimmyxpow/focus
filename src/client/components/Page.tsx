@@ -1,10 +1,3 @@
-/**
- * Page wrapper with floating navbar
- * - Manrope font
- * - Centered content with proper padding
- * - Subtle active nav indicators (not button-like)
- */
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSession } from 'modelence/client';
@@ -32,7 +25,6 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
   return (
     <nav className={cn("navbar-float", isDark && "navbar-float-dark")}>
       <div className="flex items-center gap-1">
-        {/* Logo */}
         <Link
           to="/"
           className={cn(
@@ -54,10 +46,8 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
           </span>
         </Link>
 
-        {/* Divider */}
         <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />
 
-        {/* Navigation - subtle active indicator */}
         <div className="flex items-center gap-0.5">
           <Link
             to="/sessions"
@@ -101,10 +91,8 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
           </Link>
         </div>
 
-        {/* Divider */}
         <div className={cn("w-px h-5 mx-2", isDark ? "bg-white/10" : "bg-stone-200")} />
 
-        {/* User Actions */}
         {user ? (
           <div className="flex items-center gap-2">
             <Link

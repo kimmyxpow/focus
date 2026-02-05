@@ -1,16 +1,9 @@
-/**
- * AI utilities for Quiz generation
- * 
- * Uses Z.AI's GLM-4.7-Flash model to generate quiz questions from text content.
- * Supports: Multiple Choice, True/False, Fill in the Blank
- */
-
 import { generateText } from '../lib/zai';
 
 export interface GeneratedQuestion {
   type: 'multiple_choice' | 'true_false' | 'fill_blank';
   question: string;
-  options?: string[];  // For multiple_choice only
+  options?: string[];
   correctAnswer: string;
   explanation?: string;
 }
@@ -24,9 +17,6 @@ export interface QuizGenerationResult {
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'fill_blank' | 'mixed';
 
-/**
- * Generate quiz questions from text content using AI
- */
 export async function generateQuizFromText(
   content: string,
   options: {
@@ -36,14 +26,12 @@ export async function generateQuizFromText(
   } = {}
 ): Promise<QuizGenerationResult> {
   const { maxQuestions = 15, difficulty = 'intermediate', questionTypes = 'mixed' } = options;
-  
-  // Truncate content if too long
+
   const maxContentLength = 30000;
-  const truncatedContent = content.length > maxContentLength 
+  const truncatedContent = content.length > maxContentLength
     ? content.slice(0, maxContentLength) + '\n\n[Content truncated...]'
     : content;
 
-  // Build question type instruction
   let typeInstruction = '';
   if (questionTypes === 'multiple_choice') {
     typeInstruction = 'Generate ONLY multiple choice questions with 4 options (A, B, C, D).';
@@ -116,7 +104,6 @@ Response format (JSON only, no markdown):
       maxTokens: 8000,
     });
 
-    // Parse AI response
     const text = response.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -125,16 +112,14 @@ Response format (JSON only, no markdown):
     }
 
     const result = JSON.parse(jsonMatch[0]) as QuizGenerationResult;
-    
-    // Validate and clean the result
+
     return {
       title: result.title || 'Untitled Quiz',
       description: result.description || '',
       topic: result.topic || 'General',
       questions: (result.questions || []).slice(0, maxQuestions).map((q, index) => {
-        // Normalize question type
         const type = validateQuestionType(q.type);
-        
+
         return {
           type,
           question: q.question || `Question ${index + 1}`,
@@ -142,7 +127,7 @@ Response format (JSON only, no markdown):
           correctAnswer: q.correctAnswer || '',
           explanation: q.explanation,
         };
-      }).filter(q => q.correctAnswer), // Remove questions without answers
+      }).filter(q => q.correctAnswer),
     };
 
   } catch (error) {
@@ -161,9 +146,6 @@ function validateQuestionType(type: string): 'multiple_choice' | 'true_false' | 
   return 'multiple_choice';
 }
 
-/**
- * Analyze text to suggest quiz parameters
- */
 export async function analyzeContentForQuiz(content: string): Promise<{
   suggestedTitle: string;
   suggestedTopics: string[];
@@ -172,7 +154,7 @@ export async function analyzeContentForQuiz(content: string): Promise<{
 }> {
   try {
     const preview = content.slice(0, 5000);
-    
+
     const response = await generateText({
       messages: [
         {

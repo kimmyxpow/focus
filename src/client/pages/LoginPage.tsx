@@ -73,7 +73,6 @@ export default function LoginPage() {
   const [resendCooldown, setResendCooldown] = useState(0);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Cooldown timer effect
   useEffect(() => {
     if (resendCooldown > 0) {
       const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
@@ -103,12 +102,10 @@ export default function LoginPage() {
       } else {
         toast.success('Welcome back!');
       }
-      // Reload the page to update the session state
       window.location.href = redirect;
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Invalid code');
-      // Clear OTP inputs on error
       setOtp(['', '', '', '', '', '']);
       otpInputRefs.current[0]?.focus();
     },
@@ -132,19 +129,16 @@ export default function LoginPage() {
   }, [email, sendOTPMutation]);
 
   const handleOTPChange = useCallback((index: number, value: string) => {
-    // Only allow digits
     const digit = value.replace(/\D/g, '').slice(-1);
-    
+
     const newOtp = [...otp];
     newOtp[index] = digit;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (digit && index < 5) {
       otpInputRefs.current[index + 1]?.focus();
     }
 
-    // Auto-submit when all digits are filled
     if (digit && index === 5) {
       const fullCode = newOtp.join('');
       if (fullCode.length === 6) {
@@ -174,7 +168,6 @@ export default function LoginPage() {
     sendOTPMutation.mutate({ email: email.trim() });
   }, [email, sendOTPMutation]);
 
-  // Focus first OTP input when entering OTP step
   useEffect(() => {
     if (step === 'otp') {
       setTimeout(() => otpInputRefs.current[0]?.focus(), 100);
@@ -185,7 +178,6 @@ export default function LoginPage() {
     <Page variant="dark">
       <div className="container-xs flex items-center justify-center min-h-[70vh]">
         <div className="py-8 w-full fade-in">
-          {/* Header */}
           <div className="text-center mb-8">
             <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center mx-auto mb-5">
               <span className="text-2xl font-bold text-stone-900">F</span>
@@ -201,7 +193,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Method Selection */}
           {step === 'method' && (
             <>
               {/* OAuth Buttons */}
@@ -249,7 +240,6 @@ export default function LoginPage() {
             </>
           )}
 
-          {/* Email Input Step */}
           {step === 'email' && (
             <>
               <button
@@ -292,7 +282,6 @@ export default function LoginPage() {
             </>
           )}
 
-          {/* OTP Input Step */}
           {step === 'otp' && (
             <>
               <button
@@ -308,7 +297,6 @@ export default function LoginPage() {
               </button>
 
               <div className="space-y-6">
-                {/* OTP Input Grid */}
                 <div className="flex justify-center gap-2">
                   {[0, 1, 2, 3, 4, 5].map((position) => (
                     <input
@@ -332,7 +320,6 @@ export default function LoginPage() {
                   <p className="text-white/50 text-sm text-center">Verifying...</p>
                 )}
 
-                {/* Resend Code */}
                 <div className="text-center">
                   <button
                     type="button"
@@ -355,7 +342,6 @@ export default function LoginPage() {
             </>
           )}
 
-          {/* Terms */}
           <p className="text-xs text-white/40 text-center mt-6">
             By signing in, you agree to our{' '}
             <Link to="/terms" className="text-white/60 hover:text-white underline">

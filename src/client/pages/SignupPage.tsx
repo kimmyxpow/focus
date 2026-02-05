@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-// With passwordless OAuth, signup and login are the same flow
-// Redirect to login page
 export default function SignupPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

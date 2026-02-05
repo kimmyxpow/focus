@@ -12,13 +12,10 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         type={type}
         className={cn(
-          // Base styles
           "flex h-10 w-full px-3 py-2 text-sm transition-all",
           "file:border-0 file:bg-transparent file:text-sm file:font-medium",
           "disabled:cursor-not-allowed disabled:opacity-50",
-          // Standardized radius (--radius-sm = 6px)
           "rounded-md",
-          // Variant styles
           variant === 'dark' ? [
             "bg-white/5 text-white placeholder:text-white/30",
             "shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]",

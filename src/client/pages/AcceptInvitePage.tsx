@@ -45,13 +45,11 @@ export default function AcceptInvitePage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
-  // If user is creator or already accepted, redirect directly to session
   useEffect(() => {
     if (session && user) {
       if (session.isCreator || session.hasAcceptedInvite) {
         navigate(`/focus/${session.sessionId}`, { replace: true });
       }
-      // For public sessions, redirect directly
       if (!session.isPrivate) {
         navigate(`/focus/${session.sessionId}`, { replace: true });
       }
@@ -89,7 +87,6 @@ export default function AcceptInvitePage() {
     );
   }
 
-  // User is not logged in - show sign-in prompt
   if (!user) {
     return (
       <Page variant="dark">
@@ -129,7 +126,6 @@ export default function AcceptInvitePage() {
     );
   }
 
-  // User is logged in - show acceptance page
   return (
     <Page variant="dark">
       <div className="container-sm flex items-center justify-center min-h-[70vh]">

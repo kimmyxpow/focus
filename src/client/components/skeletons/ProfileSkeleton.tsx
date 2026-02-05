@@ -7,7 +7,6 @@ interface ProfileSkeletonProps {
 export default function ProfileSkeleton({ className }: ProfileSkeletonProps) {
   return (
     <div className={cn("space-y-6", className)}>
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="space-y-3">
           <div className="h-8 w-48 bg-white/10 rounded-lg animate-pulse" />
@@ -16,7 +15,6 @@ export default function ProfileSkeleton({ className }: ProfileSkeletonProps) {
         <div className="h-10 w-32 bg-white/10 rounded-lg animate-pulse" />
       </div>
 
-      {/* Form Sections */}
       <div className="space-y-4">
         <div className="space-y-3">
           <div className="h-4 w-24 bg-white/5 rounded animate-pulse" />
@@ -43,7 +41,6 @@ export default function ProfileSkeleton({ className }: ProfileSkeletonProps) {
         </div>
       </div>
 
-      {/* Stats Section */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[...Array(4)].map((_, i) => (
           <div key={i} className="p-5 rounded-xl bg-white/5">
@@ -53,7 +50,6 @@ export default function ProfileSkeleton({ className }: ProfileSkeletonProps) {
         ))}
       </div>
 
-      {/* Button */}
       <div className="h-11 w-32 bg-white/10 rounded-lg animate-pulse" />
     </div>
   );

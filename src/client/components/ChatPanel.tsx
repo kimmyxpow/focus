@@ -19,7 +19,7 @@ interface ChatPanelProps {
   chatEnabled: boolean;
   isCreator: boolean;
   isActiveParticipant: boolean;
-  currentOdonym?: string; // Current user's anonymous name in this session
+  currentOdonym?: string;
 }
 
 export default function ChatPanel({
@@ -37,23 +37,19 @@ export default function ChatPanel({
   const inputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const hasInitializedRef = useRef(false);
-  
-  // FIXED: Use ref to store currentOdonym to avoid recreating handleChatMessage
-  // This prevents the effect from re-running and causing channel re-subscription
+
   const currentOdonymRef = useRef(currentOdonym);
   useEffect(() => {
     currentOdonymRef.current = currentOdonym;
   }, [currentOdonym]);
 
-  // Fetch initial messages (no polling - WebSocket handles new messages)
   const { data: initialMessages = [], isLoading } = useQuery({
     ...modelenceQuery<ChatMessage[]>('focus.getSessionMessages', { sessionId, limit: 50 }),
     enabled: chatEnabled && isOpen && isActiveParticipant,
-    refetchInterval: false, // REMOVED polling - WebSocket handles real-time
-    staleTime: 60000, // Consider data fresh for 1 minute
+    refetchInterval: false,
+    staleTime: 60000,
   });
 
-  // Initialize realtime messages from initial fetch
   useEffect(() => {
     if (initialMessages.length > 0 && !hasInitializedRef.current) {
       setRealtimeMessages(initialMessages);
@@ -61,8 +57,6 @@ export default function ChatPanel({
     }
   }, [initialMessages]);
 
-  // FIXED: Handle incoming WebSocket chat messages - use ref instead of closure
-  // This ensures the callback is stable and doesn't cause effect re-runs
   const handleChatMessage = useCallback((event: ChatEvent) => {
     if (event.type === 'message' && event.message) {
       const newMessage: ChatMessage = {
@@ -73,7 +67,6 @@ export default function ChatPanel({
         isOwn: event.message.odonym === currentOdonymRef.current,
       };
 
-      // Add message if not already present (avoid duplicates)
       setRealtimeMessages((prev) => {
         if (prev.some(m => m.id === newMessage.id)) {
           return prev;
@@ -81,32 +74,21 @@ export default function ChatPanel({
         return [...prev, newMessage];
       });
     }
-  }, []); // FIXED: Empty dependency array - uses ref for currentOdonym
+  }, []);
 
-  // FIXED: Subscribe to chat channel - only depends on stable values
-  // Channel subscription is managed ONLY here (not in useSessionChannel)
-  // to avoid double subscription causing race conditions
   useEffect(() => {
     if (!sessionId || !chatEnabled || !isActiveParticipant) return;
-    
-    // Only join/subscribe when chat panel conditions are met
-    // Note: We join even when panel is closed to ensure messages are received
-    // The isOpen check is only for initial messages fetch
-    
-    // Join chat channel
+
     chatClientChannel.joinChannel(sessionId);
-    
-    // Subscribe to chat events
+
     const unsubscribe = onChatEvent(sessionId, handleChatMessage);
 
     return () => {
-      // Leave channel on cleanup
       chatClientChannel.leaveChannel(sessionId);
       unsubscribe();
     };
-  }, [sessionId, chatEnabled, isActiveParticipant, handleChatMessage]); // FIXED: Removed isOpen - stay subscribed even when closed
+  }, [sessionId, chatEnabled, isActiveParticipant, handleChatMessage]);
 
-  // Reset state when chat is disabled or session changes
   useEffect(() => {
     if (!chatEnabled) {
       hasInitializedRef.current = false;
@@ -114,7 +96,6 @@ export default function ChatPanel({
     }
   }, [chatEnabled]);
 
-  // FIXED: Reset state when sessionId changes (switching between sessions)
   const prevSessionIdRef = useRef(sessionId);
   useEffect(() => {
     if (prevSessionIdRef.current !== sessionId) {
@@ -128,14 +109,12 @@ export default function ChatPanel({
     ...modelenceMutation<{ success: boolean; message: ChatMessage }>('focus.sendMessage'),
     onSuccess: (data) => {
       setMessage('');
-      // Message will arrive via WebSocket, but add optimistically for immediate feedback
       if (data.message) {
         const optimisticMessage: ChatMessage = {
           ...data.message,
           isOwn: true,
         };
         setRealtimeMessages((prev) => {
-          // Only add if not already present (WebSocket may have already delivered it)
           if (prev.some(m => m.id === optimisticMessage.id)) {
             return prev;
           }
@@ -155,17 +134,14 @@ export default function ChatPanel({
     },
   });
 
-  // Combine initial and realtime messages
   const messages = realtimeMessages;
 
-  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (isOpen && messagesEndRef.current && messages.length > 0) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages.length, isOpen]);
 
-  // Focus input when panel opens
   useEffect(() => {
     if (isOpen && chatEnabled && inputRef.current) {
       inputRef.current.focus();
@@ -183,7 +159,6 @@ export default function ChatPanel({
     toggleChat({ sessionId, enabled: !chatEnabled });
   }, [sessionId, chatEnabled, toggleChat]);
 
-  // Chat toggle button (always visible) - No tooltip since the button's purpose is clear
   const toggleButton = (
     <button
       type="button"
@@ -224,10 +199,8 @@ export default function ChatPanel({
     <>
       {toggleButton}
 
-      {/* Chat Panel - Bottom drawer on mobile, side panel on desktop */}
       <div className="fixed inset-x-0 bottom-0 sm:inset-auto sm:right-4 sm:bottom-20 sm:w-80 z-30 fade-in">
         <div className="bg-stone-900/95 backdrop-blur-sm border border-white/10 rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col max-h-[60vh] sm:max-h-[500px]">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-white">Chat</span>
@@ -254,7 +227,6 @@ export default function ChatPanel({
             )}
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[200px]">
             {!chatEnabled ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
@@ -319,7 +291,6 @@ export default function ChatPanel({
             )}
           </div>
 
-          {/* Input */}
           {chatEnabled && isActiveParticipant && (
             <form onSubmit={handleSubmit} className="p-3 border-t border-white/10">
               <div className="flex items-center gap-2">

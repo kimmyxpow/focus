@@ -2,7 +2,6 @@ import { useCallback, useRef, useEffect } from 'react';
 
 type NotificationType = 'sessionEnd' | 'breakEnd' | 'breakStart' | 'warning';
 
-// Audio context singleton to avoid creating multiple contexts
 let audioContext: AudioContext | null = null;
 
 function getAudioContext(): AudioContext {
@@ -12,37 +11,29 @@ function getAudioContext(): AudioContext {
   return audioContext;
 }
 
-// Sound configurations for different notification types
 const SOUND_CONFIG: Record<NotificationType, { frequencies: number[]; durations: number[]; type: OscillatorType }> = {
   sessionEnd: {
-    // Triumphant chime - ascending notes
-    frequencies: [523.25, 659.25, 783.99, 1046.50], // C5, E5, G5, C6
+    frequencies: [523.25, 659.25, 783.99, 1046.50],
     durations: [150, 150, 150, 300],
     type: 'sine',
   },
   breakEnd: {
-    // Gentle wake-up tone - two ascending notes
-    frequencies: [440, 554.37, 659.25], // A4, C#5, E5
+    frequencies: [440, 554.37, 659.25],
     durations: [200, 200, 300],
     type: 'sine',
   },
   breakStart: {
-    // Relaxing tone - descending soft notes
-    frequencies: [659.25, 523.25, 440], // E5, C5, A4
+    frequencies: [659.25, 523.25, 440],
     durations: [200, 200, 300],
     type: 'sine',
   },
   warning: {
-    // Subtle warning - two quick beeps
-    frequencies: [880, 880], // A5, A5
+    frequencies: [880, 880],
     durations: [100, 100],
     type: 'sine',
   },
 };
 
-/**
- * Play a sequence of tones
- */
 function playToneSequence(
   frequencies: number[],
   durations: number[],
@@ -51,8 +42,7 @@ function playToneSequence(
 ): void {
   try {
     const ctx = getAudioContext();
-    
-    // Resume audio context if suspended (required for autoplay policies)
+
     if (ctx.state === 'suspended') {
       ctx.resume();
     }
@@ -66,12 +56,11 @@ function playToneSequence(
       oscillator.type = type;
       oscillator.frequency.setValueAtTime(freq, startTime);
 
-      // Envelope for smooth sound
       const duration = durations[index] / 1000;
       gainNode.gain.setValueAtTime(0, startTime);
-      gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02); // Attack
-      gainNode.gain.setValueAtTime(volume, startTime + duration - 0.05); // Sustain
-      gainNode.gain.linearRampToValueAtTime(0, startTime + duration); // Release
+      gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
+      gainNode.gain.setValueAtTime(volume, startTime + duration - 0.05);
+      gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
 
       oscillator.connect(gainNode);
       gainNode.connect(ctx.destination);
@@ -79,16 +68,12 @@ function playToneSequence(
       oscillator.start(startTime);
       oscillator.stop(startTime + duration);
 
-      startTime += duration + 0.05; // Small gap between notes
+      startTime += duration + 0.05;
     });
   } catch (error) {
-    // Silently fail if audio is not supported
   }
 }
 
-/**
- * Request browser notification permission
- */
 async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
     return false;
@@ -106,9 +91,6 @@ async function requestNotificationPermission(): Promise<boolean> {
   return false;
 }
 
-/**
- * Show a browser notification
- */
 function showBrowserNotification(title: string, body: string, icon?: string): void {
   if (!('Notification' in window) || Notification.permission !== 'granted') {
     return;
@@ -119,37 +101,29 @@ function showBrowserNotification(title: string, body: string, icon?: string): vo
       body,
       icon: icon || '/favicon.svg',
       badge: '/favicon.svg',
-      tag: 'focus-session', // Replace previous notifications with same tag
-      silent: true, // We handle sound ourselves
+      tag: 'focus-session',
+      silent: true,
     });
 
-    // Auto-close after 5 seconds
     setTimeout(() => notification.close(), 5000);
 
-    // Focus window when notification is clicked
     notification.onclick = () => {
       window.focus();
       notification.close();
     };
   } catch (error) {
-    // Silently fail if notifications are not supported
   }
 }
 
-/**
- * Hook for managing session notifications and sounds
- */
 export function useSessionNotifications() {
   const hasRequestedPermission = useRef(false);
 
-  // Request notification permission on first interaction
   const requestPermission = useCallback(async () => {
     if (hasRequestedPermission.current) return;
     hasRequestedPermission.current = true;
     await requestNotificationPermission();
   }, []);
 
-  // Play sound for a specific notification type
   const playSound = useCallback((type: NotificationType, volume: number = 0.3) => {
     const config = SOUND_CONFIG[type];
     if (config) {
@@ -157,7 +131,6 @@ export function useSessionNotifications() {
     }
   }, []);
 
-  // Notify when focus session ends
   const notifySessionEnd = useCallback((topic: string) => {
     playSound('sessionEnd', 0.4);
     showBrowserNotification(
@@ -166,7 +139,6 @@ export function useSessionNotifications() {
     );
   }, [playSound]);
 
-  // Notify when break ends
   const notifyBreakEnd = useCallback((topic: string) => {
     playSound('breakEnd', 0.35);
     showBrowserNotification(
@@ -175,7 +147,6 @@ export function useSessionNotifications() {
     );
   }, [playSound]);
 
-  // Notify when break starts
   const notifyBreakStart = useCallback((duration: number) => {
     playSound('breakStart', 0.3);
     showBrowserNotification(
@@ -184,17 +155,13 @@ export function useSessionNotifications() {
     );
   }, [playSound]);
 
-  // Warning notification (e.g., 1 minute remaining)
   const notifyWarning = useCallback((_message: string) => {
     playSound('warning', 0.2);
-    // Don't show browser notification for warnings, just sound
   }, [playSound]);
 
-  // Request permission when component mounts (after user interaction)
   useEffect(() => {
     const handleInteraction = () => {
       requestPermission();
-      // Only need to request once
       document.removeEventListener('click', handleInteraction);
       document.removeEventListener('keydown', handleInteraction);
     };

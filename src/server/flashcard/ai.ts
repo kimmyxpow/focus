@@ -1,11 +1,3 @@
-/**
- * AI utilities for Flashcard generation
- * 
- * Uses Z.AI's GLM-4.7-Flash model via HTTP API to generate flashcards from text content.
- * API Docs: https://docs.z.ai/guides/develop/http/introduction.md
- * Model: glm-4.7-flash (lightweight, completely free)
- */
-
 import { generateText } from '../lib/zai';
 
 export interface GeneratedFlashcard {
@@ -13,7 +5,7 @@ export interface GeneratedFlashcard {
   back: string;
   hint?: string;
   explanation?: string;
-  wrongOptions?: string[];  // For quiz mode
+  wrongOptions?: string[];
 }
 
 export interface FlashcardGenerationResult {
@@ -23,9 +15,6 @@ export interface FlashcardGenerationResult {
   cards: GeneratedFlashcard[];
 }
 
-/**
- * Generate flashcards from text content using AI
- */
 export async function generateFlashcardsFromText(
   content: string,
   options: {
@@ -35,10 +24,9 @@ export async function generateFlashcardsFromText(
   } = {}
 ): Promise<FlashcardGenerationResult> {
   const { maxCards = 20, difficulty = 'intermediate', includeQuizOptions = true } = options;
-  
-  // Truncate content if too long (model has token limits)
+
   const maxContentLength = 30000;
-  const truncatedContent = content.length > maxContentLength 
+  const truncatedContent = content.length > maxContentLength
     ? content.slice(0, maxContentLength) + '\n\n[Content truncated...]'
     : content;
 
@@ -89,7 +77,6 @@ Response format (JSON only, no markdown):
       maxTokens: 8000,
     });
 
-    // Parse AI response
     const text = response.text.trim();
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
@@ -98,8 +85,7 @@ Response format (JSON only, no markdown):
     }
 
     const result = JSON.parse(jsonMatch[0]) as FlashcardGenerationResult;
-    
-    // Validate and clean the result
+
     return {
       title: result.title || 'Untitled Flashcard Set',
       description: result.description || '',
@@ -119,9 +105,6 @@ Response format (JSON only, no markdown):
   }
 }
 
-/**
- * Generate additional quiz options for existing flashcards
- */
 export async function generateQuizOptions(
   cards: Array<{ front: string; back: string }>
 ): Promise<Array<{ front: string; back: string; wrongOptions: string[] }>> {
@@ -166,14 +149,10 @@ Response format (JSON array only):
 
   } catch (error) {
     console.error('AI quiz options generation failed:', error);
-    // Return original cards with empty wrong options
     return cards.map(card => ({ ...card, wrongOptions: [] }));
   }
 }
 
-/**
- * Analyze text to suggest flashcard topics and estimate card count
- */
 export async function analyzeContent(content: string): Promise<{
   suggestedTitle: string;
   suggestedTopics: string[];
@@ -182,9 +161,8 @@ export async function analyzeContent(content: string): Promise<{
   keyTermsPreview: string[];
 }> {
   try {
-    // Quick analysis without full card generation
     const preview = content.slice(0, 5000);
-    
+
     const response = await generateText({
       messages: [
         {

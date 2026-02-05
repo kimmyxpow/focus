@@ -128,7 +128,7 @@ export default function LeaderboardPage() {
       sortBy,
       limit: 50,
     }),
-    refetchInterval: 60000, // Refresh every minute
+    refetchInterval: 60000,
   });
 
   const formatFocusTime = useCallback((minutes: number) => {

@@ -138,7 +138,6 @@ function SessionRow({ session, formatDuration, hasActiveSession }: { session: Fo
 export default function SessionsPage() {
   const { hasActiveSession } = useActiveSession();
 
-  // Fetch active public sessions
   const { data: activeSessions, isLoading: sessionsLoading } = useQuery({
     ...modelenceQuery<FocusSession[]>('focus.getActiveSessions', {}),
     refetchInterval: 30000,
@@ -150,7 +149,6 @@ export default function SessionsPage() {
     return `${min}-${max} min`;
   }, []);
 
-  // Filter to only show public sessions
   const publicSessions = activeSessions?.filter(s => !s.isPrivate) || [];
 
   return (

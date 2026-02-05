@@ -31,17 +31,14 @@ export default function JoinByInvitePage() {
     retry: false,
   });
 
-  // Redirect logic
   useEffect(() => {
     if (!session) return;
 
-    // For private sessions that haven't been accepted, redirect to accept page
     if (session.isPrivate && !session.isCreator && !session.hasAcceptedInvite) {
       navigate(`/invite/${inviteCode}`, { replace: true });
       return;
     }
 
-    // Otherwise, redirect directly to the session room
     navigate(`/focus/${session.sessionId}`, { replace: true });
   }, [session, navigate, inviteCode]);
 
@@ -76,11 +73,9 @@ export default function JoinByInvitePage() {
     );
   }
 
-  // Show preview while redirecting (user not logged in case)
   if (!user) {
-    // For private sessions, redirect to accept page for sign in
-    const redirectPath = session.isPrivate 
-      ? `/invite/${inviteCode}` 
+    const redirectPath = session.isPrivate
+      ? `/invite/${inviteCode}`
       : `/join/${inviteCode}`;
 
     return (
@@ -120,7 +115,6 @@ export default function JoinByInvitePage() {
     );
   }
 
-  // Redirecting...
   return (
     <Page variant="dark" hideNav>
       <div className="flex items-center justify-center min-h-screen">

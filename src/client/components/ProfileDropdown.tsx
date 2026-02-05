@@ -14,7 +14,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
   const navigate = useNavigate();
   const { user } = useSession();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -31,7 +30,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
     setIsOpen(false);
   };
 
-  // Get user's initial for avatar - use handle or first character of id
   const initial = user?.handle?.charAt(0).toUpperCase() || user?.id?.charAt(0).toUpperCase() || 'U';
 
   return (
@@ -45,7 +43,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
           "focus:outline-none focus:ring-2 focus:ring-white/20"
         )}
       >
-        {/* Avatar */}
         <div className={cn(
           "w-6 h-6 rounded-md flex items-center justify-center text-xs font-semibold",
           isDark ? "bg-white text-stone-900" : "bg-stone-900 text-white"
@@ -53,7 +50,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
           {initial}
         </div>
 
-        {/* Dropdown Arrow */}
         <svg
           className={cn(
             "w-3.5 h-3.5 transition-transform duration-200",
@@ -71,7 +67,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
         </svg>
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
         <div
           className={cn(
@@ -81,7 +76,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
             "border border-white/10"
           )}
         >
-          {/* Profile */}
           <Link
             to="/profile"
             onClick={() => setIsOpen(false)}
@@ -99,7 +93,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
             <span>Profile</span>
           </Link>
 
-          {/* My Sessions */}
           <Link
             to="/my-sessions"
             onClick={() => setIsOpen(false)}
@@ -117,7 +110,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
             <span>My Sessions</span>
           </Link>
 
-          {/* My Flashcards */}
           <Link
             to="/my-flashcards"
             onClick={() => setIsOpen(false)}
@@ -135,7 +127,6 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
             <span>My Flashcards</span>
           </Link>
 
-          {/* My Quizzes */}
           <Link
             to="/my-quizzes"
             onClick={() => setIsOpen(false)}
@@ -153,10 +144,8 @@ export default function ProfileDropdown({ className, isDark = false }: ProfileDr
             <span>My Quizzes</span>
           </Link>
 
-          {/* Divider */}
           <div className="h-px bg-white/10 mx-4" />
 
-          {/* Logout */}
           <button
             type="button"
             onClick={handleLogout}

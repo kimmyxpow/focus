@@ -3,7 +3,6 @@ import { useQuery } from '@tanstack/react-query';
 import { modelenceQuery } from '@modelence/react-query';
 import Page from '@/client/components/Page';
 
-// Icons
 const ClockIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -96,7 +95,6 @@ export default function HomePage() {
   return (
     <Page variant="dark">
       <div className="container-sm">
-        {/* Header */}
         <section className="py-8 fade-in">
           <h1 className="text-display-md text-white mb-2">
             Focus. Learn. Grow.
@@ -106,7 +104,6 @@ export default function HomePage() {
           </p>
         </section>
 
-        {/* Features List */}
         <section className="fade-in">
           <h2 className="text-label text-white/30 mb-2">Features</h2>
           
@@ -143,7 +140,6 @@ export default function HomePage() {
           )}
         </section>
 
-        {/* Quick Actions */}
         <section className="mt-8 pt-8 border-t border-white/10 fade-in">
           <h2 className="text-label text-white/30 mb-4">Create New</h2>
           <div className="space-y-2">

@@ -126,8 +126,6 @@ function CopyInviteButton({ sessionId, inviteCode, isPrivate }: { sessionId: str
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
-    // For private sessions with invite code, use the invite URL for the acceptance flow
-    // For public sessions or when no invite code, use direct session URL
     const url = isPrivate && inviteCode
       ? `${window.location.origin}/invite/${inviteCode}`
       : `${window.location.origin}/focus/${sessionId}`;
@@ -175,10 +173,8 @@ export default function FocusRoomPage() {
   const previousStatusRef = useRef<string | null>(null);
   const hasNotifiedWarningRef = useRef<boolean>(false);
 
-  // Handle real-time status changes via WebSocket
   const handleStatusChange = useCallback((event: SessionEvent) => {
     if (event.status && event.timer) {
-      // Sync timer immediately from WebSocket event
       const networkDelay = Date.now() - event.timer.serverTimestamp;
       const adjustedRemaining = Math.max(0, event.timer.remainingSeconds - Math.floor(networkDelay / 1000));
       setLocalRemainingSeconds(adjustedRemaining);
@@ -186,7 +182,6 @@ export default function FocusRoomPage() {
     }
   }, []);
 
-  // Handle timer sync events for precise synchronization
   const handleTimerSync = useCallback((event: SessionEvent) => {
     if (event.timer) {
       const networkDelay = Date.now() - event.timer.serverTimestamp;
@@ -196,21 +191,18 @@ export default function FocusRoomPage() {
     }
   }, []);
 
-  // Subscribe to WebSocket channel for real-time updates
   useSessionChannel({
     sessionId,
     onStatusChange: handleStatusChange,
     onTimerSync: handleTimerSync,
-    enableChat: true, // Chat handled by ChatPanel
+    enableChat: true,
   });
 
-  // Session data query with reduced polling (WebSocket handles real-time updates)
-  // Fallback polling at 30s for recovery if WebSocket disconnects
   const { data: session, isLoading, error } = useQuery({
     ...modelenceQuery<SessionData>('focus.getSession', { sessionId }),
     enabled: !!sessionId,
-    refetchInterval: 30000, // Reduced from 3-10s to 30s - WebSocket handles real-time
-    staleTime: 5000, // Consider data fresh for 5s (reduces unnecessary refetches)
+    refetchInterval: 30000,
+    staleTime: 5000,
   });
 
   const { mutate: joinSession, isPending: isJoining } = useMutation({
@@ -243,7 +235,6 @@ export default function FocusRoomPage() {
   const { mutate: leaveSession, isPending: isLeaving } = useMutation({
     ...modelenceMutation('focus.leaveSession'),
     onSuccess: () => {
-      // FIXED: Invalidate getActiveSession immediately so FloatingSessionWidget disappears
       queryClient.invalidateQueries({ queryKey: createQueryKey('focus.getActiveSession', {}) });
       navigate('/');
       toast.success('Left session');
@@ -285,7 +276,6 @@ export default function FocusRoomPage() {
     }
   }, [localRemainingSeconds, session?.status, sessionId, endSession]);
 
-  // Detect status changes and trigger appropriate notifications
   const sessionStatus = session?.status;
   const sessionTopic = session?.topic;
   const sessionBreakDuration = session?.breakDuration;
@@ -297,17 +287,13 @@ export default function FocusRoomPage() {
     const prevStatus = previousStatusRef.current;
     const currentStatus = sessionStatus;
 
-    // Status changed
     if (prevStatus && prevStatus !== currentStatus) {
-      // Focus session ended -> cooldown
       if (prevStatus === 'focusing' && currentStatus === 'cooldown') {
         notifySessionEnd(sessionTopic || 'Focus Session');
       }
-      // Break ended -> focusing resumed
       if (prevStatus === 'break' && currentStatus === 'focusing') {
         notifyBreakEnd(sessionTopic || 'Focus Session');
       }
-      // Focus ended -> break started
       if (prevStatus === 'focusing' && currentStatus === 'break') {
         notifyBreakStart(sessionBreakDuration || 5);
       }
@@ -316,13 +302,11 @@ export default function FocusRoomPage() {
     previousStatusRef.current = currentStatus;
   }, [sessionStatus, sessionTopic, sessionBreakDuration, isUserActive, notifySessionEnd, notifyBreakEnd, notifyBreakStart]);
 
-  // Warning notification at 1 minute remaining
   useEffect(() => {
     if (localRemainingSeconds === 60 && !hasNotifiedWarningRef.current && session?.status === 'focusing') {
       notifyWarning('1 minute remaining');
       hasNotifiedWarningRef.current = true;
     }
-    // Reset warning flag when timer resets (new session/repetition)
     if (localRemainingSeconds && localRemainingSeconds > 60) {
       hasNotifiedWarningRef.current = false;
     }
@@ -395,7 +379,6 @@ export default function FocusRoomPage() {
     );
   }
 
-  // Waiting state - DARK THEME
   if (session.status === 'waiting') {
     return (
       <Page variant="dark">
@@ -537,7 +520,6 @@ export default function FocusRoomPage() {
     );
   }
 
-  // Focusing state
   if (session.status === 'focusing') {
     const totalSeconds = (session.actualDuration || session.maxDuration) * 60;
     const remaining = localRemainingSeconds ?? session.timer.remainingSeconds;
@@ -673,7 +655,6 @@ export default function FocusRoomPage() {
     );
   }
 
-  // Cooldown state
   if (session.status === 'cooldown') {
     return (
       <Page variant="dark" hideNav>

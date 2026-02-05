@@ -22,7 +22,6 @@ type FlashcardSet = {
   cardCount: number;
 };
 
-// Icons
 const ArrowLeftIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -71,7 +70,6 @@ function FlashCard({
             transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0)',
           }}
         >
-          {/* Front */}
           <div
             className="absolute inset-0 bg-stone-800 border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center overflow-hidden"
             style={{ backfaceVisibility: 'hidden' }}
@@ -101,24 +99,21 @@ function FlashCard({
             </p>
           </div>
 
-          {/* Back - with glow overlay */}
           <div
             className="absolute inset-0 bg-stone-800 border border-white/20 rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center overflow-hidden"
-            style={{ 
+            style={{
               backfaceVisibility: 'hidden',
               transform: 'rotateY(180deg)',
             }}
           >
-            {/* Glow overlay like floating widget */}
-            <div 
+            <div
               className="absolute inset-0 pointer-events-none rounded-2xl"
               style={{
                 background: 'radial-gradient(ellipse at center, rgba(52, 211, 153, 0.08) 0%, transparent 70%)',
               }}
             />
-            {/* Border glow */}
             <div className="absolute inset-0 pointer-events-none rounded-2xl border border-emerald-500/20" />
-            
+
             <p className="relative text-lg sm:text-xl font-medium text-white text-center leading-relaxed">
               {card.back}
             </p>
@@ -200,7 +195,6 @@ export default function FlashcardStudyPage() {
     }
   }, [currentCard, currentIndex, cards.length, updateProgress, recordSession, setId, results, startTime]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === ' ' || e.key === 'Enter') {
@@ -281,7 +275,6 @@ export default function FlashcardStudyPage() {
   return (
     <Page variant="dark">
       <div className="container-sm py-6 fade-in">
-        {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <Link 
             to="/my-flashcards"
@@ -303,7 +296,6 @@ export default function FlashcardStudyPage() {
           </div>
         </div>
 
-        {/* Progress bar */}
         <div className="h-1 bg-white/5 rounded-full mb-8 overflow-hidden">
           <div 
             className="h-full bg-white/30 rounded-full transition-all duration-300"
@@ -311,7 +303,6 @@ export default function FlashcardStudyPage() {
           />
         </div>
 
-        {/* Card */}
         {currentCard && (
           <FlashCard
             card={currentCard}
@@ -322,7 +313,6 @@ export default function FlashcardStudyPage() {
           />
         )}
 
-        {/* Actions */}
         <div className="mt-6">
           {isFlipped ? (
             <div className="flex items-center justify-center gap-3">

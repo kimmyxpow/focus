@@ -36,7 +36,6 @@ const STATUS_CONFIG: Record<SessionStatus, StatusConfig> = {
   },
 };
 
-// Smooth easing curves
 const EASE_OUT_EXPO = [0.16, 1, 0.3, 1] as const;
 const EASE_OUT_QUART = [0.25, 1, 0.5, 1] as const;
 
@@ -48,7 +47,6 @@ export default function FloatingSessionWidget({
   const [isHovered, setIsHovered] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Fetch active session
   const { data: activeSession, isLoading, error } = useQuery({
     ...modelenceQuery<{
       sessionId: string;
@@ -64,14 +62,13 @@ export default function FloatingSessionWidget({
       participants?: number;
     } | null>("focus.getActiveSession", {}),
     enabled: true,
-    refetchInterval: 5000, // Refetch every 5 seconds
+    refetchInterval: 5000,
     staleTime: 1000,
     refetchOnWindowFocus: true,
     retry: 1,
   });
 
 
-  // Sync timer with server
   useEffect(() => {
     if (activeSession?.timer && activeSession.status === "focusing") {
       const networkDelay = Date.now() - activeSession.timer.serverTimestamp;
@@ -85,7 +82,6 @@ export default function FloatingSessionWidget({
     }
   }, [activeSession?.timer, activeSession?.status]);
 
-  // Local countdown timer
   useEffect(() => {
     if (
       localRemaining === null ||
@@ -110,7 +106,6 @@ export default function FloatingSessionWidget({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   }, []);
 
-  // Determine if widget should be visible
   const shouldShow = useMemo(() => {
     if (!activeSession) {
       return false;
@@ -119,7 +114,6 @@ export default function FloatingSessionWidget({
       return false;
     }
 
-    // Hide if viewing the same session page
     const isViewingSameSession =
       location.pathname === `/focus/${activeSession.sessionId}`;
     if (isViewingSameSession) {
@@ -129,7 +123,6 @@ export default function FloatingSessionWidget({
     return true;
   }, [activeSession, location.pathname]);
 
-  // Trigger visibility with delay for animation
   useEffect(() => {
     if (shouldShow) {
       const timer = setTimeout(() => setIsVisible(true), 100);
@@ -139,7 +132,6 @@ export default function FloatingSessionWidget({
     }
   }, [shouldShow]);
 
-  // Memoized values
   const statusConfig = useMemo(
     () =>
       STATUS_CONFIG[activeSession?.status || "waiting"] ||
@@ -164,7 +156,6 @@ export default function FloatingSessionWidget({
   const isWaiting = activeSession?.status === "waiting";
   const isCreator = activeSession?.isCreator ?? false;
 
-  // Don't render if no session
   if (!isVisible || !activeSession) {
     return null;
   }
@@ -202,7 +193,6 @@ export default function FloatingSessionWidget({
               scale: { type: "tween", duration: 0.2, ease: EASE_OUT_QUART },
             }}
           >
-            {/* Glow overlay on hover */}
             <motion.div
               className="absolute inset-0 pointer-events-none rounded-2xl"
               style={{
@@ -217,7 +207,6 @@ export default function FloatingSessionWidget({
               }}
             />
 
-            {/* Border highlight on hover */}
             <motion.div
               className="absolute inset-0 pointer-events-none rounded-2xl border border-emerald-500/30"
               animate={{ opacity: isHovered ? 1 : 0 }}
@@ -228,10 +217,8 @@ export default function FloatingSessionWidget({
               }}
             />
 
-            {/* Main content - always visible */}
             <div className="relative px-4 py-3">
               <div className="flex items-center gap-3">
-                {/* Status Dot with pulse */}
                 <div className="relative flex-shrink-0">
                   <div
                     className={cn(
@@ -253,7 +240,6 @@ export default function FloatingSessionWidget({
                   />
                 </div>
 
-                {/* Timer or Status */}
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   {timerDisplay ? (
                     <span className="font-mono tabular-nums font-semibold text-white text-lg">
@@ -296,7 +282,6 @@ export default function FloatingSessionWidget({
               </div>
             </div>
 
-            {/* Expanded section - animates height */}
             <motion.div
               className="overflow-hidden"
               initial={false}
@@ -319,7 +304,6 @@ export default function FloatingSessionWidget({
               }}
             >
               <div className="px-4 pb-3 pt-2 space-y-3 border-t border-white/5">
-                {/* Topic */}
                 <div>
                   <p className="text-[10px] uppercase tracking-wider text-white/40 mb-1">
                     Session
@@ -329,7 +313,6 @@ export default function FloatingSessionWidget({
                   </p>
                 </div>
 
-                {/* Intent - if available */}
                 {activeSession.intent && (
                   <div>
                     <p className="text-[10px] uppercase tracking-wider text-white/40 mb-1">
@@ -341,7 +324,6 @@ export default function FloatingSessionWidget({
                   </div>
                 )}
 
-                {/* Creator badge for waiting sessions */}
                 {isWaiting && isCreator && (
                   <div className="flex items-center gap-2 px-3 py-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
                     <svg
@@ -364,9 +346,7 @@ export default function FloatingSessionWidget({
                   </div>
                 )}
 
-                {/* Stats row */}
                 <div className="flex items-center justify-between pt-1">
-                  {/* Status badge */}
                   <div
                     className={cn(
                       "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
@@ -406,7 +386,6 @@ export default function FloatingSessionWidget({
                   </div>
                 </div>
 
-                {/* Click to return hint */}
                 <div className="pt-2 border-t border-white/5">
                   <p className="text-[10px] text-white/30 text-center flex items-center justify-center gap-1.5">
                     <svg

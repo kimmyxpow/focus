@@ -39,10 +39,10 @@ export default function SessionSummaryPage() {
   const { data: summary, isLoading, error } = useQuery({
     ...modelenceQuery<SessionSummary>('focus.getSessionSummary', { sessionId }),
     enabled: !!sessionId && !!user,
-    staleTime: 30 * 60 * 1000, // Cache for 30 minutes - template-based summary is static
+    staleTime: 30 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
-    gcTime: 60 * 60 * 1000, // Keep in cache for 1 hour
+    gcTime: 60 * 60 * 1000,
   });
 
   const { mutate: recordOutcome, isPending: isRecording } = useMutation({
@@ -123,7 +123,6 @@ export default function SessionSummaryPage() {
   return (
     <Page variant="dark">
       <div className="container-sm space-y-6 fade-in">
-        {/* Celebration Header */}
         <div className="text-center py-8">
           <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mx-auto mb-6">
             <svg className="w-10 h-10 text-stone-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
@@ -135,7 +134,6 @@ export default function SessionSummaryPage() {
           <p className="text-white/50">{summary.intent}</p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3">
           <div className="p-5 text-center bg-white/5 rounded-xl">
             <p className="text-3xl font-bold text-white display-number">{summary.duration}</p>
@@ -151,7 +149,6 @@ export default function SessionSummaryPage() {
           </div>
         </div>
 
-        {/* Outcome Selection */}
         {!summary.userOutcome && (
           <section className="py-6 border-t border-white/10">
             <h2 className="text-lg font-semibold text-white mb-1">How did your session go?</h2>
@@ -185,7 +182,6 @@ export default function SessionSummaryPage() {
           </section>
         )}
 
-        {/* User Outcome Display */}
         {summary.userOutcome && (
           <div className="flex items-center justify-center gap-2 py-2">
             <span className="text-sm text-white/50">Your outcome:</span>
@@ -200,26 +196,22 @@ export default function SessionSummaryPage() {
           </div>
         )}
 
-        {/* Session Insights */}
         <section className="py-6 border-t border-white/10">
           <h2 className="text-base font-semibold text-white mb-3">Session insights</h2>
           <p className="text-white/70 leading-relaxed">{summary.aiSummary}</p>
         </section>
 
-        {/* Next Step */}
         <section className="py-6 border-t border-white/10">
           <h2 className="text-base font-semibold text-white mb-3">What to do next</h2>
           <p className="text-white/70 leading-relaxed">{summary.aiNextStep}</p>
         </section>
 
-        {/* Focus Minutes Earned */}
         <section className="py-8 text-center border-t border-white/10">
           <p className="text-sm text-white/50 mb-2">Focus time earned</p>
           <p className="text-5xl font-bold text-white display-number">+{summary.focusMinutesEarned}</p>
           <p className="text-sm text-white/40 mt-3">Added to your personal stats</p>
         </section>
 
-        {/* Actions */}
         <div className="flex gap-3 pt-4">
           <Link to="/" className="btn-outline-light flex-1 text-center">
             Back to sessions

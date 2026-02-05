@@ -8,7 +8,6 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", ...props }, ref) => {
-    // Base styles with standardized radius (8px = rounded-lg)
     const baseClasses = "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stone-400/30 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
 
     const variantClasses = {
@@ -20,7 +19,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       link: "text-stone-900 underline-offset-4 hover:underline"
     }
 
-    // Standardized radius: md (8px) for default, sm for small buttons
     const sizeClasses = {
       default: "h-10 px-4 py-2 rounded-lg",
       sm: "h-8 px-3 text-xs rounded-md",

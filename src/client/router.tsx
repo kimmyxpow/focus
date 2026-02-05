@@ -2,7 +2,6 @@ import { lazy } from 'react';
 import { createBrowserRouter, Navigate, Outlet, RouteObject, useLocation, useSearchParams } from 'react-router-dom';
 import { useSession } from 'modelence/client';
 
-// For guest-only routes (login, signup) - redirects to home if already logged in
 function GuestRoute() {
   const { user } = useSession();
   const location = useLocation();
@@ -17,7 +16,6 @@ function GuestRoute() {
   return <Outlet />;
 }
 
-// For protected routes - redirects to login if not authenticated
 function PrivateRoute() {
   const { user } = useSession();
   const location = useLocation();
@@ -36,7 +34,6 @@ function PrivateRoute() {
   return <Outlet />;
 }
 
-// Public routes (no auth required)
 const publicRoutes: RouteObject[] = [
   {
     path: '/',
@@ -92,7 +89,6 @@ const publicRoutes: RouteObject[] = [
   }
 ];
 
-// Guest routes (redirect to home if already logged in)
 const guestRoutes: RouteObject[] = [
   {
     path: '/login',
@@ -104,7 +100,6 @@ const guestRoutes: RouteObject[] = [
   }
 ];
 
-// Private routes (redirect to login if not authenticated)
 const privateRoutes: RouteObject[] = [
   {
     path: '/create-session',

@@ -1,10 +1,3 @@
-/**
- * Z.AI API Client
- *
- * Simple HTTP client for Z.AI's GLM models.
- * Model: glm-4.7-flashx (lightweight)
- */
-
 import { getConfig } from "modelence/server";
 
 const ZAI_API_ENDPOINT = "https://api.z.ai/api/paas/v4/chat/completions";

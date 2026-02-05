@@ -1,8 +1,5 @@
 import { ClientChannel } from "modelence/client";
 
-/**
- * Session Event Types matching server-side definitions
- */
 export type SessionEventType =
   | 'status_changed'
   | 'participant_joined'
@@ -38,20 +35,15 @@ export interface SessionEvent {
   participantCount?: number;
 }
 
-// Event listeners that can be registered dynamically
 type SessionEventListener = (event: SessionEvent) => void;
 const sessionEventListeners: Map<string, Set<SessionEventListener>> = new Map();
 
-/**
- * Register a listener for session events
- * Returns an unsubscribe function
- */
 export function onSessionEvent(sessionId: string, listener: SessionEventListener): () => void {
   if (!sessionEventListeners.has(sessionId)) {
     sessionEventListeners.set(sessionId, new Set());
   }
   sessionEventListeners.get(sessionId)!.add(listener);
-  
+
   return () => {
     const listeners = sessionEventListeners.get(sessionId);
     if (listeners) {
@@ -63,9 +55,6 @@ export function onSessionEvent(sessionId: string, listener: SessionEventListener
   };
 }
 
-/**
- * Dispatch event to all registered listeners for a session
- */
 function dispatchSessionEvent(event: SessionEvent) {
   const listeners = sessionEventListeners.get(event.sessionId);
   if (listeners) {
@@ -79,10 +68,6 @@ function dispatchSessionEvent(event: SessionEvent) {
   }
 }
 
-/**
- * Session Client Channel
- * Handles real-time session state updates
- */
 const sessionClientChannel = new ClientChannel<SessionEvent>(
   "session",
   async (event) => {

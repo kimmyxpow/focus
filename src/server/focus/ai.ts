@@ -1,12 +1,3 @@
-/**
- * AI utilities for the Focus app
- *
- * Uses Z.AI's GLM-4.7-Flash model via HTTP API for real LLM-powered analysis and generation.
- * API Docs: https://docs.z.ai/guides/develop/http/introduction.md
- * Model: glm-4.7-flash (lightweight, completely free)
- * All AI outputs are designed to be concise, explainable, and skippable.
- */
-
 import { generateText } from '../lib/zai';
 
 interface FocusPatterns {
@@ -46,9 +37,6 @@ interface CohortMatch {
   };
 }
 
-/**
- * Generate cohort matches using AI-powered semantic analysis
- */
 export async function generateCohortMatches(input: CohortMatchInput): Promise<CohortMatch[]> {
   const { userIntent, userTopic, userDurationRange, userPatterns, availableSessions } = input;
 
@@ -56,7 +44,6 @@ export async function generateCohortMatches(input: CohortMatchInput): Promise<Co
     return [];
   }
 
-  // If no user preferences provided, return empty
   if (!userIntent && !userTopic) {
     return [];
   }
@@ -106,7 +93,6 @@ Return JSON array of matches.`
       maxTokens: 1000,
     });
 
-    // Parse AI response
     const text = response.text.trim();
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) {
@@ -120,7 +106,6 @@ Return JSON array of matches.`
       matchReasons: string[];
     }>;
 
-    // Map AI results back to full session data
     return aiMatches
       .map(match => {
         const session = availableSessions.find(s => s.id === match.sessionId);
@@ -147,9 +132,6 @@ Return JSON array of matches.`
   }
 }
 
-/**
- * Fallback cohort matching when AI is unavailable
- */
 function fallbackCohortMatching(input: CohortMatchInput): CohortMatch[] {
   const { userIntent, userTopic, userDurationRange, userPatterns, availableSessions } = input;
   const matches: CohortMatch[] = [];
@@ -211,9 +193,6 @@ interface CooldownPromptInput {
   duration: number;
 }
 
-/**
- * Generate AI-powered cooldown prompt for session wrap-up
- */
 export async function generateCooldownPrompt(input: CooldownPromptInput): Promise<string> {
   const { intent, topic, duration } = input;
 
@@ -258,14 +237,10 @@ interface DurationPredictionInput {
   topic: string;
 }
 
-/**
- * Predict optimal session duration using AI analysis of user patterns
- */
 export async function predictOptimalDuration(input: DurationPredictionInput): Promise<number> {
   const { requestedRange, userPatterns, topic } = input;
   const [minRequested, maxRequested] = requestedRange;
 
-  // If no user patterns, use middle of range
   if (!userPatterns) {
     return Math.round((minRequested + maxRequested) / 2 / 5) * 5;
   }
@@ -309,13 +284,11 @@ Return only a number.`
       throw new Error('AI returned non-numeric duration');
     }
 
-    // Clamp to requested range and round to nearest 5
     const clamped = Math.max(minRequested, Math.min(maxRequested, predicted));
     return Math.round(clamped / 5) * 5;
 
   } catch (error) {
     console.error('AI duration prediction failed:', error);
-    // Fallback logic
     let optimal = Math.round((minRequested + maxRequested) / 2);
 
     if (userPatterns.avgCompletionRate < 0.5) {
@@ -327,4 +300,3 @@ Return only a number.`
     return Math.round(optimal / 5) * 5;
   }
 }
-

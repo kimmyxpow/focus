@@ -20,17 +20,14 @@ const CARD_COUNT_OPTIONS = [
   { value: 50, label: '50 cards', description: 'Complete coverage' },
 ];
 
-// Validation constants (match backend)
 const MAX_CONTENT_LENGTH = 100000;
 
-// Helper to convert file to base64
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = () => {
       const result = reader.result as string;
-      // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
       const base64 = result.split(',')[1];
       resolve(base64);
     };
@@ -38,7 +35,6 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
-// Helper to get file type
 function getFileType(file: File): 'txt' | 'pdf' | 'docx' | 'md' | null {
   const name = file.name.toLowerCase();
   if (name.endsWith('.txt') || file.type === 'text/plain') return 'txt';
@@ -53,16 +49,13 @@ export default function CreateFlashcardPage() {
   const { user } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Input state
   const [inputType, setInputType] = useState<'text' | 'file'>('text');
   const [textContent, setTextContent] = useState('');
   const [file, setFile] = useState<File | null>(null);
 
-  // Settings
   const [difficulty, setDifficulty] = useState<'beginner' | 'intermediate' | 'advanced'>('intermediate');
   const [maxCards, setMaxCards] = useState(20);
 
-  // For text input, we need 50+ chars and under the max limit. For file upload, we just need a valid file
   const canSubmit = inputType === 'text' 
     ? textContent.length >= 50 && textContent.length <= MAX_CONTENT_LENGTH 
     : !!file;
@@ -82,14 +75,12 @@ export default function CreateFlashcardPage() {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    // Validate file type
     const type = getFileType(selectedFile);
     if (!type) {
       toast.error('Please upload a .txt, .docx, or .pdf file');
       return;
     }
 
-    // Validate file size (5MB max)
     if (selectedFile.size > 5 * 1024 * 1024) {
       toast.error('File size must be less than 5MB');
       return;
@@ -112,7 +103,6 @@ export default function CreateFlashcardPage() {
         difficulty,
       });
     } else if (file) {
-      // Convert file to base64 and send
       const fileType = getFileType(file);
       if (!fileType) {
         toast.error('Invalid file type');
@@ -134,7 +124,6 @@ export default function CreateFlashcardPage() {
     }
   }, [canSubmit, inputType, textContent, file, maxCards, difficulty, generateFlashcards]);
 
-  // Sign in prompt
   if (!user) {
     return (
       <Page variant="dark">
@@ -158,7 +147,6 @@ export default function CreateFlashcardPage() {
     );
   }
 
-  // Generating state
   if (isPending) {
     return (
       <Page variant="dark">
@@ -182,14 +170,12 @@ export default function CreateFlashcardPage() {
   return (
     <Page variant="dark">
       <div className="container-md">
-        {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-display-md text-white mb-2">Create Flashcards</h1>
           <p className="text-white/50 text-sm">Paste your study material and let AI generate flashcards for you</p>
         </div>
 
         <div className="py-6 fade-in space-y-8">
-          {/* Input Type Toggle */}
           <div>
             <label className="text-label text-white/60 mb-2 block">Input Method</label>
             <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg w-fit">
@@ -226,7 +212,6 @@ export default function CreateFlashcardPage() {
             </div>
           </div>
 
-          {/* Text Input */}
           {inputType === 'text' && (
             <div>
               <label htmlFor="content-input" className="text-label text-white/60 mb-2 block">Study Material *</label>
@@ -259,7 +244,6 @@ export default function CreateFlashcardPage() {
             </div>
           )}
 
-          {/* File Upload */}
           {inputType === 'file' && (
             <div>
               <label className="text-label text-white/60 mb-2 block">Upload File *</label>
@@ -312,14 +296,11 @@ export default function CreateFlashcardPage() {
             </div>
           )}
 
-          {/* Divider */}
           <div className="border-t border-white/10" />
 
-          {/* Settings */}
           <div className="space-y-6">
             <h3 className="text-label text-white/60">Customize Your Flashcards</h3>
 
-            {/* Difficulty */}
             <fieldset>
               <legend className="text-sm text-white/50 mb-2 block">Difficulty Level</legend>
               <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Select difficulty">
@@ -354,7 +335,6 @@ export default function CreateFlashcardPage() {
               </div>
             </fieldset>
 
-            {/* Card Count */}
             <fieldset>
               <legend className="text-sm text-white/50 mb-2 block">Number of Cards</legend>
               <div className="grid grid-cols-4 gap-2" role="radiogroup" aria-label="Select card count">
@@ -390,7 +370,6 @@ export default function CreateFlashcardPage() {
             </fieldset>
           </div>
 
-          {/* Summary */}
           {canSubmit && (
             <div className="p-4 bg-white/5 rounded-lg scale-in">
               <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-2">Summary</p>
@@ -413,7 +392,6 @@ export default function CreateFlashcardPage() {
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
               className="btn-ghost-light flex-1 sm:flex-none"

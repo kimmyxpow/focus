@@ -112,12 +112,10 @@ export default function CreateSessionPage() {
   const { hasActiveSession, activeSession } = useActiveSession();
   const queryClient = useQueryClient();
 
-  // Core session info
   const [intent, setIntent] = useState('');
   const [topic, setTopic] = useState('');
-  const [durationPreset, setDurationPreset] = useState<number | null>(1); // Default to Standard
+  const [durationPreset, setDurationPreset] = useState<number | null>(1);
 
-  // Session settings (all visible upfront)
   const [repetitions, setRepetitions] = useState(1);
   const [breakDuration, setBreakDuration] = useState(5);
   const [breakInterval, setBreakInterval] = useState(1);
@@ -162,7 +160,6 @@ export default function CreateSessionPage() {
     });
   }, [intent, topic, minDuration, maxDuration, repetitions, breakDuration, breakInterval, isPrivate, chatEnabled, createSession, canSubmit]);
 
-  // Sign in prompt
   if (!user) {
     return (
       <Page variant="dark">

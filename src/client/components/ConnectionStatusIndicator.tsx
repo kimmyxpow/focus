@@ -27,10 +27,6 @@ const STATUS_CONFIG: Record<ConnectionStatus, { label: string; className: string
   },
 };
 
-/**
- * A small indicator showing WebSocket connection status
- * Useful for showing users whether they're receiving real-time updates
- */
 export default function ConnectionStatusIndicator({
   sessionId,
   className,

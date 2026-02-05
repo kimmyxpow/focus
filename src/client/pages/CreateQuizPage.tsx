@@ -186,7 +186,6 @@ export default function CreateQuizPage() {
         </div>
 
         <div className="py-6 fade-in space-y-8">
-          {/* Input Type Toggle */}
           <div>
             <label className="text-label text-white/60 mb-2 block">Input Method</label>
             <div className="flex items-center gap-1 p-1 bg-white/5 rounded-lg w-fit">

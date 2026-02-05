@@ -62,7 +62,6 @@ export default function ProfilePage() {
     onError: (err: Error) => toast.error(err.message),
   });
 
-  // Initialize form with profile data
   useEffect(() => {
     if (profile) {
       setNickname(profile.nickname);
@@ -77,12 +76,10 @@ export default function ProfilePage() {
         }
       }
     } else if (profile === null) {
-      // No profile exists, start in editing mode
       setIsEditing(true);
     }
   }, [profile]);
 
-  // Validate nickname
   useEffect(() => {
     if (!nickname) {
       setNicknameError('');
@@ -144,7 +141,6 @@ export default function ProfilePage() {
   return (
     <Page variant="dark">
       <div className="container-md py-8 space-y-8 fade-in">
-        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-display-sm text-white">Profile</h1>
@@ -161,11 +157,9 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Profile Form / Display */}
         <div className="space-y-6">
           {isEditing || !profile ? (
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Nickname */}
               <div>
                 <label htmlFor="nickname" className="block text-sm font-medium text-white/70 mb-2">
                   Nickname <span className="text-red-400">*</span>
@@ -205,7 +199,6 @@ export default function ProfilePage() {
                 </p>
               </div>
 
-              {/* Pronouns */}
               <div>
                 <label htmlFor="pronouns" className="block text-sm font-medium text-white/70 mb-2">
                   Pronouns <span className="text-white/30">(optional)</span>
@@ -234,7 +227,6 @@ export default function ProfilePage() {
                 )}
               </div>
 
-              {/* Privacy Toggle */}
               <div className="p-4 bg-white/5 rounded-lg">
                 <div className="flex items-center justify-between">
                   <div>
@@ -263,7 +255,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="submit"
@@ -301,7 +292,6 @@ export default function ProfilePage() {
             </form>
           ) : (
             <div className="space-y-6">
-              {/* Profile Display */}
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center text-2xl font-semibold text-white">
                   {profile.nickname.charAt(0).toUpperCase()}
@@ -324,7 +314,6 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {/* Stats Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/10">
                 <div className="text-center p-3 bg-white/5 rounded-lg">
                   <span className="block text-2xl font-semibold text-white display-number">
@@ -355,7 +344,6 @@ export default function ProfilePage() {
           )}
         </div>
 
-        {/* Focus Heatmap */}
         {profile && (
           <div className="pt-6 border-t border-white/10">
             <h3 className="text-lg font-semibold text-white mb-4">Your focus activity</h3>

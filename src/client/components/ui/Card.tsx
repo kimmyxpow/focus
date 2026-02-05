@@ -8,15 +8,10 @@ const Card = React.forwardRef<
     variant?: 'default' | 'dark' | 'ghost' | 'interactive';
   }
 >(({ className, variant = 'default', ...props }, ref) => {
-  // Refined card styling: subtle borders, cohesive backgrounds, modern shadows
   const variants = {
-    // Light mode: nearly borderless with subtle shadow for depth
     default: "bg-white/80 backdrop-blur-sm shadow-[0_1px_2px_0_rgba(0,0,0,0.03),0_1px_3px_0_rgba(0,0,0,0.02)]",
-    // Dark mode: seamless with page background, subtle separation via opacity
     dark: "bg-white/[0.03] backdrop-blur-sm text-white",
-    // Ghost: transparent with blur
     ghost: "bg-white/40 backdrop-blur-md",
-    // Interactive: subtle hover elevation
     interactive: "bg-white/80 backdrop-blur-sm shadow-[0_1px_2px_0_rgba(0,0,0,0.03)] hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer",
   };
 
