@@ -22,15 +22,12 @@ type QuizSet = {
 
 function SetSkeleton() {
   return (
-    <div className="py-5">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 space-y-3">
-          <div className="skeleton bg-white/10 h-5 w-48" />
-          <div className="skeleton bg-white/10 h-4 w-full max-w-sm" />
-        </div>
-        <div className="flex gap-2">
-          <div className="skeleton bg-white/10 h-9 w-20 rounded-lg" />
-        </div>
+    <div className="p-4 bg-white/5 rounded-xl">
+      <div className="skeleton bg-white/10 h-5 w-3/4 mb-2" />
+      <div className="skeleton bg-white/10 h-4 w-full mb-3" />
+      <div className="flex gap-2">
+        <div className="skeleton bg-white/10 h-6 w-16 rounded-full" />
+        <div className="skeleton bg-white/10 h-6 w-20 rounded-full" />
       </div>
     </div>
   );
@@ -55,12 +52,12 @@ function EmptyState() {
   );
 }
 
-function QuizRow({ 
-  quiz, 
+function QuizCard({
+  quiz,
   onDelete,
   onToggleVisibility,
-}: { 
-  quiz: QuizSet; 
+}: {
+  quiz: QuizSet;
   onDelete: (id: string) => void;
   onToggleVisibility: (id: string, isPublic: boolean) => void;
 }) {
@@ -70,66 +67,41 @@ function QuizRow({
   };
 
   const formatRelativeTime = (dateString?: string) => {
-    if (!dateString) return 'Never taken';
+    if (!dateString) return 'Never';
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Taken today';
-    if (diffDays === 1) return 'Taken yesterday';
-    if (diffDays < 7) return `Taken ${diffDays} days ago`;
-    return `Last taken ${formatDate(dateString)}`;
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return formatDate(dateString);
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Navigate if clicking on the card itself (not on buttons)
+    if ((e.target as HTMLElement).closest('button')) return;
+    window.location.href = `/quiz/${quiz._id}`;
   };
 
   return (
-    <div className="py-4 fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1 flex-wrap">
-            <span className="font-semibold text-white truncate">{quiz.title}</span>
-            {quiz.topic && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/10 text-white/70">
-                {quiz.topic}
-              </span>
-            )}
-            {quiz.isPublic ? (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/20 text-emerald-300">
-                Public
-              </span>
-            ) : (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/10 text-white/50">
-                Private
-              </span>
-            )}
-            {quiz.bestScore !== undefined && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/20 text-emerald-300">
-                Best: {quiz.bestScore}%
-              </span>
-            )}
-          </div>
-          <div className="flex flex-wrap items-center gap-2 text-xs text-white/40">
-            <span>{quiz.questionCount} questions</span>
-            <span className="text-white/20">·</span>
-            <span>{formatRelativeTime(quiz.lastAttemptAt)}</span>
-            {quiz.attemptCount > 0 && (
-              <>
-                <span className="text-white/20">·</span>
-                <span>{quiz.attemptCount} attempts</span>
-              </>
-            )}
-            <span className="text-white/20">·</span>
-            <span>{formatDate(quiz.createdAt)}</span>
-          </div>
-        </div>
-        
-        <div className="flex-shrink-0 flex items-center gap-2">
+    <div
+      onClick={handleCardClick}
+      className="p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors fade-in cursor-pointer group"
+    >
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <h3 className="font-semibold text-white line-clamp-1 flex-1">{quiz.title}</h3>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
-            onClick={() => onToggleVisibility(quiz._id, !quiz.isPublic)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleVisibility(quiz._id, !quiz.isPublic);
+            }}
             className={cn(
               "p-1.5 rounded-lg transition-colors",
-              quiz.isPublic 
-                ? "text-emerald-400 hover:bg-emerald-500/10" 
+              quiz.isPublic
+                ? "text-emerald-400 hover:bg-emerald-500/10"
                 : "text-white/40 hover:text-white hover:bg-white/10"
             )}
             title={quiz.isPublic ? "Make Private" : "Make Public"}
@@ -145,7 +117,10 @@ function QuizRow({
             )}
           </button>
           <button
-            onClick={() => onDelete(quiz._id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(quiz._id);
+            }}
             className="p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
             title="Delete"
           >
@@ -153,13 +128,38 @@ function QuizRow({
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
-          <Link
-            to={`/quiz/${quiz._id}`}
-            className="btn-light text-sm px-3 py-1.5"
-          >
-            Take Quiz
-          </Link>
         </div>
+      </div>
+
+      {quiz.description && (
+        <p className="text-white/50 text-sm mb-3 line-clamp-2">{quiz.description}</p>
+      )}
+
+      <div className="flex flex-wrap items-center gap-2 text-xs">
+        {quiz.isPublic ? (
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+            Public
+          </span>
+        ) : (
+          <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/50">
+            Private
+          </span>
+        )}
+        {quiz.topic && (
+          <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/70">
+            {quiz.topic}
+          </span>
+        )}
+        {quiz.bestScore !== undefined && (
+          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
+            Best: {quiz.bestScore}%
+          </span>
+        )}
+        <span className="text-white/40">{quiz.questionCount} questions</span>
+        <span className="text-white/20">·</span>
+        <span className="text-white/40">{quiz.attemptCount} attempts</span>
+        <span className="text-white/20">·</span>
+        <span className="text-white/40">{formatRelativeTime(quiz.lastAttemptAt)}</span>
       </div>
     </div>
   );
@@ -223,7 +223,10 @@ export default function MyQuizzesPage() {
           </div>
 
           {isLoading ? (
-            <div className="divide-y divide-white/5">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <SetSkeleton />
+              <SetSkeleton />
+              <SetSkeleton />
               <SetSkeleton />
               <SetSkeleton />
               <SetSkeleton />
@@ -231,9 +234,9 @@ export default function MyQuizzesPage() {
           ) : quizzes.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {quizzes.map((quiz) => (
-                <QuizRow
+                <QuizCard
                   key={quiz._id}
                   quiz={quiz}
                   onDelete={handleDelete}
