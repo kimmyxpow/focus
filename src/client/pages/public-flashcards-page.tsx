@@ -30,7 +30,6 @@ function SetSkeleton() {
         </div>
         <div className="flex gap-2">
           <div className="skeleton bg-white/10 h-9 w-20 rounded-lg" />
-          <div className="skeleton bg-white/10 h-9 w-20 rounded-lg" />
         </div>
       </div>
     </div>
@@ -96,15 +95,9 @@ function FlashcardSetRow({ set }: { set: PublicFlashcardSet }) {
         <div className="flex-shrink-0 flex items-center gap-2">
           <Link
             to={`/flashcards/${set._id}/study`}
-            className="btn-outline-light text-sm px-3 py-1.5"
-          >
-            Study
-          </Link>
-          <Link
-            to={`/flashcards/${set._id}/quiz`}
             className="btn-light text-sm px-3 py-1.5"
           >
-            Quiz
+            Study
           </Link>
         </div>
       </div>
