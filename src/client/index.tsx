@@ -9,6 +9,7 @@ import favicon from './assets/favicon.svg';
 import './index.css';
 import LoadingSpinner from './components/loading-spinner';
 import { sessionClientChannel, chatClientChannel } from './channels';
+import { AudioProvider } from './context/audio-context';
 
 startWebsockets({
   channels: [
@@ -30,9 +31,11 @@ function App() {
 
 renderApp({
   routesElement: (
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <AudioProvider>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </AudioProvider>
   ),
   errorHandler: (error) => {
     toast.error(error.message);

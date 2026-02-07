@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useSession } from 'modelence/client';
 import LoadingSpinner from '@/client/components/loading-spinner';
 import FloatingSessionWidget from '@/client/components/floating-session-widget';
+import FloatingAudioWidget from '@/client/components/floating-audio-widget';
 import ProfileDropdown from '@/client/components/profile-dropdown';
 import { cn } from '@/client/lib/utils';
 
@@ -80,6 +81,16 @@ function FloatingNavbar({ variant = 'default' }: { variant?: 'default' | 'dark' 
             Flashcards
           </Link>
           <Link
+            to="/sounds"
+            className={cn(
+              "nav-link",
+              isDark && "nav-link-dark",
+              isActive('/sounds') && "nav-link-active"
+            )}
+          >
+            Sounds
+          </Link>
+          <Link
             to="/leaderboard"
             className={cn(
               "nav-link",
@@ -132,6 +143,7 @@ export default function Page({
     <div className={cn("page-wrapper", isDark && "page-wrapper-dark")}>
       {!hideNav && <FloatingNavbar variant={variant} />}
       <FloatingSessionWidget />
+      <FloatingAudioWidget />
       <main className={cn(
         centered ? "page-content-centered" : "page-content",
         hideNav && "!pt-0",
