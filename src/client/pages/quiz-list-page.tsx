@@ -16,12 +16,12 @@ type PublicQuiz = {
 
 function QuizSkeleton() {
   return (
-    <div className="p-4 bg-white/5 rounded-xl">
+    <div className="py-3 border-b border-white/10">
       <div className="skeleton bg-white/10 h-5 w-3/4 mb-2" />
-      <div className="skeleton bg-white/10 h-4 w-full mb-3" />
+      <div className="skeleton bg-white/10 h-4 w-full mb-2" />
       <div className="flex gap-2">
-        <div className="skeleton bg-white/10 h-6 w-16 rounded-full" />
-        <div className="skeleton bg-white/10 h-6 w-20 rounded-full" />
+        <div className="skeleton bg-white/10 h-4 w-16" />
+        <div className="skeleton bg-white/10 h-4 w-20" />
       </div>
     </div>
   );
@@ -53,26 +53,21 @@ function QuizCard({ quiz }: { quiz: PublicQuiz }) {
   };
 
   return (
-    <Link 
+    <Link
       to={`/quiz/${quiz._id}`}
-      className="block p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors fade-in"
+      className="block py-3 border-b border-white/10 hover:bg-white/5 transition-colors fade-in"
     >
-      <h3 className="font-semibold text-white mb-1 line-clamp-1">{quiz.title}</h3>
+      <h3 className="font-medium text-white text-sm mb-1">{quiz.title}</h3>
       {quiz.description && (
-        <p className="text-white/50 text-sm mb-3 line-clamp-2">{quiz.description}</p>
+        <p className="text-white/50 text-xs mb-2 line-clamp-1">{quiz.description}</p>
       )}
-      <div className="flex flex-wrap items-center gap-2 text-xs">
+      <div className="flex flex-wrap items-center gap-3 text-xs">
         {quiz.topic && (
-          <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-            {quiz.topic}
-          </span>
+          <span className="text-white/70">{quiz.topic}</span>
         )}
-        <span className="text-white/40">{quiz.questionCount} questions</span>
-        <span className="text-white/20">·</span>
+        <span className="text-white/40">{quiz.questionCount}q</span>
         <span className="text-white/40">{quiz.attemptCount} attempts</span>
-        <span className="text-white/20">·</span>
         <span className="text-white/40">by {quiz.creatorName}</span>
-        <span className="text-white/20">·</span>
         <span className="text-white/40">{formatDate(quiz.createdAt)}</span>
       </div>
     </Link>
@@ -104,7 +99,7 @@ export default function QuizListPage() {
           </div>
 
           {isLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col">
               <QuizSkeleton />
               <QuizSkeleton />
               <QuizSkeleton />
@@ -115,7 +110,7 @@ export default function QuizListPage() {
           ) : quizzes.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col">
               {quizzes.map((quiz) => (
                 <QuizCard key={quiz._id} quiz={quiz} />
               ))}

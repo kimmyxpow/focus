@@ -22,12 +22,12 @@ type QuizSet = {
 
 function SetSkeleton() {
   return (
-    <div className="p-4 bg-white/5 rounded-xl">
+    <div className="py-3 border-b border-white/10">
       <div className="skeleton bg-white/10 h-5 w-3/4 mb-2" />
-      <div className="skeleton bg-white/10 h-4 w-full mb-3" />
+      <div className="skeleton bg-white/10 h-4 w-full mb-2" />
       <div className="flex gap-2">
-        <div className="skeleton bg-white/10 h-6 w-16 rounded-full" />
-        <div className="skeleton bg-white/10 h-6 w-20 rounded-full" />
+        <div className="skeleton bg-white/10 h-4 w-16" />
+        <div className="skeleton bg-white/10 h-4 w-20" />
       </div>
     </div>
   );
@@ -88,18 +88,39 @@ function QuizCard({
   return (
     <div
       onClick={handleCardClick}
-      className="p-4 bg-white/5 hover:bg-white/10 rounded-xl transition-colors fade-in cursor-pointer group"
+      className="py-3 border-b border-white/10 hover:bg-white/5 transition-colors fade-in cursor-pointer group"
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <h3 className="font-semibold text-white line-clamp-1 flex-1">{quiz.title}</h3>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-medium text-white text-sm mb-1">{quiz.title}</h3>
+          {quiz.description && (
+            <p className="text-white/50 text-xs mb-2 line-clamp-1">{quiz.description}</p>
+          )}
+          <div className="flex flex-wrap items-center gap-3 text-xs">
+            {quiz.isPublic ? (
+              <span className="text-emerald-400">Public</span>
+            ) : (
+              <span className="text-white/50">Private</span>
+            )}
+            {quiz.topic && (
+              <span className="text-white/70">{quiz.topic}</span>
+            )}
+            {quiz.bestScore !== undefined && (
+              <span className="text-emerald-400">Best: {quiz.bestScore}%</span>
+            )}
+            <span className="text-white/40">{quiz.questionCount}q</span>
+            <span className="text-white/40">{quiz.attemptCount} attempts</span>
+            <span className="text-white/40">{formatRelativeTime(quiz.lastAttemptAt)}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
           <button
             onClick={(e) => {
               e.stopPropagation();
               onToggleVisibility(quiz._id, !quiz.isPublic);
             }}
             className={cn(
-              "p-1.5 rounded-lg transition-colors",
+              "p-1.5 rounded transition-colors",
               quiz.isPublic
                 ? "text-emerald-400 hover:bg-emerald-500/10"
                 : "text-white/40 hover:text-white hover:bg-white/10"
@@ -121,7 +142,7 @@ function QuizCard({
               e.stopPropagation();
               onDelete(quiz._id);
             }}
-            className="p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            className="p-1.5 rounded text-white/40 hover:text-red-400 hover:bg-red-500/10 transition-colors"
             title="Delete"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -129,37 +150,6 @@ function QuizCard({
             </svg>
           </button>
         </div>
-      </div>
-
-      {quiz.description && (
-        <p className="text-white/50 text-sm mb-3 line-clamp-2">{quiz.description}</p>
-      )}
-
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        {quiz.isPublic ? (
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
-            Public
-          </span>
-        ) : (
-          <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/50">
-            Private
-          </span>
-        )}
-        {quiz.topic && (
-          <span className="px-2 py-0.5 rounded-full bg-white/10 text-white/70">
-            {quiz.topic}
-          </span>
-        )}
-        {quiz.bestScore !== undefined && (
-          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">
-            Best: {quiz.bestScore}%
-          </span>
-        )}
-        <span className="text-white/40">{quiz.questionCount} questions</span>
-        <span className="text-white/20">·</span>
-        <span className="text-white/40">{quiz.attemptCount} attempts</span>
-        <span className="text-white/20">·</span>
-        <span className="text-white/40">{formatRelativeTime(quiz.lastAttemptAt)}</span>
       </div>
     </div>
   );
@@ -223,7 +213,7 @@ export default function MyQuizzesPage() {
           </div>
 
           {isLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col">
               <SetSkeleton />
               <SetSkeleton />
               <SetSkeleton />
@@ -234,7 +224,7 @@ export default function MyQuizzesPage() {
           ) : quizzes.length === 0 ? (
             <EmptyState />
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col">
               {quizzes.map((quiz) => (
                 <QuizCard
                   key={quiz._id}
